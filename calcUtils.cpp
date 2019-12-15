@@ -525,7 +525,7 @@ bool CCalcUtils::isApproxDistanceSmaller_box_box(const C4X4Matrix& box1,const C3
     return(true);
 }
 
-inline bool CCalcUtils::isApproxDistanceSmaller_box_box_fast(const C4X4Matrix& box1,const C3Vector& box1Hs,const C4X4Matrix& box2,const C3Vector& box2Hs,float& dist)
+bool CCalcUtils::isApproxDistanceSmaller_box_box_fast(const C4X4Matrix& box1,const C3Vector& box1Hs,const C4X4Matrix& box2,const C3Vector& box2Hs,float& dist)
 {   // Similar to isApproxDistanceSmaller_box_box, but only one projection axis is tested (i.e. the axis between the two boxes' origin)
     // The real distance is always larger or equal than the approximate distance
     // dist is modified if return is true
@@ -557,7 +557,7 @@ bool CCalcUtils::isApproxDistanceSmaller_box_cell(const C4X4Matrix& box,const C3
     return(isApproxDistanceSmaller_box_box(box2,sv,box,boxHs,dist));
 }
 
-inline bool CCalcUtils::isApproxDistanceSmaller_box_cell_fast(const C4X4Matrix& box,const C3Vector& boxHs,float cellHs,float& dist)
+bool CCalcUtils::isApproxDistanceSmaller_box_cell_fast(const C4X4Matrix& box,const C3Vector& boxHs,float cellHs,float& dist)
 {   // Similar to isApproxDistanceSmaller_box_cell, but only one projection axis is tested (i.e. the axis between the two boxes' origin)
     // The real distance is always larger or equal than the approximate distance
     // dist is modified if return is true
@@ -614,7 +614,7 @@ bool CCalcUtils::isApproxDistanceSmaller_box_tri(const C4X4Matrix& box,const C3V
     return(true);
 }
 
-inline bool CCalcUtils::isApproxDistanceSmaller_box_tri_fast(const C4X4Matrix& box,const C3Vector& boxHs,const C3Vector& p,const C3Vector& v,const C3Vector& w,float& dist)
+bool CCalcUtils::isApproxDistanceSmaller_box_tri_fast(const C4X4Matrix& box,const C3Vector& boxHs,const C3Vector& p,const C3Vector& v,const C3Vector& w,float& dist)
 {   // Similar to isApproxDistanceSmaller_box_tri, but only one projection axis is tested (i.e. the axis between the two boxes' origin)
     // The real distance is always larger or equal than the approximate distance
     // dist is modified if return is true
@@ -629,7 +629,7 @@ inline bool CCalcUtils::isApproxDistanceSmaller_box_tri_fast(const C4X4Matrix& b
     return(true);
 }
 
-inline bool CCalcUtils::isApproxDistanceSmaller_box_segp_fast(const C4X4Matrix& box,const C3Vector& boxHs,const C3Vector& segP,const C3Vector& segL,float& dist)
+bool CCalcUtils::isApproxDistanceSmaller_box_segp_fast(const C4X4Matrix& box,const C3Vector& boxHs,const C3Vector& segP,const C3Vector& segL,float& dist)
 {   // Similar to isApproxDistanceSmaller_box_segp, but only one projection axis is tested (i.e. the axis between the two boxes' origin)
     // The real distance is always larger or equal than the approximate distance
     // dist is modified if return is true
@@ -648,7 +648,7 @@ bool CCalcUtils::isApproxDistanceSmaller_box_segp(const C4X4Matrix& box,const C3
     return(isApproxDistanceSmaller_box_seg(box,boxHs,segCenter,segHs,dist));
 }
 
-inline bool CCalcUtils::isApproxDistanceSmaller_box_seg_fast(const C4X4Matrix& box,const C3Vector& boxHs,const C3Vector& segCenter,const C3Vector& segHs,float& dist)
+bool CCalcUtils::isApproxDistanceSmaller_box_seg_fast(const C4X4Matrix& box,const C3Vector& boxHs,const C3Vector& segCenter,const C3Vector& segHs,float& dist)
 {   // Similar to isApproxDistanceSmaller_box_seg, but only one projection axis is tested (i.e. the axis between the two boxes' origin)
     // The real distance is always larger or equal than the approximate distance
     // dist is modified if return is true
@@ -662,7 +662,7 @@ inline bool CCalcUtils::isApproxDistanceSmaller_box_seg_fast(const C4X4Matrix& b
     return(true);
 }
 
-inline bool CCalcUtils::isApproxDistanceSmaller_box_pt_fast(const C4X4Matrix& box,const C3Vector& boxHs,const C3Vector& pt,float& dist)
+bool CCalcUtils::isApproxDistanceSmaller_box_pt_fast(const C4X4Matrix& box,const C3Vector& boxHs,const C3Vector& pt,float& dist)
 {   // The real distance is always larger or equal than the approximate distance
     // dist is modified if return is true
     if (dist==0.0f)
@@ -729,7 +729,7 @@ bool CCalcUtils::isApproxDistanceSmaller_cell_tri(float cellHs,const C3Vector& p
     return(isApproxDistanceSmaller_box_tri(box,sv,p,v,w,dist));
 }
 
-inline bool CCalcUtils::isApproxDistanceSmaller_cell_tri_fast(float cellHs,const C3Vector& p,const C3Vector& v,const C3Vector& w,float& dist)
+bool CCalcUtils::isApproxDistanceSmaller_cell_tri_fast(float cellHs,const C3Vector& p,const C3Vector& v,const C3Vector& w,float& dist)
 {   // Similar to isApproxDistanceSmaller_cell_tri, but only one projection axis is tested (i.e. the axis between the two boxes' origin)
     // The real distance is always larger or equal than the approximate distance
     // dist is modified if return is true
@@ -753,7 +753,7 @@ bool CCalcUtils::isApproxDistanceSmaller_cell_segp(float cellHs,const C3Vector& 
     return(isApproxDistanceSmaller_cell_seg(cellHs,segCenter,segHs,dist));
 }
 
-inline bool CCalcUtils::isApproxDistanceSmaller_cell_segp_fast(float cellHs,const C3Vector& segP,const C3Vector& segL,float& dist)
+bool CCalcUtils::isApproxDistanceSmaller_cell_segp_fast(float cellHs,const C3Vector& segP,const C3Vector& segL,float& dist)
 {   // Similar to isApproxDistanceSmaller_cell_segp, but only one projection axis is tested (i.e. the axis between the two boxes' origin)
     // The real distance is always larger or equal than the approximate distance
     // dist is modified if return is true
@@ -778,7 +778,7 @@ bool CCalcUtils::isApproxDistanceSmaller_cell_seg(float cellHs,const C3Vector& s
     return(isApproxDistanceSmaller_box_seg(box,sv,segCenter,segHs,dist));
 }
 
-inline bool CCalcUtils::isApproxDistanceSmaller_cell_seg_fast(float cellHs,const C3Vector& segCenter,const C3Vector& segHs,float& dist)
+bool CCalcUtils::isApproxDistanceSmaller_cell_seg_fast(float cellHs,const C3Vector& segCenter,const C3Vector& segHs,float& dist)
 {   // Similar to isApproxDistanceSmaller_cell_seg, but only one projection axis is tested (i.e. the axis between the two boxes' origin)
     // The real distance is always larger or equal than the approximate distance
     // dist is modified if return is true
@@ -838,7 +838,7 @@ bool CCalcUtils::isApproxDistanceSmaller_tri_tri(const C3Vector& p1,const C3Vect
     return(true);
 }
 
-inline bool CCalcUtils::isApproxDistanceSmaller_tri_tri_fast(const C3Vector& p1,const C3Vector& v1,const C3Vector& w1,const C3Vector& p2,const C3Vector& v2,const C3Vector& w2,float& dist)
+bool CCalcUtils::isApproxDistanceSmaller_tri_tri_fast(const C3Vector& p1,const C3Vector& v1,const C3Vector& w1,const C3Vector& p2,const C3Vector& v2,const C3Vector& w2,float& dist)
 {   // Similar to isApproxDistanceSmaller_tri_tri, but only one projection axis is tested (i.e. the axis between the two boxes' origin)
     // The real distance is always larger or equal than the approximate distance
     // dist is modified if return is true
@@ -885,7 +885,7 @@ bool CCalcUtils::isApproxDistanceSmaller_tri_pt_fast(const C3Vector& p,const C3V
     return(true);
 }
 
-inline bool CCalcUtils::isApproxDistanceSmaller_segp_segp_fast(const C3Vector& seg1P,C3Vector seg1L,const C3Vector& seg2P,C3Vector seg2L,float& dist)
+bool CCalcUtils::isApproxDistanceSmaller_segp_segp_fast(const C3Vector& seg1P,C3Vector seg1L,const C3Vector& seg2P,C3Vector seg2L,float& dist)
 {   // The real distance is always larger or equal than the approximate distance
     // dist is modified if return is true
     if (dist==0.0f)
@@ -1837,7 +1837,7 @@ bool CCalcUtils::getDistance_tri_pt(const C3Vector& p,const C3Vector& v,const C3
     return(bb1||bb2||bb3||bb4);
 }
 
-inline bool CCalcUtils::getDistance_segp_segp(const C3Vector& seg1P,const C3Vector& seg1L,const C3Vector& seg2P,const C3Vector& seg2L,float& dist,C3Vector* minDistSegPt1,C3Vector* minDistSegPt2)
+bool CCalcUtils::getDistance_segp_segp(const C3Vector& seg1P,const C3Vector& seg1L,const C3Vector& seg2P,const C3Vector& seg2L,float& dist,C3Vector* minDistSegPt1,C3Vector* minDistSegPt2)
 {
     if (dist==0.0f)
         return(false);
@@ -1929,7 +1929,7 @@ inline bool CCalcUtils::getDistance_segp_segp(const C3Vector& seg1P,const C3Vect
     return(retVal);
 }
 
-inline bool CCalcUtils::getDistance_segp_pt(const C3Vector& segP,const C3Vector& segL,const C3Vector& pt,float& dist,C3Vector* minDistSegPt)
+bool CCalcUtils::getDistance_segp_pt(const C3Vector& segP,const C3Vector& segL,const C3Vector& pt,float& dist,C3Vector* minDistSegPt)
 {
     if (dist==0.0f)
         return(false);
@@ -1951,7 +1951,7 @@ inline bool CCalcUtils::getDistance_segp_pt(const C3Vector& segP,const C3Vector&
     return(false);
 }
 
-inline bool CCalcUtils::getDistance_tris_segp(const C3Vector& p,const C3Vector& v,const C3Vector& w,const C3Vector& segP,const C3Vector& segL,float& dist,C3Vector* minDistSegPt1,C3Vector* minDistSegPt2)
+bool CCalcUtils::getDistance_tris_segp(const C3Vector& p,const C3Vector& v,const C3Vector& w,const C3Vector& segP,const C3Vector& segL,float& dist,C3Vector* minDistSegPt1,C3Vector* minDistSegPt2)
 {   // Calculates the distance between a triangle's surface and a segment
     // If the closest point on the triangle lies on an edge, return value is false
 
@@ -2048,7 +2048,7 @@ inline bool CCalcUtils::getDistance_tris_segp(const C3Vector& p,const C3Vector& 
     return(retVal);
 }
 
-inline bool CCalcUtils::getDistance_tris_pt(const C3Vector& p,const C3Vector& v,const C3Vector& w,const C3Vector& pt,float& dist,C3Vector* minDistSegPt)
+bool CCalcUtils::getDistance_tris_pt(const C3Vector& p,const C3Vector& v,const C3Vector& w,const C3Vector& pt,float& dist,C3Vector* minDistSegPt)
 {
     C3Vector n(v^w);
     float a=p*n;
@@ -2079,7 +2079,7 @@ inline bool CCalcUtils::getDistance_tris_pt(const C3Vector& p,const C3Vector& v,
     return(false);
 }
 
-inline bool CCalcUtils::getDistance_seg_seg(const C3Vector& seg1Center,const C3Vector& seg1Hs,const C3Vector& seg2Center,const C3Vector& seg2Hs,float& dist,C3Vector* minDistSegPt1,C3Vector* minDistSegPt2)
+bool CCalcUtils::getDistance_seg_seg(const C3Vector& seg1Center,const C3Vector& seg1Hs,const C3Vector& seg2Center,const C3Vector& seg2Hs,float& dist,C3Vector* minDistSegPt1,C3Vector* minDistSegPt2)
 {
     C3Vector seg1P(seg1Center-seg1Hs);
     C3Vector seg1L(seg1Hs*2.0f);
