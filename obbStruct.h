@@ -13,7 +13,7 @@ public:
     void scaleYourself(float f);
     bool isSame(const float* v,int vSize,const int* ind,int indSize,float triSize,int triCnt);
     unsigned char* serialize(int& dataSize) const;
-    void deserialize(const unsigned char* data);
+    bool deserialize(const unsigned char* data);
 
     static void addObbStruct(CObbStruct* obbStruct);
     static void removeObbStruct(CObbStruct* obbStruct);
@@ -26,9 +26,9 @@ public:
 
 private:
     int _originalVerticesSize;
-    float _originalVerticesSum;
+    unsigned long _originalVerticesHash;
     int _originalIndicesSize;
-    int _originalIndicesSum;
+    unsigned long _originalIndicesHash;
     float _triSize;
     int _triCnt;
 

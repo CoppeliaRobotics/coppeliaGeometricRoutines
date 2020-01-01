@@ -21,7 +21,7 @@ public:
     COcStruct* copyYourself() const;
     void scaleYourself(float f);
     unsigned char* serialize(int& dataSize) const;
-    void deserialize(const unsigned char* data);
+    bool deserialize(const unsigned char* data);
 
     void getVoxelsPosAndRgb(std::vector<float>& voxelsPosAndRgb,std::vector<unsigned int>* userData=nullptr) const;
     void getVoxelsCorners(std::vector<float>& points) const;

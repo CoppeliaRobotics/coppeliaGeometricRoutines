@@ -119,21 +119,27 @@ unsigned char* CPcStruct::serialize(int& dataSize) const
     return(retVal);
 }
 
-void CPcStruct::deserialize(const unsigned char* data)
+bool CPcStruct::deserialize(const unsigned char* data)
 {
-    int pos=1;
-    boxSize=((float*)(data+pos))[0];pos+=sizeof(float);
-    cellSize=((float*)(data+pos))[0];pos+=sizeof(float);
-    boxPos(0)=((float*)(data+pos))[0];pos+=sizeof(float);
-    boxPos(1)=((float*)(data+pos))[0];pos+=sizeof(float);
-    boxPos(2)=((float*)(data+pos))[0];pos+=sizeof(float);
-    maxPtCnt=((int*)(data+pos))[0];pos+=sizeof(int);
-    pcNode->pcNodes=new CPcNode* [8];
-    for (size_t i=0;i<8;i++)
+    int pos=0;
+    unsigned char ver=data[pos++];
+    if (ver<=2)
     {
-        pcNode->pcNodes[i]=new CPcNode();
-        pcNode->pcNodes[i]->deserialize(data,pos);
+        boxSize=((float*)(data+pos))[0];pos+=sizeof(float);
+        cellSize=((float*)(data+pos))[0];pos+=sizeof(float);
+        boxPos(0)=((float*)(data+pos))[0];pos+=sizeof(float);
+        boxPos(1)=((float*)(data+pos))[0];pos+=sizeof(float);
+        boxPos(2)=((float*)(data+pos))[0];pos+=sizeof(float);
+        maxPtCnt=((int*)(data+pos))[0];pos+=sizeof(int);
+        pcNode->pcNodes=new CPcNode* [8];
+        for (size_t i=0;i<8;i++)
+        {
+            pcNode->pcNodes[i]=new CPcNode();
+            pcNode->pcNodes[i]->deserialize(data,pos);
+        }
+        return(true);
     }
+    return(false);
 }
 
 size_t CPcStruct::countCellsWithContent() const

@@ -21,7 +21,7 @@ public:
     CPcStruct* copyYourself() const;
     void scaleYourself(float f);
     unsigned char* serialize(int& dataSize) const;
-    void deserialize(const unsigned char* data);
+    bool deserialize(const unsigned char* data);
 
     size_t countCellsWithContent() const;
     void getPointsPosAndRgb_all(std::vector<float>& pointsPosAndRgb) const;

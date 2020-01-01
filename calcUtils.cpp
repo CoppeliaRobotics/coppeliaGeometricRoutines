@@ -1,5 +1,14 @@
 #include "calcUtils.h"
 
+
+unsigned long CCalcUtils::getDjb2Hash(const char* inputStr,size_t size)
+{ // taken from http://www.cse.yorku.ca/~oz/hash.html
+    unsigned long hash = 5381;
+    for (size_t i=0;i<size;i++)
+        hash = ((hash << 5) + hash) + int(inputStr[i]);
+    return hash;
+}
+
 bool CCalcUtils::doCollide_tri_tri(const C3Vector& p1,const C3Vector& v1,const C3Vector& w1,int tri1Index,const C3Vector& p2,const C3Vector& v2,const C3Vector& w2,int tri2Index,std::vector<float>* intersections,int* cachingTri1,int* cachingTri2)
 {
     C3Vector n1((v1^w1).getNormalized());

@@ -500,9 +500,16 @@ void geom_getMeshSerializationData(const CObbStruct* meshObbStruct,std::vector<u
 CObbStruct* geom_getMeshFromSerializationData(const unsigned char* serializationData)
 {
     CObbStruct* newObbStruct=new CObbStruct();
-    newObbStruct->deserialize(serializationData);
-    CObbStruct::addObbStruct(newObbStruct);
-    return(newObbStruct);
+    if (newObbStruct->deserialize(serializationData))
+    {
+        CObbStruct::addObbStruct(newObbStruct);
+        return(newObbStruct);
+    }
+    else
+    {
+        delete newObbStruct;
+        return(nullptr);
+    }
 }
 
 void geom_destroyMesh(CObbStruct* meshObbStruct)
@@ -1213,8 +1220,13 @@ void geom_getOctreeSerializationData(const COcStruct* ocStruct,std::vector<unsig
 COcStruct* geom_getOctreeFromSerializationData(const unsigned char* serializationData)
 {
     COcStruct* newOctreeStruct=new COcStruct();
-    newOctreeStruct->deserialize(serializationData);
-    return(newOctreeStruct);
+    if (newOctreeStruct->deserialize(serializationData))
+        return(newOctreeStruct);
+    else
+    {
+        delete newOctreeStruct;
+        return(nullptr);
+    }
 }
 
 CPcStruct* geom_createPtcloudFromPoints(const float* points,int pointCnt,const C7Vector* ptcloudOrigin/*=nullptr*/,float cellS/*=0.05f*/,int maxPointCnt/*=20*/,const unsigned char rgbData[3]/*=nullptr*/,float proximityTol/*=0.005f*/)
@@ -1293,8 +1305,13 @@ void geom_getPtcloudSerializationData(const CPcStruct* pcStruct,std::vector<unsi
 CPcStruct* geom_getPtcloudFromSerializationData(const unsigned char* serializationData)
 {
     CPcStruct* newPcStruct=new CPcStruct();
-    newPcStruct->deserialize(serializationData);
-    return(newPcStruct);
+    if (newPcStruct->deserialize(serializationData))
+        return(newPcStruct);
+    else
+    {
+        delete newPcStruct;
+        return(nullptr);
+    }
 }
 
 void geom_destroyPtcloud(CPcStruct* pcStruct)

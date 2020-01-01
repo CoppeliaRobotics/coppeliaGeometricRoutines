@@ -101,6 +101,8 @@ struct SNodeTranslationPair {
 class CCalcUtils
 {
 public:
+    static unsigned long getDjb2Hash(const char* inputStr,size_t size);
+
     // Collision detection:
     static bool doCollide_box_box(const C4X4Matrix& box1,const C3Vector& box1Hs,const C4X4Matrix& box2,const C3Vector& box2Hs,bool solidBoxes);
     static bool doCollide_box_cell(const C4X4Matrix& box,const C3Vector& boxHs,float cellHs,bool solidBoxAndCell);

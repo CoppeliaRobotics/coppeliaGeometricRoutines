@@ -17,12 +17,9 @@ CObbStruct::CObbStruct(const float* ver,int verSize,const int* ind,int indSize,f
     indices.assign(ind,ind+indSize);
     _originalVerticesSize=verSize;
     _originalIndicesSize=indSize;
-    _originalVerticesSum=0.0f;
-    for (int i=0;i<verSize;i++)
-        _originalVerticesSum+=ver[i];
-    _originalIndicesSum=0;
-    for (int i=0;i<indSize;i++)
-        _originalIndicesSum+=ind[i];
+
+    _originalVerticesHash=CCalcUtils::getDjb2Hash((char*)ver,verSize*sizeof(ver));
+    _originalIndicesHash=CCalcUtils::getDjb2Hash((char*)ind,indSize*sizeof(ind));
 
     reduceTriangleSizes(vertices,indices,_triSize);
 
@@ -45,9 +42,9 @@ CObbStruct* CObbStruct::copyYourself() const
     newObbStruct->vertices.assign(vertices.begin(),vertices.end());
     newObbStruct->indices.assign(indices.begin(),indices.end());
     newObbStruct->_originalVerticesSize=_originalVerticesSize;
-    newObbStruct->_originalVerticesSum=_originalVerticesSum;
+    newObbStruct->_originalVerticesHash=_originalVerticesHash;
     newObbStruct->_originalIndicesSize=_originalIndicesSize;
-    newObbStruct->_originalIndicesSum=_originalIndicesSum;
+    newObbStruct->_originalIndicesHash=_originalIndicesHash;
     newObbStruct->_triCnt=_triCnt;
     newObbStruct->_triSize=_triSize;
     return(newObbStruct);
@@ -70,17 +67,17 @@ bool CObbStruct::isSame(const float* v,int vSize,const int* ind,int indSize,floa
         return(false);
     if (triCnt!=_triCnt)
         return(false);
-
-    float s=0.0f;
-    for (size_t i=0;i<vSize;i++)
-        s+=v[i];
-    if (s!=_originalVerticesSum)
+    if (_originalVerticesHash==0)
+        return(false);
+    if (_originalIndicesHash==0)
         return(false);
 
-    int is=0;
-    for (size_t i=0;i<indSize;i++)
-        is+=ind[i];
-    if (is!=_originalIndicesSum)
+    unsigned long hash=CCalcUtils::getDjb2Hash((char*)v,vSize*sizeof(v));
+    if (hash!=_originalVerticesHash)
+        return(false);
+
+    hash=CCalcUtils::getDjb2Hash((char*)ind,indSize*sizeof(ind));
+    if (hash!=_originalIndicesHash)
         return(false);
 
     return(true);
@@ -90,14 +87,14 @@ unsigned char* CObbStruct::serialize(int& dataSize) const
 {
     std::vector<unsigned char> data;
 
-    data.push_back(2); // ser ver
+    data.push_back(3); // ser ver
 
     pushData(data,&_triSize,sizeof(int));
     pushData(data,&_triCnt,sizeof(int));
     pushData(data,&_originalVerticesSize,sizeof(int));
-    pushData(data,&_originalVerticesSum,sizeof(float));
+    pushData(data,&_originalVerticesHash,sizeof(unsigned long));
     pushData(data,&_originalIndicesSize,sizeof(int));
-    pushData(data,&_originalIndicesSum,sizeof(int));
+    pushData(data,&_originalIndicesHash,sizeof(unsigned long));
 
     int s=(int)vertices.size();
     pushData(data,&s,sizeof(int));
@@ -119,34 +116,57 @@ unsigned char* CObbStruct::serialize(int& dataSize) const
     return(retVal);
 }
 
-void CObbStruct::deserialize(const unsigned char* data)
+bool CObbStruct::deserialize(const unsigned char* data)
 {
-    int pos=1;
-
-    _triSize=((float*)(data+pos))[0];pos+=sizeof(float);
-    _triCnt=((int*)(data+pos))[0];pos+=sizeof(int);
-    _originalVerticesSize=((int*)(data+pos))[0];pos+=sizeof(int);
-    _originalVerticesSum=((float*)(data+pos))[0];pos+=sizeof(float);
-    _originalIndicesSize=((int*)(data+pos))[0];pos+=sizeof(int);
-    _originalIndicesSum=((int*)(data+pos))[0];pos+=sizeof(int);
-
-    int s;
-    s=((int*)(data+pos))[0];pos+=sizeof(int);
-    for (int i=0;i<s;i++)
+    int pos=0;
+    unsigned char ver=data[pos++];
+    if (ver<=3)
     {
-        vertices.push_back(((float*)(data+pos))[0]);
-        pos+=sizeof(float);
-    }
+        _triSize=((float*)(data+pos))[0];pos+=sizeof(float);
+        _triCnt=((int*)(data+pos))[0];pos+=sizeof(int);
+        _originalVerticesSize=((int*)(data+pos))[0];pos+=sizeof(int);
+        if (ver==2)
+        {
+            _originalVerticesHash=0;
+            pos+=sizeof(float);
+        }
+        else
+        {
+            _originalVerticesHash=((unsigned long*)(data+pos))[0];
+            pos+=sizeof(unsigned long);
+        }
+        _originalIndicesSize=((int*)(data+pos))[0];pos+=sizeof(int);
+        if (ver==2)
+        {
+            _originalIndicesHash=0;
+            pos+=sizeof(int);
+        }
+        else
+        {
+            _originalIndicesHash=((unsigned long*)(data+pos))[0];
+            pos+=sizeof(unsigned long);
+        }
 
-    s=((int*)(data+pos))[0];pos+=sizeof(int);
-    for (int i=0;i<s;i++)
-    {
-        indices.push_back(((int*)(data+pos))[0]);
-        pos+=sizeof(int);
-    }
+        int s;
+        s=((int*)(data+pos))[0];pos+=sizeof(int);
+        for (int i=0;i<s;i++)
+        {
+            vertices.push_back(((float*)(data+pos))[0]);
+            pos+=sizeof(float);
+        }
 
-    obb=new CObbNode();
-    obb->deserialize(data,pos);
+        s=((int*)(data+pos))[0];pos+=sizeof(int);
+        for (int i=0;i<s;i++)
+        {
+            indices.push_back(((int*)(data+pos))[0]);
+            pos+=sizeof(int);
+        }
+
+        obb=new CObbNode();
+        obb->deserialize(data,pos);
+        return(true);
+    }
+    return(false);
 }
 
 CObbStruct* CObbStruct::copyObbStructFromExisting(const float* vert,int vertSize,const int* ind,int indSize,float triSize,int triCnt)
