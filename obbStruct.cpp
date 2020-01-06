@@ -18,8 +18,8 @@ CObbStruct::CObbStruct(const float* ver,int verSize,const int* ind,int indSize,f
     _originalVerticesSize=verSize;
     _originalIndicesSize=indSize;
 
-    _originalVerticesHash=CCalcUtils::getDjb2Hash((char*)ver,verSize*sizeof(ver));
-    _originalIndicesHash=CCalcUtils::getDjb2Hash((char*)ind,indSize*sizeof(ind));
+    _originalVerticesHash=CCalcUtils::getDjb2Hash((char*)ver,verSize*sizeof(float));
+    _originalIndicesHash=CCalcUtils::getDjb2Hash((char*)ind,indSize*sizeof(int));
 
     reduceTriangleSizes(vertices,indices,_triSize);
 
@@ -72,11 +72,11 @@ bool CObbStruct::isSame(const float* v,int vSize,const int* ind,int indSize,floa
     if (_originalIndicesHash==0)
         return(false);
 
-    unsigned long hash=CCalcUtils::getDjb2Hash((char*)v,vSize*sizeof(v));
+    unsigned long hash=CCalcUtils::getDjb2Hash((char*)v,vSize*sizeof(float));
     if (hash!=_originalVerticesHash)
         return(false);
 
-    hash=CCalcUtils::getDjb2Hash((char*)ind,indSize*sizeof(ind));
+    hash=CCalcUtils::getDjb2Hash((char*)ind,indSize*sizeof(int));
     if (hash!=_originalIndicesHash)
         return(false);
 
