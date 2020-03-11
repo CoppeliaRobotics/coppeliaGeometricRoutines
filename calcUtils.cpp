@@ -1,6 +1,5 @@
 #include "calcUtils.h"
 
-
 unsigned long CCalcUtils::getDjb2Hash(const char* inputStr,size_t size)
 { // taken from http://www.cse.yorku.ca/~oz/hash.html
     unsigned long hash = 5381;
@@ -9,12 +8,12 @@ unsigned long CCalcUtils::getDjb2Hash(const char* inputStr,size_t size)
     return hash;
 }
 
-bool CCalcUtils::doCollide_tri_tri(const C3Vector& p1,const C3Vector& v1,const C3Vector& w1,int tri1Index,const C3Vector& p2,const C3Vector& v2,const C3Vector& w2,int tri2Index,std::vector<float>* intersections,int* cachingTri1,int* cachingTri2)
+bool CCalcUtils::doCollide_tri_tri(const C3Vector& p1,const C3Vector& v1,const C3Vector& w1,int tri1Index,const C3Vector& p2,const C3Vector& v2,const C3Vector& w2,int tri2Index,std::vector<simReal>* intersections,int* cachingTri1,int* cachingTri2)
 {
     C3Vector n1((v1^w1).getNormalized());
     C3Vector n2((v2^w2).getNormalized());
 
-    if (n1.isColinear(n2,0.99999f))
+    if (n1.isColinear(n2,simReal(0.99999)))
         return(false); // colinear!
 
     // Now check for separating axes:
@@ -22,18 +21,18 @@ bool CCalcUtils::doCollide_tri_tri(const C3Vector& p1,const C3Vector& v1,const C
     C3Vector u2(w2-v2);
     C3Vector tr1Edges[3]={v1,w1,u1};
     C3Vector tr2Edges[3]={v2,w2,u2};
-    if (getProjectedDistance_tri_tri(n1,p1,v1,w1,p2,v2,w2)>0.0f)
+    if (getProjectedDistance_tri_tri(n1,p1,v1,w1,p2,v2,w2)>simZero)
         return(false); // n1 is the separating axis!
-    if (getProjectedDistance_tri_tri(n2,p1,v1,w1,p2,v2,w2)>0.0f)
+    if (getProjectedDistance_tri_tri(n2,p1,v1,w1,p2,v2,w2)>simZero)
         return(false); // n2 is the separating axis!
     for (size_t i=0;i<3;i++)
     {
         for (size_t j=0;j<3;j++)
         {
             C3Vector axis=tr1Edges[i]^tr2Edges[j];
-            if ( (axis(0)!=0.0f)||(axis(1)!=0.0f)||(axis(2)!=0.0f) )
+            if ( (axis(0)!=simZero)||(axis(1)!=simZero)||(axis(2)!=simZero) )
             { // Edges are not parallel
-                if (getProjectedDistance_tri_tri(axis.getNormalized(),p1,v1,w1,p2,v2,w2)>0.0f)
+                if (getProjectedDistance_tri_tri(axis.getNormalized(),p1,v1,w1,p2,v2,w2)>simZero)
                     return(false); // that axis is separating!
             }
         }
@@ -68,23 +67,23 @@ bool CCalcUtils::doCollide_tri_tri(const C3Vector& p1,const C3Vector& v1,const C
                 if (i==2)
                     segL=triW[j2][0]-triV[j2][0];
                 // Does the segment maybe collide with the triangle?
-                float dd=-(p*n);
-                float denom=n*segL;
-                if (denom!=0.0f)
+                simReal dd=-(p*n);
+                simReal denom=n*segL;
+                if (denom!=simZero)
                 {   // Seg and tri are not parallel
-                    float t=-((n*segP)+dd)/denom;
-                    if ( (t>=0.0f)&&(t<=1.0f) )
+                    simReal t=-((n*segP)+dd)/denom;
+                    if ( (t>=simZero)&&(t<=simOne) )
                     {   // the segment collides with the triangle's plane
                         C3Vector intersection(segP+(segL*t));
                         // is intersection within triangle's borders?
                         C3Vector vect(intersection-p);
-                        if ((vect^w)*n>0.0f)
+                        if ((vect^w)*n>simZero)
                         { // within border1
-                            if ((v^vect)*n>0.0f)
+                            if ((v^vect)*n>simZero)
                             { // within border2
                                 vect-=v;
                                 C3Vector wv(w-v);
-                                if ((wv^vect)*n>0.0f)
+                                if ((wv^vect)*n>simZero)
                                 { // within border3
                                     if (intersection1Done)
                                     {
@@ -115,39 +114,32 @@ bool CCalcUtils::doCollide_tri_tri(const C3Vector& p1,const C3Vector& v1,const C
     return(true);
 }
 
-bool CCalcUtils::doCollide_tri_segp(const C3Vector& p1,const C3Vector& v1,const C3Vector& w1,int tri1Index,const C3Vector& segP,const C3Vector& segL,std::vector<float>* intersections,int* cachingTri1)
+bool CCalcUtils::doCollide_tri_segp(const C3Vector& p1,const C3Vector& v1,const C3Vector& w1,int tri1Index,const C3Vector& segP,const C3Vector& segL,C3Vector* intersection,int* cachingTri1)
 {
     bool retVal=false;
     C3Vector n(v1^w1);
     // Does the segment maybe collide with the triangle?
-    float dd=-(p1*n);
-    float denom=n*segL;
-    if (denom!=0.0f)
+    simReal dd=-(p1*n);
+    simReal denom=n*segL;
+    if (denom!=simZero)
     {   // Seg and tri are not parallel
-        float t=-((n*segP)+dd)/denom;
-        if ( (t>=0.0f)&&(t<=1.0f) )
+        simReal t=-((n*segP)+dd)/denom;
+        if ( (t>=simZero)&&(t<=simOne) )
         {   // the segment collides with the triangle's plane
-            C3Vector intersection(segP+(segL*t));
+            C3Vector intersect(segP+(segL*t));
             // is intersection within triangle's borders?
-            C3Vector vect(intersection-p1);
-            if ((vect^w1)*n>0.0f)
+            C3Vector vect(intersect-p1);
+            if ((vect^w1)*n>simZero)
             { // within border1
-                if ((v1^vect)*n>0.0f)
+                if ((v1^vect)*n>simZero)
                 { // within border2
                     vect-=v1;
                     C3Vector wv(w1-v1);
-                    if ((wv^vect)*n>0.0f)
+                    if ((wv^vect)*n>simZero)
                     { // within border3
                         retVal=true;
-                        if (intersections!=nullptr)
-                        {
-                            intersections->push_back(intersection(0));
-                            intersections->push_back(intersection(1));
-                            intersections->push_back(intersection(2));
-                            intersections->push_back(intersection(0));
-                            intersections->push_back(intersection(1));
-                            intersections->push_back(intersection(2));
-                        }
+                        if (intersection!=nullptr)
+                            intersection[0]=intersect;
                     }
                 }
             }
@@ -158,7 +150,7 @@ bool CCalcUtils::doCollide_tri_segp(const C3Vector& p1,const C3Vector& v1,const 
     return(retVal);
 }
 
-bool CCalcUtils::doCollide_box_cell(const C4X4Matrix& box,const C3Vector& boxHs,float cellHs,bool solidBoxAndCell)
+bool CCalcUtils::doCollide_box_cell(const C4X4Matrix& box,const C3Vector& boxHs,simReal cellHs,bool solidBoxAndCell)
 {   // Cell is at the origin
     // optimize!!!
     C4X4Matrix box2;
@@ -171,15 +163,15 @@ bool CCalcUtils::doCollide_box_box(const C4X4Matrix& box1,const C3Vector& box1Hs
 {
     for (size_t i=0;i<3;i++)
     { // box 1's axes
-        float box1Box2Proj=fabsf((box2.X-box1.X)*box1.M.axis[i]);
-        float box2Overlap=fabsf(box2.M.axis[0]*box1.M.axis[i])*box2Hs(0)+fabsf(box2.M.axis[1]*box1.M.axis[i])*box2Hs(1)+fabsf(box2.M.axis[2]*box1.M.axis[i])*box2Hs(2);
+        simReal box1Box2Proj=fabs((box2.X-box1.X)*box1.M.axis[i]);
+        simReal box2Overlap=fabs(box2.M.axis[0]*box1.M.axis[i])*box2Hs(0)+fabs(box2.M.axis[1]*box1.M.axis[i])*box2Hs(1)+fabs(box2.M.axis[2]*box1.M.axis[i])*box2Hs(2);
         if (box1Hs(i)+box2Overlap<box1Box2Proj)
             return(false);
     }
     for (size_t i=0;i<3;i++)
     { // box 2's axes
-        float box1Box2Proj=fabsf((box2.X-box1.X)*box2.M.axis[i]);
-        float box1Overlap=fabsf(box1.M.axis[0]*box2.M.axis[i])*box1Hs(0)+fabsf(box1.M.axis[1]*box2.M.axis[i])*box1Hs(1)+fabsf(box1.M.axis[2]*box2.M.axis[i])*box1Hs(2);
+        simReal box1Box2Proj=fabs((box2.X-box1.X)*box2.M.axis[i]);
+        simReal box1Overlap=fabs(box1.M.axis[0]*box2.M.axis[i])*box1Hs(0)+fabs(box1.M.axis[1]*box2.M.axis[i])*box1Hs(1)+fabs(box1.M.axis[2]*box2.M.axis[i])*box1Hs(2);
         if (box2Hs(i)+box1Overlap<box1Box2Proj)
             return(false);
     }
@@ -188,12 +180,12 @@ bool CCalcUtils::doCollide_box_box(const C4X4Matrix& box1,const C3Vector& box1Hs
         for (size_t j=0;j<3;j++)
         {
             C3Vector a(box1.M.axis[i]^box2.M.axis[j]);
-            if ( (a(0)!=0.0f)||(a(1)!=0.0f)||(a(2)!=0.0f) )
+            if ( (a(0)!=simZero)||(a(1)!=simZero)||(a(2)!=simZero) )
             {
                 a.normalize();
-                float box1Box2Proj=fabsf((box2.X-box1.X)*a);
-                float box1Overlap=fabsf(box1.M.axis[0]*a)*box1Hs(0)+fabsf(box1.M.axis[1]*a)*box1Hs(1)+fabsf(box1.M.axis[2]*a)*box1Hs(2);
-                float box2Overlap=fabsf(box2.M.axis[0]*a)*box2Hs(0)+fabsf(box2.M.axis[1]*a)*box2Hs(1)+fabsf(box2.M.axis[2]*a)*box2Hs(2);
+                simReal box1Box2Proj=fabs((box2.X-box1.X)*a);
+                simReal box1Overlap=fabs(box1.M.axis[0]*a)*box1Hs(0)+fabs(box1.M.axis[1]*a)*box1Hs(1)+fabs(box1.M.axis[2]*a)*box1Hs(2);
+                simReal box2Overlap=fabs(box2.M.axis[0]*a)*box2Hs(0)+fabs(box2.M.axis[1]*a)*box2Hs(1)+fabs(box2.M.axis[2]*a)*box2Hs(2);
                 if (box1Overlap+box2Overlap<box1Box2Proj)
                     return(false);
             }
@@ -203,17 +195,17 @@ bool CCalcUtils::doCollide_box_box(const C4X4Matrix& box1,const C3Vector& box1Hs
     {
         std::vector<C3Vector> b1pts;
         std::vector<C3Vector> b2pts;
-        for (float z=-1.0f;z<2.0f;z+=2.0f)
+        for (simReal z=-simOne;z<simTwo;z+=simTwo)
         {
             C3Vector a1;
             C3Vector a2;
             a1(2)=z*box1Hs(2);
             a2(2)=z*box2Hs(2);
-            for (float y=-1.0f;y<2.0f;y+=2.0f)
+            for (simReal y=-simOne;y<simTwo;y+=simTwo)
             {
                 a1(1)=y*box1Hs(1);
                 a2(1)=y*box2Hs(1);
-                for (float x=-1.0f;x<2.0f;x+=2.0f)
+                for (simReal x=-simOne;x<simTwo;x+=simTwo)
                 {
                     a1(0)=x*box1Hs(0);
                     a2(0)=x*box2Hs(0);
@@ -233,11 +225,11 @@ bool CCalcUtils::doCollide_box_box(const C4X4Matrix& box1,const C3Vector& box1Hs
 bool CCalcUtils::doCollide_box_tri(const C4X4Matrix& box,const C3Vector& boxHs,bool solidBox,const C3Vector& p,const C3Vector& v,const C3Vector& w)
 {
     C3Vector n((v^w).getNormalized());
-    if (getProjectedDistance_box_tri(n,box,boxHs,p,v,w)>0.0f)
+    if (getProjectedDistance_box_tri(n,box,boxHs,p,v,w)>simZero)
         return(false); // tri normal vect. is separating axis
     for (size_t i=0;i<3;i++)
     {
-        if (getProjectedDistance_box_tri(box.M.axis[i],box,boxHs,p,v,w)>0.0f)
+        if (getProjectedDistance_box_tri(box.M.axis[i],box,boxHs,p,v,w)>simZero)
             return(false); // one of the box's edges is separating axis
     }
     // Now check the tri edges:
@@ -248,9 +240,9 @@ bool CCalcUtils::doCollide_box_tri(const C4X4Matrix& box,const C3Vector& boxHs,b
         for (size_t j=0;j<3;j++)
         {
             C3Vector axis=box.M.axis[i]^trEdges[j];
-            if ( (axis(0)!=0.0f)||(axis(1)!=0.0f)||(axis(2)!=0.0f) )
+            if ( (axis(0)!=simZero)||(axis(1)!=simZero)||(axis(2)!=simZero) )
             {
-                if (getProjectedDistance_box_tri(axis.getNormalized(),box,boxHs,p,v,w)>0.0f)
+                if (getProjectedDistance_box_tri(axis.getNormalized(),box,boxHs,p,v,w)>simZero)
                     return(false);
             }
         }
@@ -269,7 +261,7 @@ bool CCalcUtils::doCollide_box_tri(const C4X4Matrix& box,const C3Vector& boxHs,b
 
 bool CCalcUtils::doCollide_box_segp(const C4X4Matrix& box,const C3Vector& boxHs,bool solidBox,const C3Vector& segP,const C3Vector& segL)
 {   // Segment is defined as segP (end-point1) and segP+segL (end-point2)
-    C3Vector segHs(segL*0.5f);
+    C3Vector segHs(segL*simHalf);
     C3Vector segCenter(segP+segHs);
     return(doCollide_box_seg(box,boxHs,solidBox,segCenter,segHs));
 }
@@ -277,23 +269,23 @@ bool CCalcUtils::doCollide_box_segp(const C4X4Matrix& box,const C3Vector& boxHs,
 bool CCalcUtils::doCollide_box_seg(const C4X4Matrix& box,const C3Vector& boxHs,bool solidBox,const C3Vector& segCenter,const C3Vector& segHs)
 {   // Segment is defined as segCenter (center of segment) and segHs (segment vector half-size)
     // Box-segment segment:
-    if (getProjectedDistance_box_seg(segCenter.getNormalized(),box,boxHs,segCenter,segHs)>0.0f)
+    if (getProjectedDistance_box_seg(segCenter.getNormalized(),box,boxHs,segCenter,segHs)>simZero)
         return(false);
     // Segment axis:
-    if (getProjectedDistance_box_seg(segHs.getNormalized(),box,boxHs,segCenter,segHs)>0.0f)
+    if (getProjectedDistance_box_seg(segHs.getNormalized(),box,boxHs,segCenter,segHs)>simZero)
         return(false);
     // Box axes:
     for (size_t i=0;i<3;i++)
     {
-        if (getProjectedDistance_box_seg(box.M.axis[i],box,boxHs,segCenter,segHs)>0.0f)
+        if (getProjectedDistance_box_seg(box.M.axis[i],box,boxHs,segCenter,segHs)>simZero)
             return(false);
     }
     // Combination of Box and segment axes:
     for (size_t i=0;i<3;i++)
     {
-        if (!segHs.isColinear(box.M.axis[i],0.99999f))
+        if (!segHs.isColinear(box.M.axis[i],simReal(0.99999)))
         {
-            if (getProjectedDistance_box_seg((segHs^box.M.axis[i]).getNormalized(),box,boxHs,segCenter,segHs)>0.0f)
+            if (getProjectedDistance_box_seg((segHs^box.M.axis[i]).getNormalized(),box,boxHs,segCenter,segHs)>simZero)
                 return(false);
         }
     }
@@ -314,11 +306,11 @@ bool CCalcUtils::doCollide_box_allpts(const C4X4Matrix& box,const C3Vector& boxH
     for (size_t i=0;i<points.size();i++)
     {
         C3Vector transfPt(boxInv*points[i]);
-        if (fabsf(transfPt(0))>boxHs(0))
+        if (fabs(transfPt(0))>boxHs(0))
             return(false);
-        if (fabsf(transfPt(1))>boxHs(1))
+        if (fabs(transfPt(1))>boxHs(1))
             return(false);
-        if (fabsf(transfPt(2))>boxHs(2))
+        if (fabs(transfPt(2))>boxHs(2))
             return(false);
     }
     return(true);
@@ -330,11 +322,11 @@ bool CCalcUtils::doCollide_box_onept(const C4X4Matrix& box,const C3Vector& boxHs
     for (size_t i=0;i<points.size();i++)
     {
         C3Vector transfPt(boxInv*points[i]);
-        if (fabsf(transfPt(0))<=boxHs(0))
+        if (fabs(transfPt(0))<=boxHs(0))
         {
-            if (fabsf(transfPt(1))<=boxHs(1))
+            if (fabs(transfPt(1))<=boxHs(1))
             {
-                if (fabsf(transfPt(2))<=boxHs(2))
+                if (fabs(transfPt(2))<=boxHs(2))
                 {
                     if (insidePt!=nullptr)
                         insidePt[0]=points[i];
@@ -346,15 +338,15 @@ bool CCalcUtils::doCollide_box_onept(const C4X4Matrix& box,const C3Vector& boxHs
     return(false);
 }
 
-bool CCalcUtils::doCollide_cell_segp(float cellHs,bool solidCell,const C3Vector& segP,const C3Vector& segL)
+bool CCalcUtils::doCollide_cell_segp(simReal cellHs,bool solidCell,const C3Vector& segP,const C3Vector& segL)
 {   // Cell is at the origin
     // Segment is defined as segP (end-point1) and segP+segL (end-point2)
-    C3Vector segHs(segL*0.5f);
+    C3Vector segHs(segL*simHalf);
     C3Vector segCenter(segP+segHs);
     return(doCollide_cell_seg(cellHs,solidCell,segCenter,segHs));
 }
 
-bool CCalcUtils::doCollide_cell_pt(float cellHs,const C3Vector& pt)
+bool CCalcUtils::doCollide_cell_pt(simReal cellHs,const C3Vector& pt)
 {
     if (fabs(pt(0))>cellHs)
         return(false);
@@ -365,7 +357,7 @@ bool CCalcUtils::doCollide_cell_pt(float cellHs,const C3Vector& pt)
     return(true);
 }
 
-bool CCalcUtils::doCollide_cell_seg(float cellHs,bool solidCell,const C3Vector& segCenter,const C3Vector& segHs)
+bool CCalcUtils::doCollide_cell_seg(simReal cellHs,bool solidCell,const C3Vector& segCenter,const C3Vector& segHs)
 {   // Cell is at the origin
     // Segment is defined as segCenter (center of segment) and segHs (segment vector half-size)
     // optimize!!!
@@ -375,7 +367,7 @@ bool CCalcUtils::doCollide_cell_seg(float cellHs,bool solidCell,const C3Vector& 
     return(doCollide_box_seg(box,sv,solidCell,segCenter,segHs));
 }
 
-bool CCalcUtils::doCollide_cell_tri(float cellHs,bool solidCell,const C3Vector& p,const C3Vector& v,const C3Vector& w)
+bool CCalcUtils::doCollide_cell_tri(simReal cellHs,bool solidCell,const C3Vector& p,const C3Vector& v,const C3Vector& w)
 {   // Cell is at the origin
     // optimize!!!
     C4X4Matrix box;
@@ -384,56 +376,56 @@ bool CCalcUtils::doCollide_cell_tri(float cellHs,bool solidCell,const C3Vector& 
     return(doCollide_box_tri(box,sv,solidCell,p,v,w));
 }
 
-float CCalcUtils::getProjectedDistance_box_tri(const C3Vector& axis,const C4X4Matrix& box,const C3Vector& boxHs,const C3Vector& p,const C3Vector& v,const C3Vector& w)
+simReal CCalcUtils::getProjectedDistance_box_tri(const C3Vector& axis,const C4X4Matrix& box,const C3Vector& boxHs,const C3Vector& p,const C3Vector& v,const C3Vector& w)
 {
-    float boxPProjDist=axis*(p-box.X);
-    C3Vector boxP(fabsf(box.M.axis[0]*axis),fabsf(box.M.axis[1]*axis),fabsf(box.M.axis[2]*axis));
-    float boxOverlap=boxP*boxHs;
-    float triEdge1ProjDist=axis*v;
-    float triEdge2ProjDist=axis*w;
-    float overlapTriEdge1=0.0f;
-    float overlapTriEdge2=0.0f;
-    if (boxPProjDist*triEdge1ProjDist<0.0f)
-        overlapTriEdge1=fabsf(triEdge1ProjDist);
-    if (boxPProjDist*triEdge2ProjDist<0.0f)
-        overlapTriEdge2=fabsf(triEdge2ProjDist);
-    float retVal=fabsf(boxPProjDist)-std::max<float>(overlapTriEdge1,overlapTriEdge2)-boxOverlap;
-    if (retVal<0.0f)
-        retVal=0.0f;
+    simReal boxPProjDist=axis*(p-box.X);
+    C3Vector boxP(fabs(box.M.axis[0]*axis),fabs(box.M.axis[1]*axis),fabs(box.M.axis[2]*axis));
+    simReal boxOverlap=boxP*boxHs;
+    simReal triEdge1ProjDist=axis*v;
+    simReal triEdge2ProjDist=axis*w;
+    simReal overlapTriEdge1=simZero;
+    simReal overlapTriEdge2=simZero;
+    if (boxPProjDist*triEdge1ProjDist<simZero)
+        overlapTriEdge1=fabs(triEdge1ProjDist);
+    if (boxPProjDist*triEdge2ProjDist<simZero)
+        overlapTriEdge2=fabs(triEdge2ProjDist);
+    simReal retVal=fabs(boxPProjDist)-std::max<simReal>(overlapTriEdge1,overlapTriEdge2)-boxOverlap;
+    if (retVal<simZero)
+        retVal=simZero;
     return(retVal);
 }
 
-float CCalcUtils::getProjectedDistance_box_segp(const C3Vector& axis,const C4X4Matrix& box,const C3Vector& boxHs,const C3Vector& segP,const C3Vector& segL)
+simReal CCalcUtils::getProjectedDistance_box_segp(const C3Vector& axis,const C4X4Matrix& box,const C3Vector& boxHs,const C3Vector& segP,const C3Vector& segL)
 {   // Segment is defined as segP (end-point1) and segP+segL (end-point2)
-    C3Vector segHs(segL*0.5f);
+    C3Vector segHs(segL*simHalf);
     C3Vector segCenter(segP+segHs);
     return(getProjectedDistance_box_seg(axis,box,boxHs,segCenter,segHs));
 }
 
-float CCalcUtils::getProjectedDistance_box_seg(const C3Vector& axis,const C4X4Matrix& box,const C3Vector& boxHs,const C3Vector& segCenter,const C3Vector& segHs)
+simReal CCalcUtils::getProjectedDistance_box_seg(const C3Vector& axis,const C4X4Matrix& box,const C3Vector& boxHs,const C3Vector& segCenter,const C3Vector& segHs)
 {   // Segment is defined as segCenter (center of segment) and segHs (segment vector half-size)
-    float boxSegProjDist=fabsf(axis*(segCenter-box.X));
-    C3Vector boxP(fabsf(box.M.axis[0]*axis),fabsf(box.M.axis[1]*axis),fabsf(box.M.axis[2]*axis));
-    float boxOverlap=boxP*boxHs;
-    float segOverlap=fabsf(segHs*axis);
-    float retVal=boxSegProjDist-boxOverlap-segOverlap;
-    if (retVal<0.0f)
-        retVal=0.0f;
+    simReal boxSegProjDist=fabs(axis*(segCenter-box.X));
+    C3Vector boxP(fabs(box.M.axis[0]*axis),fabs(box.M.axis[1]*axis),fabs(box.M.axis[2]*axis));
+    simReal boxOverlap=boxP*boxHs;
+    simReal segOverlap=fabs(segHs*axis);
+    simReal retVal=boxSegProjDist-boxOverlap-segOverlap;
+    if (retVal<simZero)
+        retVal=simZero;
     return(retVal);
 }
 
-float CCalcUtils::getProjectedDistance_box_pt(const C3Vector& axis,const C4X4Matrix& box,const C3Vector& boxHs,const C3Vector& pt)
+simReal CCalcUtils::getProjectedDistance_box_pt(const C3Vector& axis,const C4X4Matrix& box,const C3Vector& boxHs,const C3Vector& pt)
 {
-    float boxSegProjDist=fabsf(axis*(pt-box.X));
-    C3Vector boxP(fabsf(box.M.axis[0]*axis),fabsf(box.M.axis[1]*axis),fabsf(box.M.axis[2]*axis));
-    float boxOverlap=boxP*boxHs;
-    float retVal=boxSegProjDist-boxOverlap;
-    if (retVal<0.0f)
-        retVal=0.0f;
+    simReal boxSegProjDist=fabs(axis*(pt-box.X));
+    C3Vector boxP(fabs(box.M.axis[0]*axis),fabs(box.M.axis[1]*axis),fabs(box.M.axis[2]*axis));
+    simReal boxOverlap=boxP*boxHs;
+    simReal retVal=boxSegProjDist-boxOverlap;
+    if (retVal<simZero)
+        retVal=simZero;
     return(retVal);
 }
 
-float CCalcUtils::getProjectedDistance_cell_tri(const C3Vector& axis,float cellHs,const C3Vector& p,const C3Vector& v,const C3Vector& w)
+simReal CCalcUtils::getProjectedDistance_cell_tri(const C3Vector& axis,simReal cellHs,const C3Vector& p,const C3Vector& v,const C3Vector& w)
 {   // Cell is at the origin
     // optimize!!!
     C4X4Matrix box;
@@ -442,15 +434,15 @@ float CCalcUtils::getProjectedDistance_cell_tri(const C3Vector& axis,float cellH
     return(getProjectedDistance_box_tri(axis,box,sv,p,v,w));
 }
 
-float CCalcUtils::getProjectedDistance_cell_segp(const C3Vector& axis,float cellHs,const C3Vector& segP,const C3Vector& segL)
+simReal CCalcUtils::getProjectedDistance_cell_segp(const C3Vector& axis,simReal cellHs,const C3Vector& segP,const C3Vector& segL)
 {   // Cell is at the origin
     // Segment is defined as segP (end-point1) and segP+segL (end-point2)
-    C3Vector segHs(segL*0.5f);
+    C3Vector segHs(segL*simHalf);
     C3Vector segCenter(segP+segHs);
     return(getProjectedDistance_cell_seg(axis,cellHs,segCenter,segHs));
 }
 
-float CCalcUtils::getProjectedDistance_cell_seg(const C3Vector& axis,float cellHs,const C3Vector& segCenter,const C3Vector& segHs)
+simReal CCalcUtils::getProjectedDistance_cell_seg(const C3Vector& axis,simReal cellHs,const C3Vector& segCenter,const C3Vector& segHs)
 {   // Cell is at the origin
     // Segment is defined as segCenter (center of segment) and segHs (segment vector half-size)
     // optimize!!!
@@ -460,105 +452,105 @@ float CCalcUtils::getProjectedDistance_cell_seg(const C3Vector& axis,float cellH
     return(getProjectedDistance_box_seg(axis,box,sv,segCenter,segHs));
 }
 
-float CCalcUtils::getProjectedDistance_tri_tri(const C3Vector& axis,const C3Vector& p1,const C3Vector& v1,const C3Vector& w1,const C3Vector& p2,const C3Vector& v2,const C3Vector& w2)
+simReal CCalcUtils::getProjectedDistance_tri_tri(const C3Vector& axis,const C3Vector& p1,const C3Vector& v1,const C3Vector& w1,const C3Vector& p2,const C3Vector& v2,const C3Vector& w2)
 {
-    float p1p2ProjDist=axis*(p2-p1);
-    float tri1Edge1ProjDist=axis*v1;
-    float tri1Edge2ProjDist=axis*w1;
-    float tri2Edge1ProjDist=axis*v2;
-    float tri2Edge2ProjDist=axis*w2;
-    float overlapTri1Edge1=0.0f;
-    float overlapTri1Edge2=0.0f;
-    if (p1p2ProjDist*tri1Edge1ProjDist>0.0f)
-        overlapTri1Edge1=fabsf(tri1Edge1ProjDist);
-    if (p1p2ProjDist*tri1Edge2ProjDist>0.0f)
-        overlapTri1Edge2=fabsf(tri1Edge2ProjDist);
-    float overlapTri2Edge1=0.0f;
-    float overlapTri2Edge2=0.0f;
-    if (p1p2ProjDist*tri2Edge1ProjDist<0.0f)
-        overlapTri2Edge1=fabsf(tri2Edge1ProjDist);
-    if (p1p2ProjDist*tri2Edge2ProjDist<0.0f)
-        overlapTri2Edge2=fabsf(tri2Edge2ProjDist);
-    float retVal=fabsf(p1p2ProjDist)-std::max<float>(overlapTri1Edge1,overlapTri1Edge2)-std::max<float>(overlapTri2Edge1,overlapTri2Edge2);
-    if (retVal<0.0f)
-        retVal=0.0f;
+    simReal p1p2ProjDist=axis*(p2-p1);
+    simReal tri1Edge1ProjDist=axis*v1;
+    simReal tri1Edge2ProjDist=axis*w1;
+    simReal tri2Edge1ProjDist=axis*v2;
+    simReal tri2Edge2ProjDist=axis*w2;
+    simReal overlapTri1Edge1=simZero;
+    simReal overlapTri1Edge2=simZero;
+    if (p1p2ProjDist*tri1Edge1ProjDist>simZero)
+        overlapTri1Edge1=fabs(tri1Edge1ProjDist);
+    if (p1p2ProjDist*tri1Edge2ProjDist>simZero)
+        overlapTri1Edge2=fabs(tri1Edge2ProjDist);
+    simReal overlapTri2Edge1=simZero;
+    simReal overlapTri2Edge2=simZero;
+    if (p1p2ProjDist*tri2Edge1ProjDist<simZero)
+        overlapTri2Edge1=fabs(tri2Edge1ProjDist);
+    if (p1p2ProjDist*tri2Edge2ProjDist<simZero)
+        overlapTri2Edge2=fabs(tri2Edge2ProjDist);
+    simReal retVal=fabs(p1p2ProjDist)-std::max<simReal>(overlapTri1Edge1,overlapTri1Edge2)-std::max<simReal>(overlapTri2Edge1,overlapTri2Edge2);
+    if (retVal<simZero)
+        retVal=simZero;
     return(retVal);
 }
 
 
-bool CCalcUtils::isApproxDistanceSmaller_box_box(const C4X4Matrix& box1,const C3Vector& box1Hs,const C4X4Matrix& box2,const C3Vector& box2Hs,float& dist)
+bool CCalcUtils::isApproxDistanceSmaller_box_box(const C4X4Matrix& box1,const C3Vector& box1Hs,const C4X4Matrix& box2,const C3Vector& box2Hs,simReal& dist)
 {   // The real distance is always larger or equal than the approximate distance
     // dist is modified if return is true
-    if (dist==0.0f)
+    if (dist==simZero)
         return(false);
-    float d=0.0f;
+    simReal d=simZero;
     for (size_t i=0;i<3;i++)
     { // box 1's axes
-        float box1Box2Proj=fabsf((box2.X-box1.X)*box1.M.axis[i]);
-        float box2Overlap=fabsf(box2.M.axis[0]*box1.M.axis[i])*box2Hs(0)+fabsf(box2.M.axis[1]*box1.M.axis[i])*box2Hs(1)+fabsf(box2.M.axis[2]*box1.M.axis[i])*box2Hs(2);
-        float dd=box1Box2Proj-box1Hs(i)-box2Overlap;
+        simReal box1Box2Proj=fabs((box2.X-box1.X)*box1.M.axis[i]);
+        simReal box2Overlap=fabs(box2.M.axis[0]*box1.M.axis[i])*box2Hs(0)+fabs(box2.M.axis[1]*box1.M.axis[i])*box2Hs(1)+fabs(box2.M.axis[2]*box1.M.axis[i])*box2Hs(2);
+        simReal dd=box1Box2Proj-box1Hs(i)-box2Overlap;
         if (dd>=dist)
             return(false);
         d=dd;
     }
     for (size_t i=0;i<3;i++)
     { // box 2's axes
-        float box1Box2Proj=fabsf((box2.X-box1.X)*box2.M.axis[i]);
-        float box1Overlap=fabsf(box1.M.axis[0]*box2.M.axis[i])*box1Hs(0)+fabsf(box1.M.axis[1]*box2.M.axis[i])*box1Hs(1)+fabsf(box1.M.axis[2]*box2.M.axis[i])*box1Hs(2);
-        float dd=box1Box2Proj-box2Hs(i)-box1Overlap;
+        simReal box1Box2Proj=fabs((box2.X-box1.X)*box2.M.axis[i]);
+        simReal box1Overlap=fabs(box1.M.axis[0]*box2.M.axis[i])*box1Hs(0)+fabs(box1.M.axis[1]*box2.M.axis[i])*box1Hs(1)+fabs(box1.M.axis[2]*box2.M.axis[i])*box1Hs(2);
+        simReal dd=box1Box2Proj-box2Hs(i)-box1Overlap;
         if (dd>=dist)
             return(false);
-        d=std::max<float>(d,dd);
+        d=std::max<simReal>(d,dd);
     }
     for (size_t i=0;i<3;i++)
     {
         for (size_t j=0;j<3;j++)
         {
             C3Vector a(box1.M.axis[i]^box2.M.axis[j]);
-            if ( (a(0)!=0.0f)||(a(1)!=0.0f)||(a(2)!=0.0f) )
+            if ( (a(0)!=simZero)||(a(1)!=simZero)||(a(2)!=simZero) )
             {
                 a.normalize();
-                float box1Box2Proj=fabsf((box2.X-box1.X)*a);
-                float box1Overlap=fabsf(box1.M.axis[0]*a)*box1Hs(0)+fabsf(box1.M.axis[1]*a)*box1Hs(1)+fabsf(box1.M.axis[2]*a)*box1Hs(2);
-                float box2Overlap=fabsf(box2.M.axis[0]*a)*box2Hs(0)+fabsf(box2.M.axis[1]*a)*box2Hs(1)+fabsf(box2.M.axis[2]*a)*box2Hs(2);
-                float dd=box1Box2Proj-box1Overlap-box2Overlap;
+                simReal box1Box2Proj=fabs((box2.X-box1.X)*a);
+                simReal box1Overlap=fabs(box1.M.axis[0]*a)*box1Hs(0)+fabs(box1.M.axis[1]*a)*box1Hs(1)+fabs(box1.M.axis[2]*a)*box1Hs(2);
+                simReal box2Overlap=fabs(box2.M.axis[0]*a)*box2Hs(0)+fabs(box2.M.axis[1]*a)*box2Hs(1)+fabs(box2.M.axis[2]*a)*box2Hs(2);
+                simReal dd=box1Box2Proj-box1Overlap-box2Overlap;
                 if (dd>=dist)
                     return(false);
-                d=std::max<float>(d,dd);
+                d=std::max<simReal>(d,dd);
             }
         }
     }
-    if (d<0.0f)
-        d=0.0f;
+    if (d<simZero)
+        d=simZero;
     dist=d;
     return(true);
 }
 
-bool CCalcUtils::isApproxDistanceSmaller_box_box_fast(const C4X4Matrix& box1,const C3Vector& box1Hs,const C4X4Matrix& box2,const C3Vector& box2Hs,float& dist)
+bool CCalcUtils::isApproxDistanceSmaller_box_box_fast(const C4X4Matrix& box1,const C3Vector& box1Hs,const C4X4Matrix& box2,const C3Vector& box2Hs,simReal& dist)
 {   // Similar to isApproxDistanceSmaller_box_box, but only one projection axis is tested (i.e. the axis between the two boxes' origin)
     // The real distance is always larger or equal than the approximate distance
     // dist is modified if return is true
-    if (dist==0.0f)
+    if (dist==simZero)
         return(false);
     C3Vector axis((box2.X-box1.X).getNormalized());
-    float box1Box2Proj=fabsf((box2.X-box1.X)*axis);
-    float box1Overlap=fabsf(box1.M.axis[0]*axis)*box1Hs(0)+fabsf(box1.M.axis[1]*axis)*box1Hs(1)+fabsf(box1.M.axis[2]*axis)*box1Hs(2);
-    float box2Overlap=fabsf(box2.M.axis[0]*axis)*box2Hs(0)+fabsf(box2.M.axis[1]*axis)*box2Hs(1)+fabsf(box2.M.axis[2]*axis)*box2Hs(2);
-    float d=box1Box2Proj-box1Overlap-box2Overlap;
+    simReal box1Box2Proj=fabs((box2.X-box1.X)*axis);
+    simReal box1Overlap=fabs(box1.M.axis[0]*axis)*box1Hs(0)+fabs(box1.M.axis[1]*axis)*box1Hs(1)+fabs(box1.M.axis[2]*axis)*box1Hs(2);
+    simReal box2Overlap=fabs(box2.M.axis[0]*axis)*box2Hs(0)+fabs(box2.M.axis[1]*axis)*box2Hs(1)+fabs(box2.M.axis[2]*axis)*box2Hs(2);
+    simReal d=box1Box2Proj-box1Overlap-box2Overlap;
     if (d>=dist)
         return(false);
-    if (d<0.0f)
-        d=0.0f;
+    if (d<simZero)
+        d=simZero;
     dist=d;
     return(true);
 }
 
-bool CCalcUtils::isApproxDistanceSmaller_box_cell(const C4X4Matrix& box,const C3Vector& boxHs,float cellHs,float& dist)
+bool CCalcUtils::isApproxDistanceSmaller_box_cell(const C4X4Matrix& box,const C3Vector& boxHs,simReal cellHs,simReal& dist)
 {   // The real distance is always larger or equal than the approximate distance
     // dist is modified if return is true
     // Cell is at the origin
     // optimize!!!
-    if (dist==0.0f)
+    if (dist==simZero)
         return(false);
     C4X4Matrix box2;
     box2.setIdentity();
@@ -566,13 +558,13 @@ bool CCalcUtils::isApproxDistanceSmaller_box_cell(const C4X4Matrix& box,const C3
     return(isApproxDistanceSmaller_box_box(box2,sv,box,boxHs,dist));
 }
 
-bool CCalcUtils::isApproxDistanceSmaller_box_cell_fast(const C4X4Matrix& box,const C3Vector& boxHs,float cellHs,float& dist)
+bool CCalcUtils::isApproxDistanceSmaller_box_cell_fast(const C4X4Matrix& box,const C3Vector& boxHs,simReal cellHs,simReal& dist)
 {   // Similar to isApproxDistanceSmaller_box_cell, but only one projection axis is tested (i.e. the axis between the two boxes' origin)
     // The real distance is always larger or equal than the approximate distance
     // dist is modified if return is true
     // Cell is at the origin
     // optimize!!!
-    if (dist==0.0f)
+    if (dist==simZero)
         return(false);
     C4X4Matrix box2;
     box2.setIdentity();
@@ -580,25 +572,25 @@ bool CCalcUtils::isApproxDistanceSmaller_box_cell_fast(const C4X4Matrix& box,con
     return(isApproxDistanceSmaller_box_box_fast(box2,sv,box,boxHs,dist));
 }
 
-bool CCalcUtils::isApproxDistanceSmaller_box_tri(const C4X4Matrix& box,const C3Vector& boxHs,const C3Vector& p,const C3Vector& v,const C3Vector& w,float& dist)
+bool CCalcUtils::isApproxDistanceSmaller_box_tri(const C4X4Matrix& box,const C3Vector& boxHs,const C3Vector& p,const C3Vector& v,const C3Vector& w,simReal& dist)
 {   // The real distance is always larger or equal than the approximate distance
     // dist is modified if return is true
-    if (dist==0.0f)
+    if (dist==simZero)
         return(false);
-    float d=0.0f;
+    simReal d=simZero;
     // tri normal vect:
     C3Vector n((v^w).getNormalized());
-    float dd=getProjectedDistance_box_tri(n,box,boxHs,p,v,w);
+    simReal dd=getProjectedDistance_box_tri(n,box,boxHs,p,v,w);
     if (dd>=dist)
         return(false);
     d=dd;
     // Box's edges:
     for (size_t i=0;i<3;i++)
     {
-        float dd=getProjectedDistance_box_tri(box.M.axis[i],box,boxHs,p,v,w);
+        simReal dd=getProjectedDistance_box_tri(box.M.axis[i],box,boxHs,p,v,w);
         if (dd>=dist)
             return(false);
-        d=std::max<float>(d,dd);
+        d=std::max<simReal>(d,dd);
     }
     // Now check the tri edges ^ box's axes:
     C3Vector u(w-v);
@@ -608,90 +600,90 @@ bool CCalcUtils::isApproxDistanceSmaller_box_tri(const C4X4Matrix& box,const C3V
         for (size_t j=0;j<3;j++)
         {
             C3Vector axis=box.M.axis[i]^trEdges[j];
-            if ( (axis(0)!=0.0f)||(axis(1)!=0.0f)||(axis(2)!=0.0f) )
+            if ( (axis(0)!=simZero)||(axis(1)!=simZero)||(axis(2)!=simZero) )
             {
-                float dd=getProjectedDistance_box_tri(axis.getNormalized(),box,boxHs,p,v,w);
+                simReal dd=getProjectedDistance_box_tri(axis.getNormalized(),box,boxHs,p,v,w);
                 if (dd>=dist)
                     return(false);
-                d=std::max<float>(d,dd);
+                d=std::max<simReal>(d,dd);
             }
         }
     }
-    if (d<0.0f)
-        d=0.0f;
+    if (d<simZero)
+        d=simZero;
     dist=d;
     return(true);
 }
 
-bool CCalcUtils::isApproxDistanceSmaller_box_tri_fast(const C4X4Matrix& box,const C3Vector& boxHs,const C3Vector& p,const C3Vector& v,const C3Vector& w,float& dist)
+bool CCalcUtils::isApproxDistanceSmaller_box_tri_fast(const C4X4Matrix& box,const C3Vector& boxHs,const C3Vector& p,const C3Vector& v,const C3Vector& w,simReal& dist)
 {   // Similar to isApproxDistanceSmaller_box_tri, but only one projection axis is tested (i.e. the axis between the two boxes' origin)
     // The real distance is always larger or equal than the approximate distance
     // dist is modified if return is true
 
-    if (dist==0.0f)
+    if (dist==simZero)
         return(false);
     C3Vector axis((p-box.X).getNormalized());
-    float d=getProjectedDistance_box_tri(axis,box,boxHs,p,v,w);
+    simReal d=getProjectedDistance_box_tri(axis,box,boxHs,p,v,w);
     if (d>=dist)
         return(false);
     dist=d;
     return(true);
 }
 
-bool CCalcUtils::isApproxDistanceSmaller_box_segp_fast(const C4X4Matrix& box,const C3Vector& boxHs,const C3Vector& segP,const C3Vector& segL,float& dist)
+bool CCalcUtils::isApproxDistanceSmaller_box_segp_fast(const C4X4Matrix& box,const C3Vector& boxHs,const C3Vector& segP,const C3Vector& segL,simReal& dist)
 {   // Similar to isApproxDistanceSmaller_box_segp, but only one projection axis is tested (i.e. the axis between the two boxes' origin)
     // The real distance is always larger or equal than the approximate distance
     // dist is modified if return is true
     // Segment is defined as segP (end-point1) and segP+segL (end-point2)
-    C3Vector segHs(segL*0.5f);
+    C3Vector segHs(segL*simHalf);
     C3Vector segCenter(segP+segHs);
     return(isApproxDistanceSmaller_box_seg_fast(box,boxHs,segCenter,segHs,dist));
 }
 
-bool CCalcUtils::isApproxDistanceSmaller_box_segp(const C4X4Matrix& box,const C3Vector& boxHs,const C3Vector& segP,const C3Vector& segL,float& dist)
+bool CCalcUtils::isApproxDistanceSmaller_box_segp(const C4X4Matrix& box,const C3Vector& boxHs,const C3Vector& segP,const C3Vector& segL,simReal& dist)
 {   // The real distance is always larger or equal than the approximate distance
     // dist is modified if return is true
     // Segment is defined as segP (end-point1) and segP+segL (end-point2)
-    C3Vector segHs(segL*0.5f);
+    C3Vector segHs(segL*simHalf);
     C3Vector segCenter(segP+segHs);
     return(isApproxDistanceSmaller_box_seg(box,boxHs,segCenter,segHs,dist));
 }
 
-bool CCalcUtils::isApproxDistanceSmaller_box_seg_fast(const C4X4Matrix& box,const C3Vector& boxHs,const C3Vector& segCenter,const C3Vector& segHs,float& dist)
+bool CCalcUtils::isApproxDistanceSmaller_box_seg_fast(const C4X4Matrix& box,const C3Vector& boxHs,const C3Vector& segCenter,const C3Vector& segHs,simReal& dist)
 {   // Similar to isApproxDistanceSmaller_box_seg, but only one projection axis is tested (i.e. the axis between the two boxes' origin)
     // The real distance is always larger or equal than the approximate distance
     // dist is modified if return is true
     // Segment is defined as segCenter (center of segment) and segHs (segment vector half-size)
-    if (dist==0.0f)
+    if (dist==simZero)
         return(false);
-    float d=getProjectedDistance_box_seg((segCenter-box.X).getNormalized(),box,boxHs,segCenter,segHs);
+    simReal d=getProjectedDistance_box_seg((segCenter-box.X).getNormalized(),box,boxHs,segCenter,segHs);
     if (d>=dist)
         return(false);
     dist=d;
     return(true);
 }
 
-bool CCalcUtils::isApproxDistanceSmaller_box_pt_fast(const C4X4Matrix& box,const C3Vector& boxHs,const C3Vector& pt,float& dist)
+bool CCalcUtils::isApproxDistanceSmaller_box_pt_fast(const C4X4Matrix& box,const C3Vector& boxHs,const C3Vector& pt,simReal& dist)
 {   // The real distance is always larger or equal than the approximate distance
     // dist is modified if return is true
-    if (dist==0.0f)
+    if (dist==simZero)
         return(false);
-    float d=getProjectedDistance_box_pt((pt-box.X).getNormalized(),box,boxHs,pt);
+    simReal d=getProjectedDistance_box_pt((pt-box.X).getNormalized(),box,boxHs,pt);
     if (d>=dist)
         return(false);
     dist=d;
     return(true);
 }
 
-bool CCalcUtils::isApproxDistanceSmaller_box_seg(const C4X4Matrix& box,const C3Vector& boxHs,const C3Vector& segCenter,const C3Vector& segHs,float& dist)
+bool CCalcUtils::isApproxDistanceSmaller_box_seg(const C4X4Matrix& box,const C3Vector& boxHs,const C3Vector& segCenter,const C3Vector& segHs,simReal& dist)
 {   // The real distance is always larger or equal than the approximate distance
     // dist is modified if return is true
     // Segment is defined as segCenter (center of segment) and segHs (segment vector half-size)
-    if (dist==0.0f)
+    if (dist==simZero)
         return(false);
-    float d=0.0f;
+    simReal d=simZero;
     // Box-segment segment:
-    float dd=getProjectedDistance_box_seg((segCenter-box.X).getNormalized(),box,boxHs,segCenter,segHs);
+    simReal dd=getProjectedDistance_box_seg((segCenter-box.X).getNormalized(),box,boxHs,segCenter,segHs);
     if (dd>=dist)
         return(false);
     d=dd;
@@ -699,38 +691,38 @@ bool CCalcUtils::isApproxDistanceSmaller_box_seg(const C4X4Matrix& box,const C3V
     dd=getProjectedDistance_box_seg(segHs.getNormalized(),box,boxHs,segCenter,segHs);
     if (dd>=dist)
         return(false);
-    d=std::max<float>(d,dd);
+    d=std::max<simReal>(d,dd);
     // Box axes:
     for (size_t i=0;i<3;i++)
     {
         dd=getProjectedDistance_box_seg(box.M.axis[i],box,boxHs,segCenter,segHs);
         if (dd>=dist)
             return(false);
-        d=std::max<float>(d,dd);
+        d=std::max<simReal>(d,dd);
     }
     // Combination of Box and segment axes:
     for (size_t i=0;i<3;i++)
     {
-        if (!segHs.isColinear(box.M.axis[i],0.99999f))
+        if (!segHs.isColinear(box.M.axis[i],simReal(0.99999)))
         {
             dd=getProjectedDistance_box_seg((segHs^box.M.axis[i]).getNormalized(),box,boxHs,segCenter,segHs);
             if (dd>=dist)
                 return(false);
-            d=std::max<float>(d,dd);
+            d=std::max<simReal>(d,dd);
         }
     }
-    if (d<0.0f)
-        d=0.0f;
+    if (d<simZero)
+        d=simZero;
     dist=d;
     return(true);
 }
 
-bool CCalcUtils::isApproxDistanceSmaller_cell_tri(float cellHs,const C3Vector& p,const C3Vector& v,const C3Vector& w,float& dist)
+bool CCalcUtils::isApproxDistanceSmaller_cell_tri(simReal cellHs,const C3Vector& p,const C3Vector& v,const C3Vector& w,simReal& dist)
 {   // The real distance is always larger or equal than the approximate distance
     // dist is modified if return is true
     // Cell is at the origin
     // optimize!!!
-    if (dist==0.0f)
+    if (dist==simZero)
         return(false);
     C4X4Matrix box;
     box.setIdentity();
@@ -738,13 +730,13 @@ bool CCalcUtils::isApproxDistanceSmaller_cell_tri(float cellHs,const C3Vector& p
     return(isApproxDistanceSmaller_box_tri(box,sv,p,v,w,dist));
 }
 
-bool CCalcUtils::isApproxDistanceSmaller_cell_tri_fast(float cellHs,const C3Vector& p,const C3Vector& v,const C3Vector& w,float& dist)
+bool CCalcUtils::isApproxDistanceSmaller_cell_tri_fast(simReal cellHs,const C3Vector& p,const C3Vector& v,const C3Vector& w,simReal& dist)
 {   // Similar to isApproxDistanceSmaller_cell_tri, but only one projection axis is tested (i.e. the axis between the two boxes' origin)
     // The real distance is always larger or equal than the approximate distance
     // dist is modified if return is true
     // Cell is at the origin
     // optimize!!!
-    if (dist==0.0f)
+    if (dist==simZero)
         return(false);
     C4X4Matrix box;
     box.setIdentity();
@@ -752,34 +744,34 @@ bool CCalcUtils::isApproxDistanceSmaller_cell_tri_fast(float cellHs,const C3Vect
     return(isApproxDistanceSmaller_box_tri_fast(box,sv,p,v,w,dist));
 }
 
-bool CCalcUtils::isApproxDistanceSmaller_cell_segp(float cellHs,const C3Vector& segP,const C3Vector& segL,float& dist)
+bool CCalcUtils::isApproxDistanceSmaller_cell_segp(simReal cellHs,const C3Vector& segP,const C3Vector& segL,simReal& dist)
 {   // The real distance is always larger or equal than the approximate distance
     // dist is modified if return is true
     // Cell is at the origin
     // Segment is defined as segP (end-point1) and segP+segL (end-point2)
-    C3Vector segHs(segL*0.5f);
+    C3Vector segHs(segL*simHalf);
     C3Vector segCenter(segP+segHs);
     return(isApproxDistanceSmaller_cell_seg(cellHs,segCenter,segHs,dist));
 }
 
-bool CCalcUtils::isApproxDistanceSmaller_cell_segp_fast(float cellHs,const C3Vector& segP,const C3Vector& segL,float& dist)
+bool CCalcUtils::isApproxDistanceSmaller_cell_segp_fast(simReal cellHs,const C3Vector& segP,const C3Vector& segL,simReal& dist)
 {   // Similar to isApproxDistanceSmaller_cell_segp, but only one projection axis is tested (i.e. the axis between the two boxes' origin)
     // The real distance is always larger or equal than the approximate distance
     // dist is modified if return is true
     // Cell is at the origin
     // Segment is defined as segP (end-point1) and segP+segL (end-point2)
-    C3Vector segHs(segL*0.5f);
+    C3Vector segHs(segL*simHalf);
     C3Vector segCenter(segP+segHs);
     return(isApproxDistanceSmaller_cell_seg_fast(cellHs,segCenter,segHs,dist));
 }
 
-bool CCalcUtils::isApproxDistanceSmaller_cell_seg(float cellHs,const C3Vector& segCenter,const C3Vector& segHs,float& dist)
+bool CCalcUtils::isApproxDistanceSmaller_cell_seg(simReal cellHs,const C3Vector& segCenter,const C3Vector& segHs,simReal& dist)
 {   // The real distance is always larger or equal than the approximate distance
     // dist is modified if return is true
     // Cell is at the origin
     // Segment is defined as segCenter (center of segment) and segHs (segment vector half-size)
     // optimize!!!
-    if (dist==0.0f)
+    if (dist==simZero)
         return(false);
     C4X4Matrix box;
     box.setIdentity();
@@ -787,14 +779,14 @@ bool CCalcUtils::isApproxDistanceSmaller_cell_seg(float cellHs,const C3Vector& s
     return(isApproxDistanceSmaller_box_seg(box,sv,segCenter,segHs,dist));
 }
 
-bool CCalcUtils::isApproxDistanceSmaller_cell_seg_fast(float cellHs,const C3Vector& segCenter,const C3Vector& segHs,float& dist)
+bool CCalcUtils::isApproxDistanceSmaller_cell_seg_fast(simReal cellHs,const C3Vector& segCenter,const C3Vector& segHs,simReal& dist)
 {   // Similar to isApproxDistanceSmaller_cell_seg, but only one projection axis is tested (i.e. the axis between the two boxes' origin)
     // The real distance is always larger or equal than the approximate distance
     // dist is modified if return is true
     // Cell is at the origin
     // Segment is defined as segCenter (center of segment) and segHs (segment vector half-size)
     // optimize!!!
-    if (dist==0.0f)
+    if (dist==simZero)
         return(false);
     C4X4Matrix box;
     box.setIdentity();
@@ -802,13 +794,13 @@ bool CCalcUtils::isApproxDistanceSmaller_cell_seg_fast(float cellHs,const C3Vect
     return(isApproxDistanceSmaller_box_seg_fast(box,sv,segCenter,segHs,dist));
 }
 
-bool CCalcUtils::isApproxDistanceSmaller_tri_tri(const C3Vector& p1,const C3Vector& v1,const C3Vector& w1,const C3Vector& p2,const C3Vector& v2,const C3Vector& w2,float& dist)
+bool CCalcUtils::isApproxDistanceSmaller_tri_tri(const C3Vector& p1,const C3Vector& v1,const C3Vector& w1,const C3Vector& p2,const C3Vector& v2,const C3Vector& w2,simReal& dist)
 {   // The real distance is always larger or equal than the approximate distance
     // dist is modified if return is true
-    if (dist==0.0f)
+    if (dist==simZero)
         return(false);
 
-    float d=0.0f;
+    simReal d=simZero;
     // Now check for separating axes:
     C3Vector u1(w1-v1);
     C3Vector u2(w2-v2);
@@ -816,7 +808,7 @@ bool CCalcUtils::isApproxDistanceSmaller_tri_tri(const C3Vector& p1,const C3Vect
     C3Vector tr2Edges[3]={v2,w2,u2};
 
     C3Vector n1((v1^w1).getNormalized());
-    float dd=getProjectedDistance_tri_tri(n1,p1,v1,w1,p2,v2,w2);
+    simReal dd=getProjectedDistance_tri_tri(n1,p1,v1,w1,p2,v2,w2);
     if (dd>=dist)
         return(false);
     d=dd;
@@ -825,87 +817,87 @@ bool CCalcUtils::isApproxDistanceSmaller_tri_tri(const C3Vector& p1,const C3Vect
     dd=getProjectedDistance_tri_tri(n2,p1,v1,w1,p2,v2,w2);
     if (dd>=dist)
         return(false);
-    d=std::max<float>(d,dd);
+    d=std::max<simReal>(d,dd);
 
     for (size_t i=0;i<3;i++)
     {
         for (size_t j=0;j<3;j++)
         {
             C3Vector axis=tr1Edges[i]^tr2Edges[j];
-            if ( (axis(0)!=0.0f)||(axis(1)!=0.0f)||(axis(2)!=0.0f) )
+            if ( (axis(0)!=simZero)||(axis(1)!=simZero)||(axis(2)!=simZero) )
             { // Edges are not parallel
                 dd=getProjectedDistance_tri_tri(axis.getNormalized(),p1,v1,w1,p2,v2,w2);
                 if (dd>=dist)
                     return(false);
-                d=std::max<float>(d,dd);
+                d=std::max<simReal>(d,dd);
             }
         }
     }
-    if (d<0.0f)
-        d=0.0f;
+    if (d<simZero)
+        d=simZero;
     dist=d;
     return(true);
 }
 
-bool CCalcUtils::isApproxDistanceSmaller_tri_tri_fast(const C3Vector& p1,const C3Vector& v1,const C3Vector& w1,const C3Vector& p2,const C3Vector& v2,const C3Vector& w2,float& dist)
+bool CCalcUtils::isApproxDistanceSmaller_tri_tri_fast(const C3Vector& p1,const C3Vector& v1,const C3Vector& w1,const C3Vector& p2,const C3Vector& v2,const C3Vector& w2,simReal& dist)
 {   // Similar to isApproxDistanceSmaller_tri_tri, but only one projection axis is tested (i.e. the axis between the two boxes' origin)
     // The real distance is always larger or equal than the approximate distance
     // dist is modified if return is true
-    if (dist==0.0f)
+    if (dist==simZero)
         return(false);
 
-    float d=getProjectedDistance_tri_tri((p2-p1).getNormalized(),p1,v1,w1,p2,v2,w2);
+    simReal d=getProjectedDistance_tri_tri((p2-p1).getNormalized(),p1,v1,w1,p2,v2,w2);
     if (d>=dist)
         return(false);
     dist=d;
     return(true);
 }
 
-bool CCalcUtils::isApproxDistanceSmaller_tri_pt_fast(const C3Vector& p,const C3Vector& v,const C3Vector& w,const C3Vector& pt,float& dist)
+bool CCalcUtils::isApproxDistanceSmaller_tri_pt_fast(const C3Vector& p,const C3Vector& v,const C3Vector& w,const C3Vector& pt,simReal& dist)
 {   // The real distance is always larger or equal than the approximate distance
     // dist is modified if return is true
-    if (dist==0.0f)
+    if (dist==simZero)
         return(false);
 
     C3Vector p_tri(p-pt);
-    float l=p_tri.getLength();
-    if (l>0.0f)
+    simReal l=p_tri.getLength();
+    if (l>simZero)
     {
         p_tri/=l;
-        float triS1=0.0f;
-        float triS1P=p_tri*v;
-        if (triS1P<0.0f)
-            triS1=fabsf(triS1P);
-        float triS2=0.0f;
-        float triS2P=p_tri*w;
-        if (triS2P<0.0f)
-            triS2=fabsf(triS2P);
-        float d=l-std::max<float>(triS1,triS2);
+        simReal triS1=simZero;
+        simReal triS1P=p_tri*v;
+        if (triS1P<simZero)
+            triS1=fabs(triS1P);
+        simReal triS2=simZero;
+        simReal triS2P=p_tri*w;
+        if (triS2P<simZero)
+            triS2=fabs(triS2P);
+        simReal d=l-std::max<simReal>(triS1,triS2);
         if (d<dist)
         {
-            if (d<0.0f)
-                d=0.0f;
+            if (d<simZero)
+                d=simZero;
             dist=d;
             return(true);
         }
         return(false);
     }
-    dist=0.0f;
+    dist=simZero;
     return(true);
 }
 
-bool CCalcUtils::isApproxDistanceSmaller_segp_segp_fast(const C3Vector& seg1P,C3Vector seg1L,const C3Vector& seg2P,C3Vector seg2L,float& dist)
+bool CCalcUtils::isApproxDistanceSmaller_segp_segp_fast(const C3Vector& seg1P,C3Vector seg1L,const C3Vector& seg2P,C3Vector seg2L,simReal& dist)
 {   // The real distance is always larger or equal than the approximate distance
     // dist is modified if return is true
-    if (dist==0.0f)
+    if (dist==simZero)
         return(false);
 
     // check if projection on segCenter-segCenter axis is larger than dist
-    seg1L*=0.5f;
-    seg2L*=0.5f;
+    seg1L*=simHalf;
+    seg2L*=simHalf;
     C3Vector distS((seg1P+seg1L)-(seg2P+seg2L));
-    float d=distS.getLength();
-    if (d!=0.0f)
+    simReal d=distS.getLength();
+    if (d!=simZero)
     {
         distS=distS/d;
         d-=fabs(seg1L*distS);
@@ -917,84 +909,84 @@ bool CCalcUtils::isApproxDistanceSmaller_segp_segp_fast(const C3Vector& seg1P,C3
     return(true);
 }
 
-float CCalcUtils::getApproxDistance_box_box(const C4X4Matrix& box1,const C3Vector& box1Hs,const C4X4Matrix& box2,const C3Vector& box2Hs)
+simReal CCalcUtils::getApproxDistance_box_box(const C4X4Matrix& box1,const C3Vector& box1Hs,const C4X4Matrix& box2,const C3Vector& box2Hs)
 {   // Convenience function
-    float d=SIM_MAX_FLOAT;
+    simReal d=SIM_MAX_REAL;
     isApproxDistanceSmaller_box_box_fast(box1,box1Hs,box2,box2Hs,d);
     return(d);
 }
 
-float CCalcUtils::getApproxDistance_box_cell(const C4X4Matrix& box,const C3Vector& boxHs,float cellHs)
+simReal CCalcUtils::getApproxDistance_box_cell(const C4X4Matrix& box,const C3Vector& boxHs,simReal cellHs)
 {   // Convenience function
-    float d=SIM_MAX_FLOAT;
+    simReal d=SIM_MAX_REAL;
     isApproxDistanceSmaller_box_cell_fast(box,boxHs,cellHs,d);
     return(d);
 }
 
-float CCalcUtils::getApproxDistance_box_tri(const C4X4Matrix& box,const C3Vector& boxHs,const C3Vector& p,const C3Vector& v,const C3Vector& w)
+simReal CCalcUtils::getApproxDistance_box_tri(const C4X4Matrix& box,const C3Vector& boxHs,const C3Vector& p,const C3Vector& v,const C3Vector& w)
 {   // Convenience function
-    float d=SIM_MAX_FLOAT;
+    simReal d=SIM_MAX_REAL;
     isApproxDistanceSmaller_box_tri_fast(box,boxHs,p,v,w,d);
     return(d);
 }
 
-float CCalcUtils::getApproxDistance_box_seg(const C4X4Matrix& box,const C3Vector& boxHs,const C3Vector& segCenter,const C3Vector& segHs)
+simReal CCalcUtils::getApproxDistance_box_seg(const C4X4Matrix& box,const C3Vector& boxHs,const C3Vector& segCenter,const C3Vector& segHs)
 {   // Convenience function
-    float d=SIM_MAX_FLOAT;
+    simReal d=SIM_MAX_REAL;
     isApproxDistanceSmaller_box_seg_fast(box,boxHs,segCenter,segHs,d);
     return(d);
 }
 
-float CCalcUtils::getApproxDistance_box_segp(const C4X4Matrix& box,const C3Vector& boxHs,const C3Vector& segP,const C3Vector& segL)
+simReal CCalcUtils::getApproxDistance_box_segp(const C4X4Matrix& box,const C3Vector& boxHs,const C3Vector& segP,const C3Vector& segL)
 {   // Convenience function
-    float d=SIM_MAX_FLOAT;
+    simReal d=SIM_MAX_REAL;
     isApproxDistanceSmaller_box_segp_fast(box,boxHs,segP,segL,d);
     return(d);
 }
 
-float CCalcUtils::getApproxDistance_box_pt(const C4X4Matrix& box,const C3Vector& boxHs,const C3Vector& pt)
+simReal CCalcUtils::getApproxDistance_box_pt(const C4X4Matrix& box,const C3Vector& boxHs,const C3Vector& pt)
 {   // Convenience function
-    float d=SIM_MAX_FLOAT;
+    simReal d=SIM_MAX_REAL;
     isApproxDistanceSmaller_box_pt_fast(box,boxHs,pt,d);
     return(d);
 }
 
-float CCalcUtils::getApproxDistance_cell_tri(float cellHs,const C3Vector& p,const C3Vector& v,const C3Vector& w)
+simReal CCalcUtils::getApproxDistance_cell_tri(simReal cellHs,const C3Vector& p,const C3Vector& v,const C3Vector& w)
 {   // Convenience function
-    float d=SIM_MAX_FLOAT;
+    simReal d=SIM_MAX_REAL;
     isApproxDistanceSmaller_cell_tri_fast(cellHs,p,v,w,d);
     return(d);
 }
 
-float CCalcUtils::getApproxDistance_cell_seg(float cellHs,const C3Vector& segCenter,const C3Vector& segHs)
+simReal CCalcUtils::getApproxDistance_cell_seg(simReal cellHs,const C3Vector& segCenter,const C3Vector& segHs)
 {   // Convenience function
-    float d=SIM_MAX_FLOAT;
+    simReal d=SIM_MAX_REAL;
     isApproxDistanceSmaller_cell_seg_fast(cellHs,segCenter,segHs,d);
     return(d);
 }
 
-float CCalcUtils::getApproxDistance_cell_segp(float cellHs,const C3Vector& segP,const C3Vector& segL)
+simReal CCalcUtils::getApproxDistance_cell_segp(simReal cellHs,const C3Vector& segP,const C3Vector& segL)
 {   // Convenience function
-    float d=SIM_MAX_FLOAT;
+    simReal d=SIM_MAX_REAL;
     isApproxDistanceSmaller_cell_segp_fast(cellHs,segP,segL,d);
     return(d);
 }
 
-float CCalcUtils::getApproxDistance_tri_tri(const C3Vector& p1,const C3Vector& v1,const C3Vector& w1,const C3Vector& p2,const C3Vector& v2,const C3Vector& w2)
+simReal CCalcUtils::getApproxDistance_tri_tri(const C3Vector& p1,const C3Vector& v1,const C3Vector& w1,const C3Vector& p2,const C3Vector& v2,const C3Vector& w2)
 {   // Convenience function
-    float d=SIM_MAX_FLOAT;
+    simReal d=SIM_MAX_REAL;
     isApproxDistanceSmaller_tri_tri_fast(p1,v1,w1,p2,v2,w2,d);
     return(d);
 }
 
-bool CCalcUtils::getDistance_box_box_alt(const C4X4Matrix& box1,const C3Vector& box1Hs,const C4X4Matrix& box2,const C3Vector& box2Hs,bool solidBoxes,float& dist,C3Vector* minDistSegPt1,C3Vector* minDistSegPt2)
+bool CCalcUtils::getDistance_box_box_alt(const C4X4Matrix& box1,const C3Vector& box1Hs,const C4X4Matrix& box2,const C3Vector& box2Hs,bool solidBoxes,simReal& dist,C3Vector* minDistSegPt1,C3Vector* minDistSegPt2)
 {   // optimize! Does simple triangle/triangle dist. calc. between boxes' triangles
 
-    if (dist==0.0f)
+    if (dist==simZero)
         return(false);
 
     // do first an approximate calculation:
-    float d=dist;
+    simReal d=dist;
     if (!isApproxDistanceSmaller_box_box_fast(box1,box1Hs,box2,box2Hs,d))
         return(false);
 
@@ -1002,17 +994,17 @@ bool CCalcUtils::getDistance_box_box_alt(const C4X4Matrix& box1,const C3Vector& 
 
     std::vector<C3Vector> b1pts;
     std::vector<C3Vector> b2pts;
-    for (float z=-1.0f;z<2.0f;z+=2.0f)
+    for (simReal z=-simOne;z<simTwo;z+=simTwo)
     {
         C3Vector a1;
         C3Vector a2;
         a1(2)=z*box1Hs(2);
         a2(2)=z*box2Hs(2);
-        for (float y=-1.0f;y<2.0f;y+=2.0f)
+        for (simReal y=-simOne;y<simTwo;y+=simTwo)
         {
             a1(1)=y*box1Hs(1);
             a2(1)=y*box2Hs(1);
-            for (float x=-1.0f;x<2.0f;x+=2.0f)
+            for (simReal x=-simOne;x<simTwo;x+=simTwo)
             {
                 a1(0)=x*box1Hs(0);
                 a2(0)=x*box2Hs(0);
@@ -1027,14 +1019,14 @@ bool CCalcUtils::getDistance_box_box_alt(const C4X4Matrix& box1,const C3Vector& 
     {
         if (doCollide_box_onept(box1,box1Hs,b2pts,minDistSegPt1))
         {
-            dist=0.0f;
+            dist=simZero;
             if (minDistSegPt2!=nullptr)
                 minDistSegPt2[0]=minDistSegPt1[0];
             return(true);
         }
         if (doCollide_box_onept(box2,box2Hs,b1pts,minDistSegPt2))
         {
-            dist=0.0f;
+            dist=simZero;
             if (minDistSegPt1!=nullptr)
                 minDistSegPt1[0]=minDistSegPt2[0];
             return(true);
@@ -1061,7 +1053,7 @@ bool CCalcUtils::getDistance_box_box_alt(const C4X4Matrix& box1,const C3Vector& 
         C3Vector v1(b1pts[triIndices[3*i+1]]-p1);
         C3Vector w1(b1pts[triIndices[3*i+2]]-p1);
         C3Vector n1=v1^w1;
-        if ( (axis*n1>=0.0f)||(intertweened) )
+        if ( (axis*n1>=simZero)||(intertweened) )
         { // only faces pointing towards box2
             for (size_t j=0;j<12;j++)
             {
@@ -1069,14 +1061,14 @@ bool CCalcUtils::getDistance_box_box_alt(const C4X4Matrix& box1,const C3Vector& 
                 C3Vector v2(b2pts[triIndices[3*j+1]]-p2);
                 C3Vector w2(b2pts[triIndices[3*j+2]]-p2);
                 C3Vector n2=v2^w2;
-                if ( (axis*n2<=0.0f)||(intertweened) )
+                if ( (axis*n2<=simZero)||(intertweened) )
                 { // only faces pointing towards box1
-                    if ( (n1*n2<0.0f)||(intertweened) )
+                    if ( (n1*n2<simZero)||(intertweened) )
                     { // only faces facing each other
                         if (getDistance_tri_tri(p1,v1,w1,p2,v2,w2,dist,minDistSegPt1,minDistSegPt2))
                         {
                             retVal=true;
-                            if (dist<=0.0f)
+                            if (dist<=simZero)
                                 break;
                         }
                     }
@@ -1084,19 +1076,19 @@ bool CCalcUtils::getDistance_box_box_alt(const C4X4Matrix& box1,const C3Vector& 
             }
 
         }
-        if (retVal&&(dist<=0.0f))
+        if (retVal&&(dist<=simZero))
             break;
     }
     return(retVal);
 }
 
-bool CCalcUtils::getDistance_box_box(const C4X4Matrix& box1,const C3Vector& box1Hs,const C4X4Matrix& box2,const C3Vector& box2Hs,bool solidBoxes,float& dist,C3Vector* minDistSegPt1,C3Vector* minDistSegPt2)
+bool CCalcUtils::getDistance_box_box(const C4X4Matrix& box1,const C3Vector& box1Hs,const C4X4Matrix& box2,const C3Vector& box2Hs,bool solidBoxes,simReal& dist,C3Vector* minDistSegPt1,C3Vector* minDistSegPt2)
 { // computes the distance between two boxes
-    if (dist==0.0f)
+    if (dist==simZero)
         return(false);
 
     // do first an approximate calculation:
-    float d=dist;
+    simReal d=dist;
     if (!isApproxDistanceSmaller_box_box_fast(box1,box1Hs,box2,box2Hs,d))
         return(false);
 
@@ -1109,7 +1101,7 @@ bool CCalcUtils::getDistance_box_box(const C4X4Matrix& box1,const C3Vector& box1
     C3Vector __p1B(box2.X-dirsB[0]);
     C3Vector __p2B(box2.X-dirsB[1]);
     C3Vector __p3B(box2.X-dirsB[2]);
-    for (float fi=-1.0f;fi<2.0f;fi+=2.0f)
+    for (simReal fi=-simOne;fi<simTwo;fi+=simTwo)
     {
         C3Vector _p1A(__p1A+(box1.M.axis[2]*(box1Hs(2)*fi)));
         C3Vector _p2A(__p2A+(box1.M.axis[2]*(box1Hs(2)*fi)));
@@ -1117,7 +1109,7 @@ bool CCalcUtils::getDistance_box_box(const C4X4Matrix& box1,const C3Vector& box1
         C3Vector _p1B(__p1B+(box2.M.axis[2]*(box2Hs(2)*fi)));
         C3Vector _p2B(__p2B+(box2.M.axis[2]*(box2Hs(2)*fi)));
         C3Vector _p3B(__p3B+(box2.M.axis[1]*(box2Hs(1)*fi)));
-        for (float fj=-1.0f;fj<2.0f;fj+=2.0f)
+        for (simReal fj=-simOne;fj<simTwo;fj+=simTwo)
         {
             C3Vector p1A(_p1A+(box1.M.axis[1]*(box1Hs(1)*fj)));
             C3Vector p2A(_p2A+(box1.M.axis[0]*(box1Hs(0)*fj)));
@@ -1125,28 +1117,28 @@ bool CCalcUtils::getDistance_box_box(const C4X4Matrix& box1,const C3Vector& box1
             C3Vector p1B(_p1B+(box2.M.axis[1]*(box2Hs(1)*fj)));
             C3Vector p2B(_p2B+(box2.M.axis[0]*(box2Hs(0)*fj)));
             C3Vector p3B(_p3B+(box2.M.axis[0]*(box2Hs(0)*fj)));
-            bool b1=getDistance_box_segp(box2,box2Hs,solidBoxes,p1A,dirsA[0]*2.0f,dist,minDistSegPt2,minDistSegPt1);
-            bool b2=getDistance_box_segp(box2,box2Hs,solidBoxes,p2A,dirsA[1]*2.0f,dist,minDistSegPt2,minDistSegPt1);
-            bool b3=getDistance_box_segp(box2,box2Hs,solidBoxes,p3A,dirsA[2]*2.0f,dist,minDistSegPt2,minDistSegPt1);
-            bool b4=getDistance_box_segp(box1,box1Hs,solidBoxes,p1B,dirsB[0]*2.0f,dist,minDistSegPt1,minDistSegPt2);
-            bool b5=getDistance_box_segp(box1,box1Hs,solidBoxes,p2B,dirsB[1]*2.0f,dist,minDistSegPt1,minDistSegPt2);
-            bool b6=getDistance_box_segp(box1,box1Hs,solidBoxes,p3B,dirsB[2]*2.0f,dist,minDistSegPt1,minDistSegPt2);
+            bool b1=getDistance_box_segp(box2,box2Hs,solidBoxes,p1A,dirsA[0]*simTwo,dist,minDistSegPt2,minDistSegPt1);
+            bool b2=getDistance_box_segp(box2,box2Hs,solidBoxes,p2A,dirsA[1]*simTwo,dist,minDistSegPt2,minDistSegPt1);
+            bool b3=getDistance_box_segp(box2,box2Hs,solidBoxes,p3A,dirsA[2]*simTwo,dist,minDistSegPt2,minDistSegPt1);
+            bool b4=getDistance_box_segp(box1,box1Hs,solidBoxes,p1B,dirsB[0]*simTwo,dist,minDistSegPt1,minDistSegPt2);
+            bool b5=getDistance_box_segp(box1,box1Hs,solidBoxes,p2B,dirsB[1]*simTwo,dist,minDistSegPt1,minDistSegPt2);
+            bool b6=getDistance_box_segp(box1,box1Hs,solidBoxes,p3B,dirsB[2]*simTwo,dist,minDistSegPt1,minDistSegPt2);
             retVal=retVal||b1||b2||b3||b4||b5||b6;
-            if (dist==0.0f)
+            if (dist==simZero)
                 return(retVal);
         }
     }
     return(retVal);
 }
 
-bool CCalcUtils::getDistance_box_tri_alt(const C4X4Matrix& box,const C3Vector& boxHs,bool solidBox,const C3Vector& p,const C3Vector& v,const C3Vector& w,float& dist,C3Vector* minDistSegPt1,C3Vector* minDistSegPt2)
+bool CCalcUtils::getDistance_box_tri_alt(const C4X4Matrix& box,const C3Vector& boxHs,bool solidBox,const C3Vector& p,const C3Vector& v,const C3Vector& w,simReal& dist,C3Vector* minDistSegPt1,C3Vector* minDistSegPt2)
 {   // optimize! Does simple triangle/triangle dist. calc. between boxs' triangles and triangle
 
-    if (dist==0.0f)
+    if (dist==simZero)
         return(false);
 
     // do first an approximate calculation:
-    float d=dist;
+    simReal d=dist;
     if (!isApproxDistanceSmaller_box_tri_fast(box,boxHs,p,v,w,d))
         return(false);
 
@@ -1159,7 +1151,7 @@ bool CCalcUtils::getDistance_box_tri_alt(const C4X4Matrix& box,const C3Vector& b
         _pts.push_back(p+w);
         if (doCollide_box_onept(box,boxHs,_pts,minDistSegPt1))
         {
-            dist=0.0f;
+            dist=simZero;
             if (minDistSegPt2!=nullptr)
                 minDistSegPt2[0]=minDistSegPt1[0];
             return(true);
@@ -1168,14 +1160,14 @@ bool CCalcUtils::getDistance_box_tri_alt(const C4X4Matrix& box,const C3Vector& b
 
     C3Vector bpts[8];
     size_t pos=0;
-    for (float z=-1.0f;z<2.0f;z+=2.0f)
+    for (simReal z=-simOne;z<simTwo;z+=simTwo)
     {
         C3Vector a;
         a(2)=z*boxHs(2);
-        for (float y=-1.0f;y<2.0f;y+=2.0f)
+        for (simReal y=-simOne;y<simTwo;y+=simTwo)
         {
             a(1)=y*boxHs(1);
-            for (float x=-1.0f;x<2.0f;x+=2.0f)
+            for (simReal x=-simOne;x<simTwo;x+=simTwo)
             {
                 a(0)=x*boxHs(0);
                 bpts[pos++]=C3Vector(box*a);
@@ -1193,19 +1185,19 @@ bool CCalcUtils::getDistance_box_tri_alt(const C4X4Matrix& box,const C3Vector& b
         C3Vector bw(bpts[triIndices[3*i+2]]-bp);
         bool bb=getDistance_tri_tri(bp,bv,bw,p,v,w,dist,minDistSegPt1,minDistSegPt2);
         retVal=retVal||bb;
-        if (dist==0.0f)
+        if (dist==simZero)
             break;
     }
     return(retVal);
 }
 
-bool CCalcUtils::getDistance_box_tri(const C4X4Matrix& box,const C3Vector& boxHs,bool solidBox,const C3Vector& p,const C3Vector& v,const C3Vector& w,float& dist,C3Vector* minDistSegPt1,C3Vector* minDistSegPt2)
+bool CCalcUtils::getDistance_box_tri(const C4X4Matrix& box,const C3Vector& boxHs,bool solidBox,const C3Vector& p,const C3Vector& v,const C3Vector& w,simReal& dist,C3Vector* minDistSegPt1,C3Vector* minDistSegPt2)
 { // computes the distance between a box and a triangle.
-    if (dist==0.0f)
+    if (dist==simZero)
         return(false);
 
     // do first an approximate calculation:
-    float d=dist;
+    simReal d=dist;
     if (!isApproxDistanceSmaller_box_tri_fast(box,boxHs,p,v,w,d))
         return(false);
 
@@ -1245,7 +1237,7 @@ bool CCalcUtils::getDistance_box_tri(const C4X4Matrix& box,const C3Vector& boxHs
     C3Vector _segL[3]={_v,_w,_wv};
 
     // We now check box's faces vs tri segments:
-    int axesInd[3];
+    size_t axesInd[3];
     C3Vector firstAxis,secondAxis,thirdAxis;
     for (int i=0;i<3;i++)
     { // for each face orientation
@@ -1282,21 +1274,21 @@ bool CCalcUtils::getDistance_box_tri(const C4X4Matrix& box,const C3Vector& boxHs
             C3Vector segPP(_segP[j]);
             C3Vector segLL(_segL[j]);
             // Does the segment maybe collide with that rect. face?
-            if (segLL(axesInd[0])!=0.0f)
+            if (segLL(axesInd[0])!=simZero)
             { // ok, segment is not parallel to that face
-                for (float fi=-1.0;fi<2.0f;fi+=2.0f)
+                for (simReal fi=-simOne;fi<simTwo;fi+=simTwo)
                 { // for each of the two faces with the same orientation
-                    float off=fi*boxHs(axesInd[0]);
-                    float t=(off-segPP(axesInd[0]))/segLL(axesInd[0]);
-                    if ( (t>=0.0f)&&(t<=1.0f) )
+                    simReal off=fi*boxHs(axesInd[0]);
+                    simReal t=(off-segPP(axesInd[0]))/segLL(axesInd[0]);
+                    if ( (t>=simZero)&&(t<=simOne) )
                     { // the segment collides with that plane. Now check the 2 other axes, if we are within bounds:
                         C3Vector intersection(segPP+(segLL*t));
                         if ( fabs(intersection(axesInd[1]))<=boxHs(axesInd[1]) )
                         {
                             if ( fabs(intersection(axesInd[2]))<=boxHs(axesInd[2]) )
                             { // yes, we are within bounds. The segment collides with one of the box's face:
-                                retVal=true;//dist>0.0f;
-                                dist=0.0f;
+                                retVal=true;//dist>simZero;
+                                dist=simZero;
                                 if (minDistSegPt1!=nullptr)
                                     minDistSegPt1[0]=box*intersection;
                                 if (minDistSegPt2!=nullptr)
@@ -1309,10 +1301,10 @@ bool CCalcUtils::getDistance_box_tri(const C4X4Matrix& box,const C3Vector& boxHs
             }
             // Now check the 4 edges that link those two faces with the same orientation, VS the segment,
             // and the 4 edges vs tri surface:
-            C3Vector edgeL(firstAxis*boxHs(axesInd[0])*2.0f);
-            for (float f1=-1.0f;f1<2.0f;f1+=2.0f)
+            C3Vector edgeL(firstAxis*boxHs(axesInd[0])*simTwo);
+            for (simReal f1=-simOne;f1<simTwo;f1+=simTwo)
             {
-                for (float f2=-1.0f;f2<2.0f;f2+=2.0f)
+                for (simReal f2=-simOne;f2<simTwo;f2+=simTwo)
                 {
                     C3Vector edgeP(firstAxis*-boxHs(axesInd[0])+secondAxis*boxHs(axesInd[1])*f1+thirdAxis*boxHs(axesInd[2])*f2);
                     bool b1=getDistance_segp_segp(edgeP,edgeL,segPP,segLL,dist,minDistSegPt1,minDistSegPt2);
@@ -1333,13 +1325,13 @@ bool CCalcUtils::getDistance_box_tri(const C4X4Matrix& box,const C3Vector& boxHs
     return(retVal);
 }
 
-bool CCalcUtils::getDistance_box_segp_alt(const C4X4Matrix& box,const C3Vector& boxHs,bool solidBox,const C3Vector& segP,const C3Vector& segL,float& dist,C3Vector* minDistSegPt1,C3Vector* minDistSegPt2)
+bool CCalcUtils::getDistance_box_segp_alt(const C4X4Matrix& box,const C3Vector& boxHs,bool solidBox,const C3Vector& segP,const C3Vector& segL,simReal& dist,C3Vector* minDistSegPt1,C3Vector* minDistSegPt2)
 {   // optimize! Does simple triangle/seg dist. calc. between boxs' triangles and segment
-    if (dist==0.0f)
+    if (dist==simZero)
         return(false);
 
     // do first an approximate calculation:
-    float d=dist;
+    simReal d=dist;
     if (!isApproxDistanceSmaller_box_segp_fast(box,boxHs,segP,segL,d))
         return(false);
 
@@ -1351,7 +1343,7 @@ bool CCalcUtils::getDistance_box_segp_alt(const C4X4Matrix& box,const C3Vector& 
         _pts.push_back(segP+segL);
         if (doCollide_box_onept(box,boxHs,_pts,minDistSegPt1))
         {
-            dist=0.0f;
+            dist=simZero;
             if (minDistSegPt2!=nullptr)
                 minDistSegPt2[0]=minDistSegPt1[0];
             return(true);
@@ -1360,14 +1352,14 @@ bool CCalcUtils::getDistance_box_segp_alt(const C4X4Matrix& box,const C3Vector& 
 
     C3Vector bpts[8];
     size_t pos=0;
-    for (float z=-1.0f;z<2.0f;z+=2.0f)
+    for (simReal z=-simOne;z<simTwo;z+=simTwo)
     {
         C3Vector a;
         a(2)=z*boxHs(2);
-        for (float y=-1.0f;y<2.0f;y+=2.0f)
+        for (simReal y=-simOne;y<simTwo;y+=simTwo)
         {
             a(1)=y*boxHs(1);
-            for (float x=-1.0f;x<2.0f;x+=2.0f)
+            for (simReal x=-simOne;x<simTwo;x+=simTwo)
             {
                 a(0)=x*boxHs(0);
                 bpts[pos++]=C3Vector(box*a);
@@ -1384,19 +1376,19 @@ bool CCalcUtils::getDistance_box_segp_alt(const C4X4Matrix& box,const C3Vector& 
         C3Vector bw(bpts[triIndices[3*i+2]]-bp);
         bool bb=getDistance_tri_segp(bp,bv,bw,segP,segL,dist,minDistSegPt1,minDistSegPt2);
         retVal=retVal||bb;
-        if (dist==0.0f)
+        if (dist==simZero)
             break;
     }
     return(retVal);
 }
 
-bool CCalcUtils::getDistance_box_segp(const C4X4Matrix& box,const C3Vector& boxHs,bool solidBox,const C3Vector& segP,const C3Vector& segL,float& dist,C3Vector* minDistSegPt1,C3Vector* minDistSegPt2)
+bool CCalcUtils::getDistance_box_segp(const C4X4Matrix& box,const C3Vector& boxHs,bool solidBox,const C3Vector& segP,const C3Vector& segL,simReal& dist,C3Vector* minDistSegPt1,C3Vector* minDistSegPt2)
 { // computes the distance between a box and a segment.
-    if (dist==0.0f)
+    if (dist==simZero)
         return(false);
 
     // do first an approximate calculation:
-    float d=dist;
+    simReal d=dist;
     if (!isApproxDistanceSmaller_box_segp_fast(box,boxHs,segP,segL,d))
         return(false);
 
@@ -1425,7 +1417,7 @@ bool CCalcUtils::getDistance_box_segp(const C4X4Matrix& box,const C3Vector& boxH
     C3Vector segLL(boxInv*segL);
 
     // We now check box's faces vs segment:
-    int axesInd[3];
+    size_t axesInd[3];
     C3Vector firstAxis,secondAxis,thirdAxis;
     for (int i=0;i<3;i++)
     { // for each face orientation
@@ -1458,21 +1450,21 @@ bool CCalcUtils::getDistance_box_segp(const C4X4Matrix& box,const C3Vector& boxH
         }
 
         // Does the segment maybe collide with that rect. face?
-        if (segLL(axesInd[0])!=0.0f)
+        if (segLL(axesInd[0])!=simZero)
         { // ok, segment is not parallel to that face
-            for (float fi=-1.0;fi<2.0f;fi+=2.0f)
+            for (simReal fi=-simOne;fi<simTwo;fi+=simTwo)
             { // for each of the two faces with the same orientation
-                float off=fi*boxHs(axesInd[0]);
-                float t=(off-segPP(axesInd[0]))/segLL(axesInd[0]);
-                if ( (t>=0.0f)&&(t<=1.0f) )
+                simReal off=fi*boxHs(axesInd[0]);
+                simReal t=(off-segPP(axesInd[0]))/segLL(axesInd[0]);
+                if ( (t>=simZero)&&(t<=simOne) )
                 { // the segment collides with that plane. Now check the 2 other axes, if we are within bounds:
                     C3Vector intersection(segPP+(segLL*t));
                     if ( fabs(intersection(axesInd[1]))<=boxHs(axesInd[1]) )
                     {
                         if ( fabs(intersection(axesInd[2]))<=boxHs(axesInd[2]) )
                         { // yes, we are within bounds. The segment collides with one of the box's face:
-                            retVal=dist>0.0f;
-                            dist=0.0f;
+                            retVal=dist>simZero;
+                            dist=simZero;
                             if (minDistSegPt1!=nullptr)
                                 minDistSegPt1[0]=box*intersection;
                             if (minDistSegPt2!=nullptr)
@@ -1484,10 +1476,10 @@ bool CCalcUtils::getDistance_box_segp(const C4X4Matrix& box,const C3Vector& boxH
             }
         }
         // Now check the 4 edges that link those two faces with the same orientation, VS the segment:
-        C3Vector edgeL(firstAxis*boxHs(axesInd[0])*2.0f);
-        for (float f1=-1.0f;f1<2.0f;f1+=2.0f)
+        C3Vector edgeL(firstAxis*boxHs(axesInd[0])*simTwo);
+        for (simReal f1=-simOne;f1<simTwo;f1+=simTwo)
         {
-            for (float f2=-1.0f;f2<2.0f;f2+=2.0f)
+            for (simReal f2=-simOne;f2<simTwo;f2+=simTwo)
             {
                 C3Vector edgeP(firstAxis*-boxHs(axesInd[0])+secondAxis*boxHs(axesInd[1])*f1+thirdAxis*boxHs(axesInd[2])*f2);
                 if (getDistance_segp_segp(edgeP,edgeL,segPP,segLL,dist,minDistSegPt1,minDistSegPt2))
@@ -1504,18 +1496,18 @@ bool CCalcUtils::getDistance_box_segp(const C4X4Matrix& box,const C3Vector& boxH
     return(retVal);
 }
 
-bool CCalcUtils::getDistance_cell_segp(float cellHs,bool solidCell,const C3Vector& segP,const C3Vector& segL,float& dist,C3Vector* minDistSegPt1,C3Vector* minDistSegPt2)
+bool CCalcUtils::getDistance_cell_segp(simReal cellHs,bool solidCell,const C3Vector& segP,const C3Vector& segL,simReal& dist,C3Vector* minDistSegPt1,C3Vector* minDistSegPt2)
 { // computes the distance between a cube at the origine and a segment.
 /*
     C4X4Matrix ident;
     ident.setIdentity();
-    return(getDistance_box_segp_alt(ident,C3Vector(cellHs*0.5f,cellHs*0.5f,cellHs*0.5f),solidCell,segP,segL,dist,minDistSegPt1,minDistSegPt2));
+    return(getDistance_box_segp_alt(ident,C3Vector(cellHs*simHalf,cellHs*simHalf,cellHs*simHalf),solidCell,segP,segL,dist,minDistSegPt1,minDistSegPt2));
 */
-    if (dist==0.0f)
+    if (dist==simZero)
         return(false);
 
     // do first an approximate calculation:
-    float d=dist;
+    simReal d=dist;
     if (!isApproxDistanceSmaller_cell_segp_fast(cellHs,segP,segL,d))
         return(false);
 
@@ -1539,7 +1531,7 @@ bool CCalcUtils::getDistance_cell_segp(float cellHs,bool solidCell,const C3Vecto
         return(retVal);
 
     // We now check box's faces vs segment:
-    int axesInd[3];
+    size_t axesInd[3];
     C3Vector firstAxis,secondAxis,thirdAxis;
     for (int i=0;i<3;i++)
     { // for each face orientation
@@ -1572,21 +1564,21 @@ bool CCalcUtils::getDistance_cell_segp(float cellHs,bool solidCell,const C3Vecto
         }
 
         // Does the segment maybe collide with that rect. face?
-        if (segL(axesInd[0])!=0.0f)
+        if (segL(axesInd[0])!=simZero)
         { // ok, segment is not parallel to that face
-            for (float fi=-1.0;fi<2.0f;fi+=2.0f)
+            for (simReal fi=-simOne;fi<simTwo;fi+=simTwo)
             { // for each of the two faces with the same orientation
-                float off=fi*cellHs;
-                float t=(off-segP(axesInd[0]))/segL(axesInd[0]);
-                if ( (t>=0.0f)&&(t<=1.0f) )
+                simReal off=fi*cellHs;
+                simReal t=(off-segP(axesInd[0]))/segL(axesInd[0]);
+                if ( (t>=simZero)&&(t<=simOne) )
                 { // the segment collides with that plane. Now check the 2 other axes, if we are within bounds:
                     C3Vector intersection(segP+(segL*t));
                     if ( fabs(intersection(axesInd[1]))<=cellHs )
                     {
                         if ( fabs(intersection(axesInd[2]))<=cellHs )
                         { // yes, we are within bounds. The segment collides with one of the box's face:
-                            retVal=dist>0.0f;
-                            dist=0.0f;
+                            retVal=dist>simZero;
+                            dist=simZero;
                             if (minDistSegPt1!=nullptr)
                                 minDistSegPt1[0]=intersection;
                             if (minDistSegPt2!=nullptr)
@@ -1598,10 +1590,10 @@ bool CCalcUtils::getDistance_cell_segp(float cellHs,bool solidCell,const C3Vecto
             }
         }
         // Now check the 4 edges that link those two faces with the same orientation, VS the segment:
-        C3Vector edgeL(firstAxis*cellHs*2.0f);
-        for (float f1=-1.0f;f1<2.0f;f1+=2.0f)
+        C3Vector edgeL(firstAxis*cellHs*simTwo);
+        for (simReal f1=-simOne;f1<simTwo;f1+=simTwo)
         {
-            for (float f2=-1.0f;f2<2.0f;f2+=2.0f)
+            for (simReal f2=-simOne;f2<simTwo;f2+=simTwo)
             {
                 C3Vector edgeP(firstAxis*-cellHs+secondAxis*cellHs*f1+thirdAxis*cellHs*f2);
                 if (getDistance_segp_segp(edgeP,edgeL,segP,segL,dist,minDistSegPt1,minDistSegPt2))
@@ -1618,26 +1610,26 @@ bool CCalcUtils::getDistance_cell_segp(float cellHs,bool solidCell,const C3Vecto
     return(retVal);
 }
 
-bool CCalcUtils::getDistance_box_pt(const C4X4Matrix& box,const C3Vector& boxHs,bool solidBox,const C3Vector& pt,float& dist,C3Vector* minDistSegPt,bool* ptIsInside)
+bool CCalcUtils::getDistance_box_pt(const C4X4Matrix& box,const C3Vector& boxHs,bool solidBox,const C3Vector& pt,simReal& dist,C3Vector* minDistSegPt,bool* ptIsInside)
 {
-    if (dist==0.0f)
+    if (dist==simZero)
         return(false);
     C3Vector transfPt(box.getInverse()*pt);
     C3Vector transfBoxPt(transfPt);
-    if (fabsf(transfBoxPt(0))>boxHs(0))
-        transfBoxPt(0)*=boxHs(0)/fabsf(transfBoxPt(0));
-    if (fabsf(transfBoxPt(1))>boxHs(1))
-        transfBoxPt(1)*=boxHs(1)/fabsf(transfBoxPt(1));
-    if (fabsf(transfBoxPt(2))>boxHs(2))
-        transfBoxPt(2)*=boxHs(2)/fabsf(transfBoxPt(2));
-    float d=(transfBoxPt-transfPt).getLength();
+    if (fabs(transfBoxPt(0))>boxHs(0))
+        transfBoxPt(0)*=boxHs(0)/fabs(transfBoxPt(0));
+    if (fabs(transfBoxPt(1))>boxHs(1))
+        transfBoxPt(1)*=boxHs(1)/fabs(transfBoxPt(1));
+    if (fabs(transfBoxPt(2))>boxHs(2))
+        transfBoxPt(2)*=boxHs(2)/fabs(transfBoxPt(2));
+    simReal d=(transfBoxPt-transfPt).getLength();
     if (ptIsInside!=nullptr)
-        ptIsInside[0]=(d==0.0f);
-    if ( (d==0.0f)&&(!solidBox) )
+        ptIsInside[0]=(d==simZero);
+    if ( (d==simZero)&&(!solidBox) )
     { // we are inside the box, and want a distance to the walls
         transfBoxPt=transfPt;
-        C3Vector dd( boxHs(0)-fabsf(transfBoxPt(0)),boxHs(1)-fabsf(transfBoxPt(1)),boxHs(2)-fabsf(transfBoxPt(2)) );
-        int a=0;
+        C3Vector dd( boxHs(0)-fabs(transfBoxPt(0)),boxHs(1)-fabs(transfBoxPt(1)),boxHs(2)-fabs(transfBoxPt(2)) );
+        size_t a=0;
         if (dd(1)<dd(0))
         {
             if (dd(2)<dd(1))
@@ -1650,7 +1642,7 @@ bool CCalcUtils::getDistance_box_pt(const C4X4Matrix& box,const C3Vector& boxHs,
             if (dd(2)<dd(0))
                 a=2;
         }
-        if (transfBoxPt(a)>=0.0f)
+        if (transfBoxPt(a)>=simZero)
             transfBoxPt(a)=boxHs(a);
         else
             transfBoxPt(a)=-boxHs(a);
@@ -1666,25 +1658,25 @@ bool CCalcUtils::getDistance_box_pt(const C4X4Matrix& box,const C3Vector& boxHs,
     return(false);
 }
 
-bool CCalcUtils::getDistance_cell_pt(float cellHs,bool solidCell,const C3Vector& pt,float& dist,C3Vector* minDistSegPt,bool* ptIsInside)
+bool CCalcUtils::getDistance_cell_pt(simReal cellHs,bool solidCell,const C3Vector& pt,simReal& dist,C3Vector* minDistSegPt,bool* ptIsInside)
 {
-    if (dist==0.0f)
+    if (dist==simZero)
         return(false);
     C3Vector transfBoxPt(pt);
-    if (fabsf(transfBoxPt(0))>cellHs)
-        transfBoxPt(0)*=cellHs/fabsf(transfBoxPt(0));
-    if (fabsf(transfBoxPt(1))>cellHs)
-        transfBoxPt(1)*=cellHs/fabsf(transfBoxPt(1));
-    if (fabsf(transfBoxPt(2))>cellHs)
-        transfBoxPt(2)*=cellHs/fabsf(transfBoxPt(2));
-    float d=(transfBoxPt-pt).getLength();
+    if (fabs(transfBoxPt(0))>cellHs)
+        transfBoxPt(0)*=cellHs/fabs(transfBoxPt(0));
+    if (fabs(transfBoxPt(1))>cellHs)
+        transfBoxPt(1)*=cellHs/fabs(transfBoxPt(1));
+    if (fabs(transfBoxPt(2))>cellHs)
+        transfBoxPt(2)*=cellHs/fabs(transfBoxPt(2));
+    simReal d=(transfBoxPt-pt).getLength();
     if (ptIsInside!=nullptr)
-        ptIsInside[0]=(d==0.0f);
-    if ( (d==0.0f)&&(!solidCell) )
+        ptIsInside[0]=(d==simZero);
+    if ( (d==simZero)&&(!solidCell) )
     { // we are inside the cell, and want a distance to the walls
         transfBoxPt=pt;
-        C3Vector dd( cellHs-fabsf(transfBoxPt(0)),cellHs-fabsf(transfBoxPt(1)),cellHs-fabsf(transfBoxPt(2)) );
-        int a=0;
+        C3Vector dd( cellHs-fabs(transfBoxPt(0)),cellHs-fabs(transfBoxPt(1)),cellHs-fabs(transfBoxPt(2)) );
+        size_t a=0;
         if (dd(1)<dd(0))
         {
             if (dd(2)<dd(1))
@@ -1697,7 +1689,7 @@ bool CCalcUtils::getDistance_cell_pt(float cellHs,bool solidCell,const C3Vector&
             if (dd(2)<dd(0))
                 a=2;
         }
-        if (transfBoxPt(a)>=0.0f)
+        if (transfBoxPt(a)>=simZero)
             transfBoxPt(a)=cellHs;
         else
             transfBoxPt(a)=-cellHs;
@@ -1713,12 +1705,12 @@ bool CCalcUtils::getDistance_cell_pt(float cellHs,bool solidCell,const C3Vector&
     return(false);
 }
 
-bool CCalcUtils::getDistance_cell_cell(const C4X4Matrix& cell1,float cell1Hs,const C4X4Matrix& cell2,float cell2Hs,bool solidCells,float& dist,C3Vector* minDistSegPt1,C3Vector* minDistSegPt2)
+bool CCalcUtils::getDistance_cell_cell(const C4X4Matrix& cell1,simReal cell1Hs,const C4X4Matrix& cell2,simReal cell2Hs,bool solidCells,simReal& dist,C3Vector* minDistSegPt1,C3Vector* minDistSegPt2)
 {
     return(getDistance_box_box(cell1,C3Vector(cell1Hs,cell1Hs,cell1Hs),cell2,C3Vector(cell2Hs,cell2Hs,cell2Hs),solidCells,dist,minDistSegPt1,minDistSegPt2));
 }
 
-bool CCalcUtils::getDistance_cell_tri(float cellHs,bool solidCell,const C3Vector& p,const C3Vector& v,const C3Vector& w,float& dist,C3Vector* minDistSegPt1,C3Vector* minDistSegPt2)
+bool CCalcUtils::getDistance_cell_tri(simReal cellHs,bool solidCell,const C3Vector& p,const C3Vector& v,const C3Vector& w,simReal& dist,C3Vector* minDistSegPt1,C3Vector* minDistSegPt2)
 {   // Cell is at the origin
     // optimize!!!
     C4X4Matrix box;
@@ -1728,13 +1720,13 @@ bool CCalcUtils::getDistance_cell_tri(float cellHs,bool solidCell,const C3Vector
 }
 
 
-bool CCalcUtils::getDistance_tri_tri(const C3Vector& p1,const C3Vector& v1,const C3Vector& w1,const C3Vector& p2,const C3Vector& v2,const C3Vector& w2,float& dist,C3Vector* minDistSegPt1,C3Vector* minDistSegPt2)
+bool CCalcUtils::getDistance_tri_tri(const C3Vector& p1,const C3Vector& v1,const C3Vector& w1,const C3Vector& p2,const C3Vector& v2,const C3Vector& w2,simReal& dist,C3Vector* minDistSegPt1,C3Vector* minDistSegPt2)
 {
-    if (dist==0.0f)
+    if (dist==simZero)
         return(false);
 
     // do first an approximate calculation:
-    float projectionDistance=dist;
+    simReal projectionDistance=dist;
     if (!isApproxDistanceSmaller_tri_tri_fast(p1,v1,w1,p2,v2,w2,projectionDistance))
         return(false);
 
@@ -1744,7 +1736,7 @@ bool CCalcUtils::getDistance_tri_tri(const C3Vector& p1,const C3Vector& v1,const
     C3Vector pv2(p2+v2);
     C3Vector wv2(w2-v2);
 
-    if (projectionDistance==0.0f)
+    if (projectionDistance==simZero)
     { // the two triangles could collide... do the slower calculations:
         // triangle surface vs triangle edges:
         bool bb1=getDistance_tris_segp(p1,v1,w1,p2,v2,dist,minDistSegPt1,minDistSegPt2);
@@ -1754,7 +1746,7 @@ bool CCalcUtils::getDistance_tri_tri(const C3Vector& p1,const C3Vector& v1,const
         bool bb5=getDistance_tris_segp(p2,v2,w2,p1,w1,dist,minDistSegPt2,minDistSegPt1);
         bool bb6=getDistance_tris_segp(p2,v2,w2,pv1,wv1,dist,minDistSegPt2,minDistSegPt1);
         retVal=retVal||bb1||bb2||bb3||bb4||bb5||bb6;
-        if (dist==0.0f)
+        if (dist==simZero)
             return(retVal);
     }
     else
@@ -1813,9 +1805,9 @@ bool CCalcUtils::getDistance_tri_tri(const C3Vector& p1,const C3Vector& v1,const
     return(retVal);
 }
 
-bool CCalcUtils::getDistance_tri_segp(const C3Vector& p,const C3Vector& v,const C3Vector& w,const C3Vector& segP,const C3Vector& segL,float& dist,C3Vector* minDistSegPt1,C3Vector* minDistSegPt2)
+bool CCalcUtils::getDistance_tri_segp(const C3Vector& p,const C3Vector& v,const C3Vector& w,const C3Vector& segP,const C3Vector& segL,simReal& dist,C3Vector* minDistSegPt1,C3Vector* minDistSegPt2)
 {
-    if (dist==0.0f)
+    if (dist==simZero)
         return(false);
 
     // triangle surface vs segment:
@@ -1829,13 +1821,13 @@ bool CCalcUtils::getDistance_tri_segp(const C3Vector& p,const C3Vector& v,const 
     return(retVal);
 }
 
-bool CCalcUtils::getDistance_tri_pt(const C3Vector& p,const C3Vector& v,const C3Vector& w,const C3Vector& pt,float& dist,C3Vector* minDistSegPt)
+bool CCalcUtils::getDistance_tri_pt(const C3Vector& p,const C3Vector& v,const C3Vector& w,const C3Vector& pt,simReal& dist,C3Vector* minDistSegPt)
 {
-    if (dist==0.0f)
+    if (dist==simZero)
         return(false);
 
     // do first an approximate calculation:
-    float d=dist;
+    simReal d=dist;
     if (!isApproxDistanceSmaller_tri_pt_fast(p,v,w,pt,d))
         return(false);
 
@@ -1846,37 +1838,37 @@ bool CCalcUtils::getDistance_tri_pt(const C3Vector& p,const C3Vector& v,const C3
     return(bb1||bb2||bb3||bb4);
 }
 
-bool CCalcUtils::getDistance_segp_segp(const C3Vector& seg1P,const C3Vector& seg1L,const C3Vector& seg2P,const C3Vector& seg2L,float& dist,C3Vector* minDistSegPt1,C3Vector* minDistSegPt2)
+bool CCalcUtils::getDistance_segp_segp(const C3Vector& seg1P,const C3Vector& seg1L,const C3Vector& seg2P,const C3Vector& seg2L,simReal& dist,C3Vector* minDistSegPt1,C3Vector* minDistSegPt2)
 {
-    if (dist==0.0f)
+    if (dist==simZero)
         return(false);
 
     // do first an approximate calculation:
-    float d=dist;
+    simReal d=dist;
     if (!isApproxDistanceSmaller_segp_segp_fast(seg1P,seg1L,seg2P,seg2L,d))
         return(false);
 
-    float t1,t2;
+    simReal t1,t2;
     C3Vector c(seg1L^seg2L);
 
-    if ( (c(0)==0.0f)&&(c(1)==0.0f)&&(c(2)==0.0f) )
+    if ( (c(0)==simZero)&&(c(1)==simZero)&&(c(2)==simZero) )
     {   // Segments are colinear
-        t1=0.0f;
+        t1=simZero;
         t2=(seg1P*seg1L)-(seg1L*seg2P)/(seg1L*seg2L);
-        float l=seg2L.getLength()/seg1L.getLength();
-        if ( (seg1L*seg2L)<0.0f )
-            l*=-1.0f;
-        if (t2<0.0f)
+        simReal l=seg2L.getLength()/seg1L.getLength();
+        if ( (seg1L*seg2L)<simZero )
+            l*=-simOne;
+        if (t2<simZero)
         {
             t1=-t2*l;
-            t2=0.0f;
+            t2=simZero;
         }
         else
         {
-            if (t2>1.0f)
+            if (t2>simOne)
             {
-                t1=-(t2-1.0f)*l;
-                t2=1.0f;
+                t1=-(t2-simOne)*l;
+                t2=simOne;
             }
         }
     }
@@ -1884,7 +1876,7 @@ bool CCalcUtils::getDistance_segp_segp(const C3Vector& seg1P,const C3Vector& seg
     {   // Segments not colinear
         // plane with line 1 intersection with line 2:
         C3Vector perp(c^seg1L);
-        float l=seg1P*perp;
+        simReal l=seg1P*perp;
         t2=(l-(perp*seg2P))/(perp*seg2L);
         // plane with line 2 intersection with line 1:
         perp=c^seg2L;
@@ -1893,7 +1885,7 @@ bool CCalcUtils::getDistance_segp_segp(const C3Vector& seg1P,const C3Vector& seg
     }
 
     bool retVal=false;
-    if ( (t1<0.0f)||(t1>1.0f)||(t2<0.0f)||(t2>1.0f) )
+    if ( (t1<simZero)||(t1>simOne)||(t2<simZero)||(t2>simOne) )
     {
         if (getDistance_segp_pt(seg2P,seg2L,seg1P,dist,minDistSegPt2))
         {
@@ -1924,7 +1916,7 @@ bool CCalcUtils::getDistance_segp_segp(const C3Vector& seg1P,const C3Vector& seg
     { // the min. dist pts are within the two segments bounds
         C3Vector p1(seg1P+seg1L*t1);
         C3Vector p2(seg2P+seg2L*t2);
-        float d=(p1-p2).getLength();
+        simReal d=(p1-p2).getLength();
         if (d<dist)
         {
             dist=d;
@@ -1938,18 +1930,18 @@ bool CCalcUtils::getDistance_segp_segp(const C3Vector& seg1P,const C3Vector& seg
     return(retVal);
 }
 
-bool CCalcUtils::getDistance_segp_pt(const C3Vector& segP,const C3Vector& segL,const C3Vector& pt,float& dist,C3Vector* minDistSegPt)
+bool CCalcUtils::getDistance_segp_pt(const C3Vector& segP,const C3Vector& segL,const C3Vector& pt,simReal& dist,C3Vector* minDistSegPt)
 {
-    if (dist==0.0f)
+    if (dist==simZero)
         return(false);
 
-    float t=(pt*segL-segP*segL)/(segL*segL);
-    if (t<0.0f)
-        t=0.0f;
-    if (t>1.0f)
-        t=1.0f;
+    simReal t=(pt*segL-segP*segL)/(segL*segL);
+    if (t<simZero)
+        t=simZero;
+    if (t>simOne)
+        t=simOne;
     C3Vector p(segP+segL*t);
-    float d=(p-pt).getLength();
+    simReal d=(p-pt).getLength();
     if (d<dist)
     {
         dist=d;
@@ -1960,32 +1952,32 @@ bool CCalcUtils::getDistance_segp_pt(const C3Vector& segP,const C3Vector& segL,c
     return(false);
 }
 
-bool CCalcUtils::getDistance_tris_segp(const C3Vector& p,const C3Vector& v,const C3Vector& w,const C3Vector& segP,const C3Vector& segL,float& dist,C3Vector* minDistSegPt1,C3Vector* minDistSegPt2)
+bool CCalcUtils::getDistance_tris_segp(const C3Vector& p,const C3Vector& v,const C3Vector& w,const C3Vector& segP,const C3Vector& segL,simReal& dist,C3Vector* minDistSegPt1,C3Vector* minDistSegPt2)
 {   // Calculates the distance between a triangle's surface and a segment
     // If the closest point on the triangle lies on an edge, return value is false
 
     C3Vector n(v^w);
 
     // Does the segment maybe collide with the triangle?
-    float dd=-(p*n);
-    float denom=n*segL;
-    if (denom!=0.0f)
+    simReal dd=-(p*n);
+    simReal denom=n*segL;
+    if (denom!=simZero)
     {   // Seg and tri are not parallel
-        float t=-((n*segP)+dd)/denom;
-        if ( (t>=0.0f)&&(t<=1.0f) )
+        simReal t=-((n*segP)+dd)/denom;
+        if ( (t>=simZero)&&(t<=simOne) )
         {   // the segment collides with the triangle's plane
             C3Vector intersection(segP+(segL*t));
             // is intersection within triangle's borders?
             C3Vector vect(intersection-p);
-            if ((vect^w)*n>0.0f)
+            if ((vect^w)*n>simZero)
             { // within border1
-                if ((v^vect)*n>0.0f)
+                if ((v^vect)*n>simZero)
                 { // within border2
                     vect-=v;
                     C3Vector wv(w-v);
-                    if ((wv^vect)*n>0.0f)
+                    if ((wv^vect)*n>simZero)
                     { // within border3
-                        dist=0.0f;
+                        dist=simZero;
                         if (minDistSegPt1!=nullptr)
                             minDistSegPt1[0]=intersection;
                         if (minDistSegPt2!=nullptr)
@@ -2001,19 +1993,19 @@ bool CCalcUtils::getDistance_tris_segp(const C3Vector& p,const C3Vector& v,const
     // Now we check the segment endpoint1 projected onto the triangle's surface
     // If the projection lies within the triangle's borders, we have a distance
     denom=n*n;
-    float t=-((n*segP)+dd)/denom;
+    simReal t=-((n*segP)+dd)/denom;
     C3Vector projectedPt(segP+(n*t));
     // is projected pt within triangle's borders?
     C3Vector vect(projectedPt-p);
-    if ((vect^w)*n>0.0f)
+    if ((vect^w)*n>simZero)
     { // within border1
-        if ((v^vect)*n>0.0f)
+        if ((v^vect)*n>simZero)
         { // within border2
             vect-=v;
             C3Vector wv(w-v);
-            if ((wv^vect)*n>0.0f)
+            if ((wv^vect)*n>simZero)
             { // within border3
-                float d=(projectedPt-segP).getLength();
+                simReal d=(projectedPt-segP).getLength();
                 if (d<dist)
                 {
                     retVal=true;
@@ -2033,15 +2025,15 @@ bool CCalcUtils::getDistance_tris_segp(const C3Vector& p,const C3Vector& v,const
     projectedPt=segP+segL+(n*t);
     // is projected pt within triangle's borders?
     vect=projectedPt-p;
-    if ((vect^w)*n>0.0f)
+    if ((vect^w)*n>simZero)
     { // within border1
-        if ((v^vect)*n>0.0f)
+        if ((v^vect)*n>simZero)
         { // within border2
             vect-=v;
             C3Vector wv(w-v);
-            if ((wv^vect)*n>0.0f)
+            if ((wv^vect)*n>simZero)
             { // within border3
-                float d=(projectedPt-(segP+segL)).getLength();
+                simReal d=(projectedPt-(segP+segL)).getLength();
                 if (d<dist)
                 {
                     retVal=true;
@@ -2057,24 +2049,24 @@ bool CCalcUtils::getDistance_tris_segp(const C3Vector& p,const C3Vector& v,const
     return(retVal);
 }
 
-bool CCalcUtils::getDistance_tris_pt(const C3Vector& p,const C3Vector& v,const C3Vector& w,const C3Vector& pt,float& dist,C3Vector* minDistSegPt)
+bool CCalcUtils::getDistance_tris_pt(const C3Vector& p,const C3Vector& v,const C3Vector& w,const C3Vector& pt,simReal& dist,C3Vector* minDistSegPt)
 {
     C3Vector n(v^w);
-    float a=p*n;
+    simReal a=p*n;
     // Point projected onto the triangle's plane:
-    float t=(a-(n*pt))/(n*n);
+    simReal t=(a-(n*pt))/(n*n);
     C3Vector projection(pt+(n*t));
     // is projection within triangle's borders?
     C3Vector vect(projection-p);
-    if ((vect^w)*n>0.0f)
+    if ((vect^w)*n>simZero)
     { // within border1
-        if ((v^vect)*n>0.0f)
+        if ((v^vect)*n>simZero)
         { // within border2
             vect-=v;
             C3Vector wv(w-v);
-            if ((wv^vect)*n>0.0f)
+            if ((wv^vect)*n>simZero)
             { // within border3
-                float d=(projection-pt).getLength();
+                simReal d=(projection-pt).getLength();
                 if (d<dist)
                 {
                     dist=d;
@@ -2088,24 +2080,24 @@ bool CCalcUtils::getDistance_tris_pt(const C3Vector& p,const C3Vector& v,const C
     return(false);
 }
 
-bool CCalcUtils::getDistance_seg_seg(const C3Vector& seg1Center,const C3Vector& seg1Hs,const C3Vector& seg2Center,const C3Vector& seg2Hs,float& dist,C3Vector* minDistSegPt1,C3Vector* minDistSegPt2)
+bool CCalcUtils::getDistance_seg_seg(const C3Vector& seg1Center,const C3Vector& seg1Hs,const C3Vector& seg2Center,const C3Vector& seg2Hs,simReal& dist,C3Vector* minDistSegPt1,C3Vector* minDistSegPt2)
 {
     C3Vector seg1P(seg1Center-seg1Hs);
-    C3Vector seg1L(seg1Hs*2.0f);
+    C3Vector seg1L(seg1Hs*simTwo);
     C3Vector seg2P(seg2Center-seg2Hs);
-    C3Vector seg2L(seg2Hs*2.0f);
+    C3Vector seg2L(seg2Hs*simTwo);
     return(getDistance_segp_segp(seg1P,seg1L,seg2P,seg2L,dist,minDistSegPt1,minDistSegPt2));
 }
 
 
-bool CCalcUtils::getSensorDistance_segp(const CVolumePlanes& planesIn,const CVolumePlanes& planesOut,float cosAngle,const C3Vector& segP,const C3Vector& segL,float& dist,C3Vector* detectPt)
+bool CCalcUtils::getSensorDistance_segp(const CVolumePlanes& planesIn,const CVolumePlanes& planesOut,simReal cosAngle,const C3Vector& segP,const C3Vector& segL,simReal& dist,C3Vector* detectPt)
 {
-    if (dist==0.0f)
+    if (dist==simZero)
         return(false);
 
     // First we ignore the volumes:
     C3Vector tmpPt;
-    float d=dist;
+    simReal d=dist;
     if (!getDistance_segp_pt(segP,segL,C3Vector::zeroVector,d,&tmpPt))
         return(false);
 
@@ -2137,9 +2129,9 @@ bool CCalcUtils::getSensorDistance_segp(const CVolumePlanes& planesIn,const CVol
         }
         if (truncateSegmentWithVolume(planesOut,p1,p2)<0)
             return(false); // segment was completely truncated away
-        float d1=p1.getLength();
-        float d2=p2.getLength();
-        d=std::min<float>(d1,d2);
+        simReal d1=p1.getLength();
+        simReal d2=p2.getLength();
+        d=std::min<simReal>(d1,d2);
         if (d>=dist)
             return(false);
         if (d1<d2)
@@ -2148,12 +2140,12 @@ bool CCalcUtils::getSensorDistance_segp(const CVolumePlanes& planesIn,const CVol
             tmpPt=p2;
     }
     // Volumes are respected. Check angle between detection ray and segment:
-    bool retVal=(cosAngle>=piValue_f*0.5f);
+    bool retVal=(cosAngle>=piValue*simHalf);
     if (!retVal)
     {   // we have an angular limitation
         C3Vector v(tmpPt.getNormalized());
-        float a=acosf(fabsf(segL.getNormalized()*v));
-        retVal=(((piValue_f*0.5f)-a)<=cosAngle);
+        simReal a=acos(fabs(segL.getNormalized()*v));
+        retVal=(((piValue*simHalf)-a)<=cosAngle);
     }
     if (retVal)
     {
@@ -2165,15 +2157,15 @@ bool CCalcUtils::getSensorDistance_segp(const CVolumePlanes& planesIn,const CVol
     return(false);
 }
 
-bool CCalcUtils::getSensorDistance_tri(const CVolumePlanes& planesIn,const CVolumePlanes& planesOut,float cosAngle,bool frontDetection,bool backDetection,const C3Vector& p,const C3Vector& v,const C3Vector& w,float& dist,C3Vector* detectPt,C3Vector* triN)
+bool CCalcUtils::getSensorDistance_tri(const CVolumePlanes& planesIn,const CVolumePlanes& planesOut,simReal cosAngle,bool frontDetection,bool backDetection,const C3Vector& p,const C3Vector& v,const C3Vector& w,simReal& dist,C3Vector* detectPt,C3Vector* triN)
 {
-    if (dist==0.0f)
+    if (dist==simZero)
         return(false);
 
     C3Vector triangleN(v^w);
     if ( (!frontDetection)||(!backDetection) )
     {
-        if (triangleN*p<0.0f)
+        if (triangleN*p<simZero)
         { // showing front
             if (!frontDetection)
                 return(false); // wrong side
@@ -2184,14 +2176,14 @@ bool CCalcUtils::getSensorDistance_tri(const CVolumePlanes& planesIn,const CVolu
                 return(false); // wrong side
         }
     }
-    float d=dist;
+    simReal d=dist;
     C3Vector tmpPt;
     if (!getDistance_tri_pt(p,v,w,C3Vector::zeroVector,d,&tmpPt))
         return(false); // nope, distance too large
     triangleN.normalize();
-    if (cosAngle<1.1f)
+    if (cosAngle<simReal(1.1))
     { // do a first angle test
-        if (fabsf(triangleN*tmpPt.getNormalized())<cosAngle)
+        if (fabs(triangleN*tmpPt.getNormalized())<cosAngle)
             return(false); // nope, angle too large
     }
     // Check volumeIn:
@@ -2262,9 +2254,9 @@ bool CCalcUtils::getSensorDistance_tri(const CVolumePlanes& planesIn,const CVolu
 
     // Point tmpPt is inside of volumeIn and outside of volumeOut, and is closer than 'dist'
 
-    if (cosAngle<1.1f)
+    if (cosAngle<simReal(1.1))
     { // Check the angle
-        if (fabsf(triangleN*tmpPt.getNormalized())<cosAngle)
+        if (fabs(triangleN*tmpPt.getNormalized())<cosAngle)
             return(false); // nope, angle too large
     }
 
@@ -2276,30 +2268,30 @@ bool CCalcUtils::getSensorDistance_tri(const CVolumePlanes& planesIn,const CVolu
     return(true); // point is ok
 }
 
-bool CCalcUtils::getSensorDistance_cell(const CVolumePlanes& planesIn,const CVolumePlanes& planesOut,float cosAngle,bool frontDetection,bool backDetection,const C4X4Matrix& cell,float cellHs,float& dist,C3Vector* detectPt,C3Vector* triN)
+bool CCalcUtils::getSensorDistance_cell(const CVolumePlanes& planesIn,const CVolumePlanes& planesOut,simReal cosAngle,bool frontDetection,bool backDetection,const C4X4Matrix& cell,simReal cellHs,simReal& dist,C3Vector* detectPt,C3Vector* triN)
 {   // optimize!!!
     C3Vector sv(cellHs,cellHs,cellHs);
     return(getSensorDistance_box(planesIn,planesOut,cosAngle,frontDetection,backDetection,cell,sv,dist,detectPt,triN));
 }
 
-bool CCalcUtils::getSensorDistance_box(const CVolumePlanes& planesIn,const CVolumePlanes& planesOut,float cosAngle,bool frontDetection,bool backDetection,const C4X4Matrix& box,const C3Vector& boxHs,float& dist,C3Vector* detectPt,C3Vector* triN)
+bool CCalcUtils::getSensorDistance_box(const CVolumePlanes& planesIn,const CVolumePlanes& planesOut,simReal cosAngle,bool frontDetection,bool backDetection,const C4X4Matrix& box,const C3Vector& boxHs,simReal& dist,C3Vector* detectPt,C3Vector* triN)
 {   // optimize! Does simple sensor/triangle dist. calc. between boxs' triangles and sensor
 
-    if (dist==0.0f)
+    if (dist==simZero)
         return(false);
 
     bool retVal=false;
 
     C3Vector bpts[8];
     size_t pos=0;
-    for (float z=-1.0f;z<2.0f;z+=2.0f)
+    for (simReal z=-simOne;z<simTwo;z+=simTwo)
     {
         C3Vector a;
         a(2)=z*boxHs(2);
-        for (float y=-1.0f;y<2.0f;y+=2.0f)
+        for (simReal y=-simOne;y<simTwo;y+=simTwo)
         {
             a(1)=y*boxHs(1);
-            for (float x=-1.0f;x<2.0f;x+=2.0f)
+            for (simReal x=-simOne;x<simTwo;x+=simTwo)
             {
                 a(0)=x*boxHs(0);
                 bpts[pos++]=C3Vector(box*a);
@@ -2317,21 +2309,21 @@ bool CCalcUtils::getSensorDistance_box(const CVolumePlanes& planesIn,const CVolu
         C3Vector bw(bpts[triIndices[3*i+2]]-bp);
         bool bb=getSensorDistance_tri(planesIn,planesOut,cosAngle,frontDetection,backDetection,bp,bv,bw,dist,detectPt,triN);
         retVal=retVal||bb;
-        if (dist==0.0f)
+        if (dist==simZero)
             break;
     }
     return(retVal);
 }
 
-bool CCalcUtils::getRaySensorDistance_tri(const C3Vector& raySegP,const C3Vector& raySegL,float cosAngle,bool frontDetection,bool backDetection,float forbiddenDist,const C3Vector& p,const C3Vector& v,const C3Vector& w,bool* forbiddenDistTouched,float& dist,C3Vector* detectPt,C3Vector* triN)
+bool CCalcUtils::getRaySensorDistance_tri(const C3Vector& raySegP,const C3Vector& raySegL,simReal cosAngle,bool frontDetection,bool backDetection,simReal forbiddenDist,const C3Vector& p,const C3Vector& v,const C3Vector& w,bool* forbiddenDistTouched,simReal& dist,C3Vector* detectPt,C3Vector* triN)
 {
-    if (dist==0.0f)
+    if (dist==simZero)
         return(false);
 
     C3Vector triangleN(v^w);
     if ( (!frontDetection)||(!backDetection) )
     {
-        if (triangleN*p<0.0f)
+        if (triangleN*p<simZero)
         { // showing front
             if (!frontDetection)
                 return(false); // wrong side
@@ -2343,30 +2335,30 @@ bool CCalcUtils::getRaySensorDistance_tri(const C3Vector& raySegP,const C3Vector
         }
     }
     triangleN.normalize();
-    if (cosAngle<1.1f)
+    if (cosAngle<simReal(1.1))
     { // do the angle test
-        if (fabsf(triangleN*raySegL.getNormalized())<cosAngle)
+        if (fabs(triangleN*raySegL.getNormalized())<cosAngle)
             return(false); // nope, angle too large
     }
 
-    float denom=triangleN*raySegL;
-    if (denom!=0.0f)
+    simReal denom=triangleN*raySegL;
+    if (denom!=simZero)
     {   // Ray and tri plane are not parallel
-        float t=((p*triangleN)-(triangleN*raySegP))/denom;
-        if ( (t>=0.0f)&&(t<=1.0f) )
+        simReal t=((p*triangleN)-(triangleN*raySegP))/denom;
+        if ( (t>=simZero)&&(t<=simOne) )
         {
             C3Vector intersection(raySegP+(raySegL*t));
             // is intersection within triangle's borders?
             C3Vector vect(intersection-p);
-            if ((vect^w)*triangleN>0.0f)
+            if ((vect^w)*triangleN>simZero)
             { // within border1
-                if ((v^vect)*triangleN>0.0f)
+                if ((v^vect)*triangleN>simZero)
                 { // within border2
                     vect-=v;
                     C3Vector wv(w-v);
-                    if ((wv^vect)*triangleN>0.0f)
+                    if ((wv^vect)*triangleN>simZero)
                     { // within border3
-                        float d=intersection.getLength();
+                        simReal d=intersection.getLength();
                         if (d<dist)
                         {
                             dist=d;
@@ -2389,29 +2381,29 @@ bool CCalcUtils::getRaySensorDistance_tri(const C3Vector& raySegP,const C3Vector
     return(false);
 }
 
-bool CCalcUtils::getRaySensorDistance_cell(const C3Vector& raySegP,const C3Vector& raySegL,float cosAngle,bool frontDetection,bool backDetection,float forbiddenDist,const C4X4Matrix& cell,float cellHs,bool* forbiddenDistTouched,float& dist,C3Vector* detectPt,C3Vector* triN)
+bool CCalcUtils::getRaySensorDistance_cell(const C3Vector& raySegP,const C3Vector& raySegL,simReal cosAngle,bool frontDetection,bool backDetection,simReal forbiddenDist,const C4X4Matrix& cell,simReal cellHs,bool* forbiddenDistTouched,simReal& dist,C3Vector* detectPt,C3Vector* triN)
 {
     return(getRaySensorDistance_box(raySegP,raySegL,cosAngle,frontDetection,backDetection,forbiddenDist,cell,C3Vector(cellHs,cellHs,cellHs),forbiddenDistTouched,dist,detectPt,triN));
 }
 
-bool CCalcUtils::getRaySensorDistance_box(const C3Vector& raySegP,const C3Vector& raySegL,float cosAngle,bool frontDetection,bool backDetection,float forbiddenDist,const C4X4Matrix& box,const C3Vector& boxHs,bool* forbiddenDistTouched,float& dist,C3Vector* detectPt,C3Vector* triN)
+bool CCalcUtils::getRaySensorDistance_box(const C3Vector& raySegP,const C3Vector& raySegL,simReal cosAngle,bool frontDetection,bool backDetection,simReal forbiddenDist,const C4X4Matrix& box,const C3Vector& boxHs,bool* forbiddenDistTouched,simReal& dist,C3Vector* detectPt,C3Vector* triN)
 {   // optimize! Does simple triangle/triangle dist. calc. between boxs' triangles and triangle
 
-    if (dist==0.0f)
+    if (dist==simZero)
         return(false);
 
     bool retVal=false;
 
     C3Vector bpts[8];
     size_t pos=0;
-    for (float z=-1.0f;z<2.0f;z+=2.0f)
+    for (simReal z=-simOne;z<simTwo;z+=simTwo)
     {
         C3Vector a;
         a(2)=z*boxHs(2);
-        for (float y=-1.0f;y<2.0f;y+=2.0f)
+        for (simReal y=-simOne;y<simTwo;y+=simTwo)
         {
             a(1)=y*boxHs(1);
-            for (float x=-1.0f;x<2.0f;x+=2.0f)
+            for (simReal x=-simOne;x<simTwo;x+=simTwo)
             {
                 a(0)=x*boxHs(0);
                 bpts[pos++]=C3Vector(box*a);
@@ -2429,7 +2421,7 @@ bool CCalcUtils::getRaySensorDistance_box(const C3Vector& raySegP,const C3Vector
         C3Vector bw(bpts[triIndices[3*i+2]]-bp);
         bool bb=getRaySensorDistance_tri(raySegP,raySegL,cosAngle,frontDetection,backDetection,forbiddenDist,bp,bv,bw,forbiddenDistTouched,dist,detectPt,triN);
         retVal=retVal||bb;
-        if (dist==0.0f)
+        if (dist==simZero)
             break;
     }
     return(retVal);
@@ -2441,7 +2433,7 @@ bool CCalcUtils::isPointInVolume(const CVolumePlanes& planes,const C3Vector& pt)
     {
         for (size_t i=0;i<planes.size()/4;i++)
         {
-            if ((C3Vector(planes.ptr()+4*i+0)*pt+planes.at(4*i+3))>=0.0f)
+            if ((C3Vector(planes.ptr()+4*i+0)*pt+planes.at(4*i+3))>=simZero)
                 return(false);
         }
         return(true);
@@ -2458,14 +2450,14 @@ int CCalcUtils::truncateSegmentWithVolume(const CVolumePlanes& planes,C3Vector& 
         for (size_t i=0;i<planes.size()/4;i++)
         {
             C3Vector ppp(planes.ptr()+4*i+0);
-            float d=planes.at(4*i+3);
-            bool p1Inside=((ppp*segP1+d)<0.0f);
-            bool p2Inside=((ppp*segP2+d)<0.0f);
+            simReal d=planes.at(4*i+3);
+            bool p1Inside=((ppp*segP1+d)<simZero);
+            bool p2Inside=((ppp*segP2+d)<simZero);
             if (p1Inside!=p2Inside)
             { // points lie on opposite side of plane
                 retVal=0;
                 C3Vector v(segP2-segP1);
-                float t=-(ppp*segP1+d)/(ppp*v);
+                simReal t=-(ppp*segP1+d)/(ppp*v);
                 if (p1Inside)
                     segP2=segP1+(v*t);
                 else
@@ -2486,10 +2478,10 @@ CPolygonePt* CCalcUtils::truncatePolygonWithVolume(const CVolumePlanes& planes,C
     for (size_t i=0;i<planes.size()/4;i++)
     {
         C3Vector xyz(planes.ptr()+4*i+0);
-        float d=planes.at(4*i+3);
+        simReal d=planes.at(4*i+3);
         CPolygonePt* it=polygone;
         C3Vector pt1(it->pt);
-        bool p1Inside=((xyz*pt1+d)<0.0f);
+        bool p1Inside=((xyz*pt1+d)<simZero);
         it=it->next;
         bool cont=true;
         CPolygonePt* insideStart=nullptr;
@@ -2500,11 +2492,11 @@ CPolygonePt* CCalcUtils::truncatePolygonWithVolume(const CVolumePlanes& planes,C
             if (it==polygone)
                 cont=false;
             C3Vector pt2(it->pt);
-            bool p2Inside=((xyz*pt2+d)<0.0f);
+            bool p2Inside=((xyz*pt2+d)<simZero);
             if (p2Inside!=p1Inside)
             { // pts lie on different side of the plane
                 C3Vector pt1_pt2_vect(pt2-pt1);
-                float t=-(xyz*pt1+d)/(xyz*pt1_pt2_vect);
+                simReal t=-(xyz*pt1+d)/(xyz*pt1_pt2_vect);
                 C3Vector newP(pt1+(pt1_pt2_vect*t));
                 CPolygonePt* newPt=new CPolygonePt(newP);
                 newPt->insertAfter(it->previous);
@@ -2547,14 +2539,14 @@ bool CCalcUtils::isBoxMaybeInSensorVolume(const CVolumePlanes& planesIn,const CV
 {
     C3Vector bpts[8];
     size_t pos=0;
-    for (float z=-1.0f;z<2.0f;z+=2.0f)
+    for (simReal z=-simOne;z<simTwo;z+=simTwo)
     {
         C3Vector a;
         a(2)=z*boxHs(2);
-        for (float y=-1.0f;y<2.0f;y+=2.0f)
+        for (simReal y=-simOne;y<simTwo;y+=simTwo)
         {
             a(1)=y*boxHs(1);
-            for (float x=-1.0f;x<2.0f;x+=2.0f)
+            for (simReal x=-simOne;x<simTwo;x+=simTwo)
             {
                 a(0)=x*boxHs(0);
                 bpts[pos++]=C3Vector(box*a);
@@ -2566,9 +2558,9 @@ bool CCalcUtils::isBoxMaybeInSensorVolume(const CVolumePlanes& planesIn,const CV
     {
         bool allCornersOutsideForThisPlane=true;
         C3Vector xyz(planesIn.ptr()+4*i+0);
-        float d=planesIn.at(4*i+3);
+        simReal d=planesIn.at(4*i+3);
         for (size_t j=0;j<8;j++)
-            allCornersOutsideForThisPlane=allCornersOutsideForThisPlane&&((xyz*bpts[j]+d)>0.0f);
+            allCornersOutsideForThisPlane=allCornersOutsideForThisPlane&&((xyz*bpts[j]+d)>simZero);
         if (allCornersOutsideForThisPlane)
             return(false);
     }
@@ -2580,9 +2572,9 @@ bool CCalcUtils::isBoxMaybeInSensorVolume(const CVolumePlanes& planesIn,const CV
     {
         bool oneCornerOutsideForThisPlane=false;
         C3Vector xyz(planesOut.ptr()+4*i+0);
-        float d=planesOut.at(4*i+3);
+        simReal d=planesOut.at(4*i+3);
         for (size_t j=0;j<8;j++)
-            oneCornerOutsideForThisPlane=oneCornerOutsideForThisPlane||((xyz*bpts[j]+d)>0.0f);
+            oneCornerOutsideForThisPlane=oneCornerOutsideForThisPlane||((xyz*bpts[j]+d)>simZero);
         if (oneCornerOutsideForThisPlane)
             return(true);
     }

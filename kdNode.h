@@ -14,16 +14,16 @@ class CKdNode
 {
 public:
     CKdNode();
-    CKdNode(std::vector<SKdPt>& pts,const std::vector<int>& selectedPts,float proximityTol,int axis);
+    CKdNode(std::vector<SKdPt>& pts,const std::vector<int>& selectedPts,simReal proximityTol,int axis);
 
     virtual ~CKdNode();
 
-    static CKdNode* buildKdTree(const float* pts,size_t ptCnt,const unsigned char* rgbData,bool rgbForEachPt,float proximityTol);
+    static CKdNode* buildKdTree(const simReal* pts,size_t ptCnt,const unsigned char* rgbData,bool rgbForEachPt,simReal proximityTol);
 
-    void getPts(std::vector<float>& pts,std::vector<unsigned char>& rgbs);
+    void getPts(std::vector<simReal>& pts,std::vector<unsigned char>& rgbs);
 
-    void _populateNode(std::vector<SKdPt>& pts,const std::vector<int>& selectedPts,float proximityTol,int axis);
-    void _disableClosePts(std::vector<SKdPt>& pts,const std::vector<int>& selectedPts,float proximityTol,int axis);
+    void _populateNode(std::vector<SKdPt>& pts,const std::vector<int>& selectedPts,simReal proximityTol,int axis);
+    void _disableClosePts(std::vector<SKdPt>& pts,const std::vector<int>& selectedPts,simReal proximityTol,int axis);
 
     CKdNode* kdNodes[2];
     C3Vector pt;

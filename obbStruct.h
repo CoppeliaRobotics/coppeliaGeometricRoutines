@@ -1,27 +1,28 @@
 #pragma once
 
+#include "conf.h"
 #include "obbNode.h"
 
 class CObbStruct
 {
 public:
     CObbStruct();
-    CObbStruct(const float* ver,int verSize,const int* ind,int indSize,float triSize,int triCnt);
+    CObbStruct(const simReal* ver,int verSize,const int* ind,int indSize,simReal triSize,int triCnt);
     virtual ~CObbStruct();
 
     CObbStruct* copyYourself() const;
-    void scaleYourself(float f);
-    bool isSame(const float* v,int vSize,const int* ind,int indSize,float triSize,int triCnt);
+    void scaleYourself(simReal f);
+    bool isSame(const simReal* v,int vSize,const int* ind,int indSize,simReal triSize,int triCnt);
     unsigned char* serialize(int& dataSize) const;
     bool deserialize(const unsigned char* data);
 
     static void addObbStruct(CObbStruct* obbStruct);
     static void removeObbStruct(CObbStruct* obbStruct);
-    static CObbStruct* copyObbStructFromExisting(const float* vert,int vertSize,const int* ind,int indSize,float triSize,int triCnt);
-    static void reduceTriangleSizes(std::vector<float>& vert,std::vector<int>& ind,float triSize);
+    static CObbStruct* copyObbStructFromExisting(const simReal* vert,int vertSize,const int* ind,int indSize,simReal triSize,int triCnt);
+    static void reduceTriangleSizes(std::vector<simReal>& vert,std::vector<int>& ind,simReal triSize);
 
     CObbNode* obb;
-    std::vector<float> vertices;
+    std::vector<simReal> vertices;
     std::vector<int> indices;
 
 private:
@@ -29,7 +30,7 @@ private:
     unsigned long _originalVerticesHash;
     int _originalIndicesSize;
     unsigned long _originalIndicesHash;
-    float _triSize;
+    simReal _triSize;
     int _triCnt;
 
     static std::vector<CObbStruct*> _obbStructs;

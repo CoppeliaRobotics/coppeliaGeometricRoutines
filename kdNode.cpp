@@ -1,6 +1,6 @@
 #include "kdNode.h"
 
-CKdNode* CKdNode::buildKdTree(const float* pts,size_t ptCnt,const unsigned char* rgbData,bool rgbForEachPt,float proximityTol)
+CKdNode* CKdNode::buildKdTree(const simReal* pts,size_t ptCnt,const unsigned char* rgbData,bool rgbForEachPt,simReal proximityTol)
 {
     std::vector<SKdPt> allPts;
     std::vector<int> selectedPts;
@@ -36,7 +36,7 @@ CKdNode::CKdNode()
     ptIsValid=false;
 }
 
-CKdNode::CKdNode(std::vector<SKdPt>& pts,const std::vector<int>& selectedPts,float proximityTol,int axis)
+CKdNode::CKdNode(std::vector<SKdPt>& pts,const std::vector<int>& selectedPts,simReal proximityTol,int axis)
 {
     kdNodes[0]=nullptr;
     kdNodes[1]=nullptr;
@@ -50,9 +50,9 @@ CKdNode::~CKdNode()
     delete kdNodes[1];
 }
 
-void CKdNode::_populateNode(std::vector<SKdPt>& pts,const std::vector<int>& selectedPts,float proximityTol,int axis)
+void CKdNode::_populateNode(std::vector<SKdPt>& pts,const std::vector<int>& selectedPts,simReal proximityTol,int axis)
 {
-    float proxTolPow2=proximityTol*proximityTol;
+    simReal proxTolPow2=proximityTol*proximityTol;
     for (size_t i=0;i<selectedPts.size();i++)
     {
         if (!pts[selectedPts[i]].ignorePt)
@@ -76,10 +76,10 @@ void CKdNode::_populateNode(std::vector<SKdPt>& pts,const std::vector<int>& sele
             {
                 C3Vector v(pts[selectedPts[i]].pt);
                 C3Vector dv(v-pt);
-                float d=dv(0)*dv(0)+dv(1)*dv(1)+dv(2)*dv(2);
+                simReal d=dv(0)*dv(0)+dv(1)*dv(1)+dv(2)*dv(2);
                 if (d>proxTolPow2)
                 {
-                    if (dv(axis)<0.0f)
+                    if (dv(axis)<simZero)
                         selectedNegativeAxisPts.push_back(selectedPts[i]);
                     else
                         selectedPositiveAxisPts.push_back(selectedPts[i]);
@@ -101,11 +101,11 @@ void CKdNode::_populateNode(std::vector<SKdPt>& pts,const std::vector<int>& sele
     }
 }
 
-void CKdNode::_disableClosePts(std::vector<SKdPt>& pts,const std::vector<int>& selectedPts,float proximityTol,int axis)
+void CKdNode::_disableClosePts(std::vector<SKdPt>& pts,const std::vector<int>& selectedPts,simReal proximityTol,int axis)
 {
     if (ptIsValid)
     {
-        float proxTolPow2=proximityTol*proximityTol;
+        simReal proxTolPow2=proximityTol*proximityTol;
         std::vector<int> selectedNegativeAxisPts;
         std::vector<int> selectedPositiveAxisPts;
         for (size_t i=0;i<selectedPts.size();i++)
@@ -113,12 +113,12 @@ void CKdNode::_disableClosePts(std::vector<SKdPt>& pts,const std::vector<int>& s
             if (!pts[selectedPts[i]].ignorePt)
             {
                 C3Vector dv=pts[selectedPts[i]].pt-pt;
-                float d=dv(0)*dv(0)+dv(1)*dv(1)+dv(2)*dv(2);
+                simReal d=dv(0)*dv(0)+dv(1)*dv(1)+dv(2)*dv(2);
                 if (d<proxTolPow2)
                     pts[selectedPts[i]].ignorePt=true;
                 else
                 {
-                    if (dv(axis)<0.0f)
+                    if (dv(axis)<simZero)
                     {
                         selectedNegativeAxisPts.push_back(selectedPts[i]);
                         if (dv(axis)>-proximityTol) // do not forget points on the other side, close to the border!
@@ -144,7 +144,7 @@ void CKdNode::_disableClosePts(std::vector<SKdPt>& pts,const std::vector<int>& s
     }
 }
 
-void CKdNode::getPts(std::vector<float>& pts,std::vector<unsigned char>& rgbs)
+void CKdNode::getPts(std::vector<simReal>& pts,std::vector<unsigned char>& rgbs)
 {
     if (ptIsValid)
     {

@@ -3,11 +3,17 @@
 #define _SECURE_SCL 0 // Disable bound checks (a bit faster)
 #include <algorithm> // std::max, etc.
 #include <vector>
+#include "mathDefines.h"
+#ifdef SIM_MATH_DOUBLE
+    typedef double simReal;
+#else
+    typedef float simReal;
+#endif
 
 class CVolumePlanes
 {
 public:
-    CVolumePlanes(const float* planes,size_t size)
+    CVolumePlanes(const simReal* planes,size_t size)
     {
         s=size;
         if (s==0)
@@ -15,7 +21,7 @@ public:
         else
             p=planes;
     }
-    const float* ptr() const
+    const simReal* ptr() const
     {
         return(p);
     }
@@ -23,18 +29,18 @@ public:
     {
         return(s);
     }
-    float at(size_t pos) const
+    simReal at(size_t pos) const
     {
         return(p[pos]);
     }
 
 private:
-    const float* p;
+    const simReal* p;
     size_t s;
 };
 
 static void pushData(std::vector<unsigned char>& data,const void* v,size_t vSize)
 {
     for (size_t i=0;i<vSize;i++)
-        data.push_back(((unsigned char*)v)[i]);
+        data.push_back((reinterpret_cast<const unsigned char*>(v))[i]);
 };
