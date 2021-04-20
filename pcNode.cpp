@@ -364,6 +364,19 @@ void CPcNode::add_pts(simReal boxS,const C3Vector& boxCenter,simReal cellS,int c
             }
             else
             { // we have to create children...
+                if (!rgbForEachPt)
+                { // create individual colors anyway (but same), since we need to also handle previous points:
+                    rgbData2.clear();
+                    for (size_t i=0;i<points2.size()/3;i++)
+                    {
+                        rgbData2.push_back(rgbData[0]);
+                        rgbData2.push_back(rgbData[1]);
+                        rgbData2.push_back(rgbData[2]);
+                    }
+                }
+                rgbData2.insert(rgbData2.end(),rgbs.begin(),rgbs.end());
+                rgbs.clear();
+
                 points2.insert(points2.end(),pts.begin(),pts.end());
                 for (size_t i=0;i<pts.size()/3;i++)
                 {
@@ -371,9 +384,6 @@ void CPcNode::add_pts(simReal boxS,const C3Vector& boxCenter,simReal cellS,int c
                     ptsInvalidityIndicators.push_back(false);
                 }
                 pts.clear();
-                if (rgbForEachPt)
-                    rgbData2.insert(rgbData2.end(),rgbs.begin(),rgbs.end());
-                rgbs.clear();
                 pcNodes=new CPcNode* [8];
                 for (size_t i=0;i<8;i++)
                     pcNodes[i]=new CPcNode(boxS*simHalf,ocNodeTranslations[i]*boxS,cellS,cellPts,points2,ptsOriginalIndices2,ptsInvalidityIndicators,rgbData2,true);
