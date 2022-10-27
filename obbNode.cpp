@@ -363,7 +363,7 @@ C4X4Matrix CObbNode::getNaturalFrame(const std::vector<simReal>& allVertices,con
     C4Vector bestQ;
     bestQ.setIdentity();
     bestM.setIdentity();
-    boxHs.set(simReal(0.00001),simReal(0.00001),simReal(0.00001));
+    boxHs.setData(simReal(0.00001),simReal(0.00001),simReal(0.00001));
     if (trianglesIndices.size()!=0)
     {
         std::vector<C3Vector> usedVertices;
