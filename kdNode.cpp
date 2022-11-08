@@ -79,7 +79,7 @@ void CKdNode::_populateNode(std::vector<SKdPt>& pts,const std::vector<int>& sele
                 simReal d=dv(0)*dv(0)+dv(1)*dv(1)+dv(2)*dv(2);
                 if (d>proxTolPow2)
                 {
-                    if (dv(axis)<simZero)
+                    if (dv(axis)<0.0)
                         selectedNegativeAxisPts.push_back(selectedPts[i]);
                     else
                         selectedPositiveAxisPts.push_back(selectedPts[i]);
@@ -118,7 +118,7 @@ void CKdNode::_disableClosePts(std::vector<SKdPt>& pts,const std::vector<int>& s
                     pts[selectedPts[i]].ignorePt=true;
                 else
                 {
-                    if (dv(axis)<simZero)
+                    if (dv(axis)<0.0)
                     {
                         selectedNegativeAxisPts.push_back(selectedPts[i]);
                         if (dv(axis)>-proximityTol) // do not forget points on the other side, close to the border!

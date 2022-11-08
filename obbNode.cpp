@@ -296,13 +296,13 @@ void CObbNode::splitTriangles(const std::vector<simReal>& allVertices,const std:
     for (size_t loop=0;loop<3;loop++)
     {
         int bestAxis=0;
-        simReal bestAxisS=simZero;
+        simReal bestAxisS=0.0;
         for (size_t i=0;i<3;i++)
         {
             if (hs(i)>bestAxisS)
             {
                 bestAxisS=hs(i);
-                hs(i)=simZero;
+                hs(i)=0.0;
                 bestAxis=int(i);
             }
         }
@@ -339,8 +339,8 @@ void CObbNode::splitTriangles(const std::vector<simReal>& allVertices,const std:
 
         // To avoid unbalanced situations:
         simReal q=simReal(triIndicesGroup1.size())/simReal(triIndicesGroup2.size()+1);
-        if (q>simOne)
-            q=simOne/q;
+        if (q>1.0)
+            q=1.0/q;
         if (q>simReal(0.25))
             break;
         // If we have a bad ratio, we try a different axis
@@ -348,8 +348,8 @@ void CObbNode::splitTriangles(const std::vector<simReal>& allVertices,const std:
 
     // To avoid unbalanced situations, last chance:
     simReal q=simReal(triIndicesGroup1.size())/simReal(triIndicesGroup2.size()+1);
-    if (q>simOne)
-        q=simOne/q;
+    if (q>1.0)
+        q=1.0/q;
     if (q<simReal(0.25))
     { // we have a bad ratio. We simply equally split the triangles:
         triIndicesGroup1.assign(triIndices.begin(),triIndices.begin()+triIndices.size()/2);
@@ -382,7 +382,7 @@ C4X4Matrix CObbNode::getNaturalFrame(const std::vector<simReal>& allVertices,con
             }
         }
 
-        simReal smallestZ=SIM_MAX_REAL;
+        simReal smallestZ=FLOAT_MAX;
         const simReal* orientations[2]={q1,q2};
         int orientationsCnt[2]={91,36};
         for (size_t l=0;l<2;l++)
@@ -392,8 +392,8 @@ C4X4Matrix CObbNode::getNaturalFrame(const std::vector<simReal>& allVertices,con
                 C4Vector q(orientations[l]+4*i);
                 q=bestQ*q;
                 C4Vector qInv(q.getInverse());
-                simReal minV=SIM_MAX_REAL;
-                simReal maxV=-SIM_MAX_REAL;
+                simReal minV=FLOAT_MAX;
+                simReal maxV=-FLOAT_MAX;
                 simReal l;
                 for (size_t j=0;j<usedVertices.size();j++)
                 {
@@ -414,7 +414,7 @@ C4X4Matrix CObbNode::getNaturalFrame(const std::vector<simReal>& allVertices,con
             }
         }
 
-        simReal smallestVolume=SIM_MAX_REAL;
+        simReal smallestVolume=FLOAT_MAX;
         const simReal* circularOrientations[2]={q3,q4};
         int circularOrientationsCnt[2]={10,10};
         for (size_t l=0;l<2;l++)
@@ -424,8 +424,8 @@ C4X4Matrix CObbNode::getNaturalFrame(const std::vector<simReal>& allVertices,con
                 C4Vector q(circularOrientations[l]+4*i);
                 q=bestQ*q;
                 C4Vector qInv(q.getInverse());
-                C3Vector minV(SIM_MAX_REAL,SIM_MAX_REAL,SIM_MAX_REAL);
-                C3Vector maxV(-SIM_MAX_REAL,-SIM_MAX_REAL,-SIM_MAX_REAL);
+                C3Vector minV(FLOAT_MAX,FLOAT_MAX,FLOAT_MAX);
+                C3Vector maxV(-FLOAT_MAX,-FLOAT_MAX,-FLOAT_MAX);
                 simReal vol;
                 C3Vector dim;
                 for (size_t j=0;j<usedVertices.size();j++)
@@ -441,9 +441,9 @@ C4X4Matrix CObbNode::getNaturalFrame(const std::vector<simReal>& allVertices,con
                 if (vol<smallestVolume)
                 {
                     smallestVolume=vol;
-                    boxHs=dim*simHalf;
+                    boxHs=dim*0.5;
                     bestM.M=q.getMatrix();
-                    bestM.X=bestM.M*((minV+maxV)*simHalf);
+                    bestM.X=bestM.M*((minV+maxV)*0.5);
                 }
             }
         }
@@ -676,7 +676,7 @@ bool CObbNode::checkCollision_segp_withTriInfo(const CObbStruct* obbStruct1,cons
 
 bool CObbNode::checkDistance_obb(const CObbStruct* obbStruct1,const C4X4Matrix& shape1M,const CObbNode* obb2,const CObbStruct* obbStruct2,const C4X4Matrix& shape2M,simReal& dist,C3Vector* minDistSegPt1,C3Vector* minDistSegPt2,int* cachingTri1,int* cachingTri2) const
 {
-    if (dist==simZero)
+    if (dist==0.0)
         return(false);
     bool retVal=false;
     if (leafTris==nullptr)
@@ -728,7 +728,7 @@ bool CObbNode::checkDistance_obb(const CObbStruct* obbStruct1,const C4X4Matrix& 
             w-=p;
             bool bb=obb2->checkDistance_tri(obbStruct2,shape2M,p,v,w,leafTris[0][i],dist,minDistSegPt2,minDistSegPt1,cachingTri2,cachingTri1);
             retVal=retVal||bb;
-            if (dist==simZero)
+            if (dist==0.0)
                 break;
         }
     }
@@ -737,7 +737,7 @@ bool CObbNode::checkDistance_obb(const CObbStruct* obbStruct1,const C4X4Matrix& 
 
 bool CObbNode::checkDistance_tri(const CObbStruct* obbStruct1,const C4X4Matrix& shape1M,const C3Vector& p2,const C3Vector& v2,const C3Vector& w2,int tri2Index,simReal& dist,C3Vector* minDistSegPt1,C3Vector* minDistSegPt2,int* cachingTri1,int* cachingTri2) const
 {
-    if (dist==simZero)
+    if (dist==0.0)
         return(false);
     bool retVal=false;
     if (leafTris==nullptr)
@@ -789,7 +789,7 @@ bool CObbNode::checkDistance_tri(const CObbStruct* obbStruct1,const C4X4Matrix& 
                     cachingTri1[0]=leafTris[0][i];
                 if (cachingTri2!=nullptr)
                     cachingTri2[0]=tri2Index;
-                if (dist==simZero)
+                if (dist==0.0)
                     break;
             }
         }
@@ -799,7 +799,7 @@ bool CObbNode::checkDistance_tri(const CObbStruct* obbStruct1,const C4X4Matrix& 
 
 bool CObbNode::checkDistance_segp(const CObbStruct* obbStruct1,const C4X4Matrix& shape1M,const C3Vector& segP,const C3Vector& segL,simReal& dist,C3Vector* minDistSegPt1,C3Vector* minDistSegPt2,int* cachingTri1) const
 {
-    if (dist==simZero)
+    if (dist==0.0)
         return(false);
     bool retVal=false;
     if (leafTris==nullptr)
@@ -849,7 +849,7 @@ bool CObbNode::checkDistance_segp(const CObbStruct* obbStruct1,const C4X4Matrix&
                 retVal=true;
                 if (cachingTri1!=nullptr)
                     cachingTri1[0]=leafTris[0][i];
-                if (dist==simZero)
+                if (dist==0.0)
                     break;
             }
         }
@@ -859,7 +859,7 @@ bool CObbNode::checkDistance_segp(const CObbStruct* obbStruct1,const C4X4Matrix&
 
 bool CObbNode::checkDistance_pt(const CObbStruct* obbStruct,const C4X4Matrix& shapeM,const C3Vector& pt,simReal& dist,C3Vector* minDistSegPt,int* cachingTri) const
 {
-    if (dist==simZero)
+    if (dist==0.0)
         return(false);
     bool retVal=false;
     if (leafTris==nullptr)
@@ -919,7 +919,7 @@ bool CObbNode::checkDistance_pt(const CObbStruct* obbStruct,const C4X4Matrix& sh
 
 bool CObbNode::checkSensorDistance_obb(const CObbStruct* obbStruct,const C4X4Matrix& shapeM,const CVolumePlanes& planesIn,const CVolumePlanes& planesOut,simReal cosAngle,bool frontDetection,bool backDetection,bool fast,simReal& dist,C3Vector* detectPt,C3Vector* triN)
 {
-    if (dist==simZero)
+    if (dist==0.0)
         return(false);
     bool retVal=false;
     if (leafTris==nullptr)
@@ -991,7 +991,7 @@ bool CObbNode::checkSensorDistance_obb(const CObbStruct* obbStruct,const C4X4Mat
 
 bool CObbNode::checkRaySensorDistance_obb(const CObbStruct* obbStruct,const C4X4Matrix& shapeM,const C3Vector& raySegP,const C3Vector& raySegL,simReal cosAngle,bool frontDetection,bool backDetection,simReal forbiddenDist,bool fast,simReal& dist,C3Vector* detectPt,C3Vector* triN,bool* forbiddenDistTouched)
 {
-    if (dist==simZero)
+    if (dist==0.0)
         return(false);
     bool retVal=false;
     if (leafTris==nullptr)

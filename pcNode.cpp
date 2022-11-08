@@ -45,7 +45,7 @@ CPcNode::CPcNode(simReal boxS,const C3Vector& boxCenter,simReal cellS,int cellPt
         { // subdivide
             pcNodes=new CPcNode* [8];
             for (size_t i=0;i<8;i++)
-                pcNodes[i]=new CPcNode(boxS*simHalf,ocNodeTranslations[i]*boxS,cellS,cellPts,points2,ptsOriginalIndices2,ptsInvalidityIndicators,rgbData2,rgbForEachPt);
+                pcNodes[i]=new CPcNode(boxS*0.5,ocNodeTranslations[i]*boxS,cellS,cellPts,points2,ptsOriginalIndices2,ptsInvalidityIndicators,rgbData2,rgbForEachPt);
         }
         else
         { // we are at a leaf. Populate it
@@ -182,7 +182,7 @@ void CPcNode::getPointsPosAndRgb_all(simReal boxS,const C3Vector& boxCenter,std:
     if (pcNodes!=nullptr)
     {
         for (size_t i=0;i<8;i++)
-            pcNodes[i]->getPointsPosAndRgb_all(boxS*simHalf,boxCenter+ocNodeTranslations[i]*boxS,data);
+            pcNodes[i]->getPointsPosAndRgb_all(boxS*0.5,boxCenter+ocNodeTranslations[i]*boxS,data);
     }
     for (size_t i=0;i<pts.size()/3;i++)
     {
@@ -202,10 +202,10 @@ void CPcNode::getPointsPosAndRgb_subset(simReal boxS,const C3Vector& boxCenter,s
     if (pcNodes!=nullptr)
     {
         for (size_t i=0;i<8;i++)
-            pcNodes[i]->getPointsPosAndRgb_subset(boxS*simHalf,boxCenter+ocNodeTranslations[i]*boxS,prop,data);
+            pcNodes[i]->getPointsPosAndRgb_subset(boxS*0.5,boxCenter+ocNodeTranslations[i]*boxS,prop,data);
     }
-    simReal step=(simOne/prop)+simReal(0.0001);
-    for (simReal fi=simZero;size_t(fi)<pts.size()/3;fi+=step)
+    simReal step=(1.0/prop)+simReal(0.0001);
+    for (simReal fi=0.0;size_t(fi)<pts.size()/3;fi+=step)
     {
         C3Vector pt(&pts[3*size_t(fi)]);
         pt+=boxCenter;
@@ -223,11 +223,11 @@ void CPcNode::getOctreeCorners(simReal boxS,const C3Vector& boxCenter,std::vecto
     if (pcNodes!=nullptr)
     {
         for (size_t i=0;i<8;i++)
-            pcNodes[i]->getOctreeCorners(boxS*simHalf,boxCenter+ocNodeTranslations[i]*boxS,data);
+            pcNodes[i]->getOctreeCorners(boxS*0.5,boxCenter+ocNodeTranslations[i]*boxS,data);
     }
     for (size_t i=0;i<8;i++)
     {
-        C3Vector shift(ocNodeTranslations[i]*boxS*simTwo);
+        C3Vector shift(ocNodeTranslations[i]*boxS*2.0);
         data.push_back(boxCenter(0)+shift(0));
         data.push_back(boxCenter(1)+shift(1));
         data.push_back(boxCenter(2)+shift(2));
@@ -245,7 +245,7 @@ const simReal* CPcNode::getPoints(simReal boxS,const C3Vector& boxCenter,unsigne
         {
             int index=(cellPath>>(6+(cellDepth-1)*3))&7;
             unsigned long long int _pcCaching=cellPath|(cellDepth-1);
-            retVal=pcNodes[index]->getPoints(boxS*simHalf,boxCenter+ocNodeTranslations[index]*boxS,_pcCaching,ptCnt,totalTransl);
+            retVal=pcNodes[index]->getPoints(boxS*0.5,boxCenter+ocNodeTranslations[index]*boxS,_pcCaching,ptCnt,totalTransl);
         }
     }
     else
@@ -326,13 +326,13 @@ void CPcNode::add_pts(simReal boxS,const C3Vector& boxCenter,simReal cellS,int c
                 { // we create new children..
                     pcNodes=new CPcNode* [8];
                     for (size_t i=0;i<8;i++)
-                        pcNodes[i]=new CPcNode(boxS*simHalf,ocNodeTranslations[i]*boxS,cellS,cellPts,points2,ptsOriginalIndices2,ptsInvalidityIndicators,rgbData2,rgbForEachPt);
+                        pcNodes[i]=new CPcNode(boxS*0.5,ocNodeTranslations[i]*boxS,cellS,cellPts,points2,ptsOriginalIndices2,ptsInvalidityIndicators,rgbData2,rgbForEachPt);
                 }
             }
             else
             { // continue exploring...
                 for (size_t i=0;i<8;i++)
-                    pcNodes[i]->add_pts(boxS*simHalf,ocNodeTranslations[i]*boxS,cellS,cellPts,points2,ptsOriginalIndices2,ptsInvalidityIndicators,rgbData2,rgbForEachPt);
+                    pcNodes[i]->add_pts(boxS*0.5,ocNodeTranslations[i]*boxS,cellS,cellPts,points2,ptsOriginalIndices2,ptsInvalidityIndicators,rgbData2,rgbForEachPt);
             }
         }
         else
@@ -386,7 +386,7 @@ void CPcNode::add_pts(simReal boxS,const C3Vector& boxCenter,simReal cellS,int c
                 pts.clear();
                 pcNodes=new CPcNode* [8];
                 for (size_t i=0;i<8;i++)
-                    pcNodes[i]=new CPcNode(boxS*simHalf,ocNodeTranslations[i]*boxS,cellS,cellPts,points2,ptsOriginalIndices2,ptsInvalidityIndicators,rgbData2,true);
+                    pcNodes[i]=new CPcNode(boxS*0.5,ocNodeTranslations[i]*boxS,cellS,cellPts,points2,ptsOriginalIndices2,ptsInvalidityIndicators,rgbData2,true);
             }
         }
     }
@@ -421,7 +421,7 @@ bool CPcNode::delete_pts(simReal boxS,const C3Vector& boxCenter,const std::vecto
                 bool removeChildNodes=true;
                 for (size_t i=0;i<8;i++)
                 {
-                    bool bb=pcNodes[i]->delete_pts(boxS*simHalf,ocNodeTranslations[i]*boxS,points2,proximityTol,count);
+                    bool bb=pcNodes[i]->delete_pts(boxS*0.5,ocNodeTranslations[i]*boxS,points2,proximityTol,count);
                     removeChildNodes=removeChildNodes&&bb;
                 }
                 if (removeChildNodes)
@@ -490,7 +490,7 @@ bool CPcNode::delete_octree(simReal pcBoxS,const C3Vector& pcBoxCenter,const C4X
                         bool removeChildNodes=true;
                         for (size_t i=0;i<8;i++)
                         {
-                            bool bb=pcNodes[i]->delete_octree(pcBoxS*simHalf,pcBoxCenter+ocNodeTranslations[i]*pcBoxS,pcM,ocBoxS,ocBoxCenter,ocNode,ocM,count);
+                            bool bb=pcNodes[i]->delete_octree(pcBoxS*0.5,pcBoxCenter+ocNodeTranslations[i]*pcBoxS,pcM,ocBoxS,ocBoxCenter,ocNode,ocM,count);
                             removeChildNodes=removeChildNodes&&bb;
                         }
                         if (removeChildNodes)
@@ -506,7 +506,7 @@ bool CPcNode::delete_octree(simReal pcBoxS,const C3Vector& pcBoxCenter,const C4X
                     { // explore the OC tree..
                         for (size_t i=0;i<8;i++)
                         {
-                            if (delete_octree(pcBoxS,pcBoxCenter,pcM,ocBoxS*simHalf,ocBoxCenter+ocNodeTranslations[i]*ocBoxS,ocNode->ocNodes[i],ocM,count))
+                            if (delete_octree(pcBoxS,pcBoxCenter,pcM,ocBoxS*0.5,ocBoxCenter+ocNodeTranslations[i]*ocBoxS,ocNode->ocNodes[i],ocM,count))
                                 return(true); // this node could be removed
                         }
                     }
@@ -545,7 +545,7 @@ bool CPcNode::delete_octree(simReal pcBoxS,const C3Vector& pcBoxCenter,const C4X
                 { // continue exploring the oc tree...
                     for (size_t i=0;i<8;i++)
                     {
-                        if (delete_octree(pcBoxS,pcBoxCenter,pcM,ocBoxS*simHalf,ocBoxCenter+ocNodeTranslations[i]*ocBoxS,ocNode->ocNodes[i],ocM,count))
+                        if (delete_octree(pcBoxS,pcBoxCenter,pcM,ocBoxS*0.5,ocBoxCenter+ocNodeTranslations[i]*ocBoxS,ocNode->ocNodes[i],ocM,count))
                             return(true); // this node could be removed
                     }
                 }
@@ -582,7 +582,7 @@ bool CPcNode::intersect_pts(simReal boxS,const C3Vector& boxCenter,const std::ve
                 bool removeChildNodes=true;
                 for (size_t i=0;i<8;i++)
                 {
-                    bool bb=pcNodes[i]->intersect_pts(boxS*simHalf,ocNodeTranslations[i]*boxS,points2,proximityTol);
+                    bool bb=pcNodes[i]->intersect_pts(boxS*0.5,ocNodeTranslations[i]*boxS,points2,proximityTol);
                     removeChildNodes=removeChildNodes&&bb;
                 }
                 if (removeChildNodes)
@@ -677,7 +677,7 @@ void CPcNode::flagDuplicates(simReal boxS,const C3Vector& boxCenter,const std::v
             if (pcNodes!=nullptr)
             { // continue exploration..
                 for (size_t i=0;i<8;i++)
-                    pcNodes[i]->flagDuplicates(boxS*simHalf,ocNodeTranslations[i]*boxS,points2,ptsOriginalIndices2,duplicateIndicators,proximityTol);
+                    pcNodes[i]->flagDuplicates(boxS*0.5,ocNodeTranslations[i]*boxS,points2,ptsOriginalIndices2,duplicateIndicators,proximityTol);
             }
         }
         else
@@ -705,7 +705,7 @@ void CPcNode::flagDuplicates(simReal boxS,const C3Vector& boxCenter,const std::v
 bool CPcNode::getDistance_pt(simReal boxS,const C3Vector& boxCenter,const C3Vector& point,simReal& dist,C3Vector* pcMinDistSegPt,unsigned long long int* pcCaching,unsigned long long int pcCachePos) const
 {
     bool retVal=false;
-    if (dist==simZero)
+    if (dist==0.0)
         return(retVal);
     simReal pcBoxHsp=boxS*simReal(0.5001);
     C3Vector relPoint(point-boxCenter);
@@ -721,7 +721,7 @@ bool CPcNode::getDistance_pt(simReal boxS,const C3Vector& boxCenter,const C3Vect
                 unsigned long long int cellDepth=(pcCachePos&63);
                 for (size_t i=0;i<8;i++)
                 {
-                    bool bb=pcNodes[i]->getDistance_pt(boxS*simHalf,boxCenter+ocNodeTranslations[i]*boxS,point,dist,pcMinDistSegPt,pcCaching,cellPath|(i<<6)|(cellDepth+1));
+                    bool bb=pcNodes[i]->getDistance_pt(boxS*0.5,boxCenter+ocNodeTranslations[i]*boxS,point,dist,pcMinDistSegPt,pcCaching,cellPath|(i<<6)|(cellDepth+1));
                     retVal=retVal||bb;
                 }
             }
@@ -750,7 +750,7 @@ bool CPcNode::getDistance_pt(simReal boxS,const C3Vector& boxCenter,const C3Vect
 bool CPcNode::getDistance_seg(simReal boxS,const C3Vector& boxCenter,const C3Vector& segMiddle,const C3Vector& segHs,simReal& dist,C3Vector* pcMinDistSegPt,C3Vector* segMinDistSegPt,unsigned long long int* pcCaching,unsigned long long int pcCachePos) const
 {
     bool retVal=false;
-    if (dist==simZero)
+    if (dist==0.0)
         return(retVal);
     simReal pcBoxHsp=boxS*simReal(0.5001);
     C3Vector relSegMiddle(segMiddle-boxCenter);
@@ -766,7 +766,7 @@ bool CPcNode::getDistance_seg(simReal boxS,const C3Vector& boxCenter,const C3Vec
                 unsigned long long int cellDepth=(pcCachePos&63);
                 for (size_t i=0;i<8;i++)
                 {
-                    bool bb=pcNodes[i]->getDistance_seg(boxS*simHalf,boxCenter+ocNodeTranslations[i]*boxS,segMiddle,segHs,dist,pcMinDistSegPt,segMinDistSegPt,pcCaching,cellPath|(i<<6)|(cellDepth+1));
+                    bool bb=pcNodes[i]->getDistance_seg(boxS*0.5,boxCenter+ocNodeTranslations[i]*boxS,segMiddle,segHs,dist,pcMinDistSegPt,segMinDistSegPt,pcCaching,cellPath|(i<<6)|(cellDepth+1));
                     retVal=retVal||bb;
                 }
             }
@@ -776,7 +776,7 @@ bool CPcNode::getDistance_seg(simReal boxS,const C3Vector& boxCenter,const C3Vec
             for (size_t i=0;i<pts.size()/3;i++)
             {
                 C3Vector pt(&pts[3*i]);
-                if (CCalcUtils::getDistance_segp_pt(relSegMiddle-segHs,segHs*simTwo,pt,dist,segMinDistSegPt))
+                if (CCalcUtils::getDistance_segp_pt(relSegMiddle-segHs,segHs*2.0,pt,dist,segMinDistSegPt))
                 {
                     retVal=true;
                     if (pcMinDistSegPt!=nullptr)
@@ -795,7 +795,7 @@ bool CPcNode::getDistance_seg(simReal boxS,const C3Vector& boxCenter,const C3Vec
 bool CPcNode::getDistance_tri(simReal boxS,const C3Vector& boxCenter,const C3Vector& p,const C3Vector& v,const C3Vector& w,simReal& dist,C3Vector* pcMinDistSegPt,C3Vector* triMinDistSegPt,unsigned long long int* pcCaching,unsigned long long int pcCachePos) const
 {
     bool retVal=false;
-    if (dist==simZero)
+    if (dist==0.0)
         return(retVal);
     simReal pcBoxHsp=boxS*simReal(0.5001);
     C3Vector relP(p-boxCenter);
@@ -811,7 +811,7 @@ bool CPcNode::getDistance_tri(simReal boxS,const C3Vector& boxCenter,const C3Vec
                 unsigned long long int cellDepth=(pcCachePos&63);
                 for (size_t i=0;i<8;i++)
                 {
-                    bool bb=pcNodes[i]->getDistance_tri(boxS*simHalf,boxCenter+ocNodeTranslations[i]*boxS,p,v,w,dist,pcMinDistSegPt,triMinDistSegPt,pcCaching,cellPath|(i<<6)|(cellDepth+1));
+                    bool bb=pcNodes[i]->getDistance_tri(boxS*0.5,boxCenter+ocNodeTranslations[i]*boxS,p,v,w,dist,pcMinDistSegPt,triMinDistSegPt,pcCaching,cellPath|(i<<6)|(cellDepth+1));
                     retVal=retVal||bb;
                 }
             }
@@ -840,13 +840,13 @@ bool CPcNode::getDistance_tri(simReal boxS,const C3Vector& boxCenter,const C3Vec
 bool CPcNode::getDistance_shape(simReal boxS,const C3Vector& boxCenter,const C4X4Matrix& pcM,const CObbStruct* obbStruct,const CObbNode* obb,const C4X4Matrix& shapeM,simReal& dist,C3Vector* pcMinDistSegPt,C3Vector* shapeMinDistSegPt,unsigned long long int* pcCaching,unsigned long long int pcCachePos,int* obbCaching) const
 {
     bool retVal=false;
-    if (dist==simZero)
+    if (dist==0.0)
         return(retVal);
     C4X4Matrix pcTr(pcM);
     pcTr.X+=pcM.M*boxCenter;
     C4X4Matrix shapeTr(shapeM*obb->boxM);
     // Make a quick check:
-    simReal d=CCalcUtils::getApproxDistance_box_box(pcTr,C3Vector(boxS*simHalf,boxS*simHalf,boxS*simHalf),shapeTr,obb->boxHs);
+    simReal d=CCalcUtils::getApproxDistance_box_box(pcTr,C3Vector(boxS*0.5,boxS*0.5,boxS*0.5),shapeTr,obb->boxHs);
     if (d<dist)
     { // we may be closer than dist
         bool exploreObbNode=false;
@@ -871,7 +871,7 @@ bool CPcNode::getDistance_shape(simReal boxS,const C3Vector& boxCenter,const C4X
                     C3Vector transl(nodesToExplore[i].second.transl);
                     size_t index=nodesToExplore[i].second.index;
                     unsigned long long int _pcCacheValueHere=cellPath|(index<<6)|(cellDepth+1);
-                    bool bb=pcNodes[index]->getDistance_shape(boxS*simHalf,boxCenter+transl,pcM,obbStruct,obb,shapeM,dist,pcMinDistSegPt,shapeMinDistSegPt,pcCaching,_pcCacheValueHere,obbCaching);
+                    bool bb=pcNodes[index]->getDistance_shape(boxS*0.5,boxCenter+transl,pcM,obbStruct,obb,shapeM,dist,pcMinDistSegPt,shapeMinDistSegPt,pcCaching,_pcCacheValueHere,obbCaching);
                     retVal=retVal||bb;
                 }
             }
@@ -949,7 +949,7 @@ bool CPcNode::getDistance_shape(simReal boxS,const C3Vector& boxCenter,const C4X
 bool CPcNode::getDistance_ptcloud(simReal box1Size,const C3Vector& box1Center,const C4X4Matrix& pc1M,const CPcNode* pc2Node,simReal box2Size,const C3Vector& box2Center,const C4X4Matrix& pc2M,simReal& dist,C3Vector* pc1MinDistSegPt,C3Vector* pc2MinDistSegPt,unsigned long long int* pc1Caching,unsigned long long int pc1CachePos,unsigned long long int* pc2Caching,unsigned long long int pc2CachePos) const
 {
     bool retVal=false;
-    if (dist==simZero)
+    if (dist==0.0)
         return(retVal);
     C4X4Matrix m1(pc1M);
     m1.X+=pc1M.M*box1Center;
@@ -1049,7 +1049,7 @@ bool CPcNode::getDistance_ptcloud(simReal box1Size,const C3Vector& box1Center,co
                 C3Vector transl(nodesToExplore[i].second.transl);
                 size_t index=nodesToExplore[i].second.index;
                 unsigned long long int cacheValueHere=cellPath|(index<<6)|(cellDepth+1);
-                bool bb=pcNodes[nodeIndexToExplore]->pcNodes[index]->getDistance_ptcloud(boxSizes[nodeIndexToExplore]*simHalf,boxCenters[nodeIndexToExplore][0]+transl,pcMs[nodeIndexToExplore][0],pcNodes[otherNodeIndex],boxSizes[otherNodeIndex],boxCenters[otherNodeIndex][0],pcMs[otherNodeIndex][0],dist,pcMinDistSegPts[nodeIndexToExplore],pcMinDistSegPts[otherNodeIndex],pcCachings[nodeIndexToExplore],cacheValueHere,pcCachings[otherNodeIndex],pcCachePoss[otherNodeIndex]);
+                bool bb=pcNodes[nodeIndexToExplore]->pcNodes[index]->getDistance_ptcloud(boxSizes[nodeIndexToExplore]*0.5,boxCenters[nodeIndexToExplore][0]+transl,pcMs[nodeIndexToExplore][0],pcNodes[otherNodeIndex],boxSizes[otherNodeIndex],boxCenters[otherNodeIndex][0],pcMs[otherNodeIndex][0],dist,pcMinDistSegPts[nodeIndexToExplore],pcMinDistSegPts[otherNodeIndex],pcCachings[nodeIndexToExplore],cacheValueHere,pcCachings[otherNodeIndex],pcCachePoss[otherNodeIndex]);
                 retVal=retVal||bb;
             }
         }
@@ -1060,14 +1060,14 @@ bool CPcNode::getDistance_ptcloud(simReal box1Size,const C3Vector& box1Center,co
 bool CPcNode::getSensorDistance(simReal boxS,const C3Vector& boxCenter,const C4X4Matrix& pcM,const CVolumePlanes& planesIn,const CVolumePlanes& planesOut,bool fast,simReal& dist,C3Vector* detectPt) const
 {
     bool retVal=false;
-    if (dist==simZero)
+    if (dist==0.0)
         return(retVal);
     C4X4Matrix m(pcM);
     m.X+=pcM.M*boxCenter;
     simReal d=dist;
-    if (CCalcUtils::getDistance_box_pt(m,C3Vector(boxS*simHalf,boxS*simHalf,boxS*simHalf),true,C3Vector::zeroVector,d,nullptr,nullptr))
+    if (CCalcUtils::getDistance_box_pt(m,C3Vector(boxS*0.5,boxS*0.5,boxS*0.5),true,C3Vector::zeroVector,d,nullptr,nullptr))
     { // we are closer than dist..
-        if (CCalcUtils::isBoxMaybeInSensorVolume(planesIn,planesOut,m,C3Vector(boxS*simHalf,boxS*simHalf,boxS*simHalf)))
+        if (CCalcUtils::isBoxMaybeInSensorVolume(planesIn,planesOut,m,C3Vector(boxS*0.5,boxS*0.5,boxS*0.5)))
         { // the PC box touches the sensor volume
             if (pcNodes==nullptr)
             { // no more child nodes
@@ -1109,7 +1109,7 @@ bool CPcNode::getSensorDistance(simReal boxS,const C3Vector& boxCenter,const C4X
                 {
                     C3Vector transl(nodesToExplore[i].second.transl);
                     size_t index=nodesToExplore[i].second.index;
-                    bool bb=pcNodes[index]->getSensorDistance(boxS*simHalf,boxCenter+transl,pcM,planesIn,planesOut,fast,dist,detectPt);
+                    bool bb=pcNodes[index]->getSensorDistance(boxS*0.5,boxCenter+transl,pcM,planesIn,planesOut,fast,dist,detectPt);
                     retVal=retVal||bb;
                     if (retVal&&fast)
                         break;

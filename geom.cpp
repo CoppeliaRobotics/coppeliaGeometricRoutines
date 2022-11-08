@@ -50,7 +50,7 @@ bool geom_getMeshOctreeCollision(const CObbStruct* meshObbStruct,const C7Vector&
                 p1=cellMi*meshTransformation*p1;
                 p2=cellMi*meshTransformation*p2;
                 p3=cellMi*meshTransformation*p3;
-                retVal=CCalcUtils::doCollide_cell_tri(cellS*simHalf,true,p1,p2-p1,p3-p1);
+                retVal=CCalcUtils::doCollide_cell_tri(cellS*0.5,true,p1,p2-p1,p3-p1);
             }
         }
     }
@@ -116,12 +116,12 @@ bool geom_getOctreeOctreeCollision(const COcStruct* oc1Struct,const C7Vector& oc
         simReal cell1S;
         if (oc1Struct->getCell(octree1Transformation.getMatrix(),(const unsigned long long int)oc1Caching[0],cell1S,cell1M,nullptr))
         {
-            C3Vector _cell1S(cell1S*simHalf,cell1S*simHalf,cell1S*simHalf);
+            C3Vector _cell1S(cell1S*0.5,cell1S*0.5,cell1S*0.5);
             C4X4Matrix cell2M;
             simReal cell2S;
             if (oc2Struct->getCell(octree2Transformation.getMatrix(),(const unsigned long long int)oc2Caching[0],cell2S,cell2M,nullptr))
             {
-                C3Vector _cell2S(cell2S*simHalf,cell2S*simHalf,cell2S*simHalf);
+                C3Vector _cell2S(cell2S*0.5,cell2S*0.5,cell2S*0.5);
                 retVal=CCalcUtils::doCollide_box_box(cell1M,_cell1S,cell2M,_cell2S,true);
             }
         }
@@ -149,7 +149,7 @@ bool geom_getOctreePtcloudCollision(const COcStruct* ocStruct,const C7Vector& oc
                 {
                     C3Vector pt(pts+3*i);
                     pt*=m;
-                    if (CCalcUtils::doCollide_cell_pt(cellS*simHalf,pt))
+                    if (CCalcUtils::doCollide_cell_pt(cellS*0.5,pt))
                     {
                         retVal=true;
                         break;
@@ -176,7 +176,7 @@ bool geom_getOctreeTriangleCollision(const COcStruct* ocStruct,const C7Vector& o
             cellMi.X.clear();
             C3Vector _v(cellMi*v);
             C3Vector _w(cellMi*w);
-            retVal=CCalcUtils::doCollide_cell_tri(cellS*simHalf,true,_p,_v,_w);
+            retVal=CCalcUtils::doCollide_cell_tri(cellS*0.5,true,_p,_v,_w);
         }
     }
     if (!retVal)
@@ -204,7 +204,7 @@ bool geom_getOctreeSegmentCollision(const COcStruct* ocStruct,const C7Vector& oc
             C3Vector _segP(cellMi*segmentExtremity);
             cellMi.X.clear();
             C3Vector _segL(cellMi*segmentVector);
-            retVal=CCalcUtils::doCollide_cell_segp(cellS*simHalf,true,_segP,_segL);
+            retVal=CCalcUtils::doCollide_cell_segp(cellS*0.5,true,_segP,_segL);
         }
     }
     if (!retVal)
@@ -213,7 +213,7 @@ bool geom_getOctreeSegmentCollision(const COcStruct* ocStruct,const C7Vector& oc
         C3Vector _segP(trInv*segmentExtremity);
         trInv.X.clear();
         C3Vector _segL(trInv*segmentVector);
-        retVal=ocStruct->doCollide_seg(_segP+_segL*simHalf,_segL*simHalf,nullptr,caching);
+        retVal=ocStruct->doCollide_seg(_segP+_segL*0.5,_segL*0.5,nullptr,caching);
     }
     return(retVal);
 }
@@ -247,7 +247,7 @@ bool geom_getOctreePointCollision(const COcStruct* ocStruct,const C7Vector& octr
         {
             C4X4Matrix cellMi(cellM.getInverse());
             C3Vector _point(cellMi*point);
-            retVal=CCalcUtils::doCollide_cell_pt(cellS*simHalf,_point);
+            retVal=CCalcUtils::doCollide_cell_pt(cellS*0.5,_point);
         }
     }
     if (!retVal)
@@ -335,7 +335,7 @@ bool geom_getBoxBoxDistanceIfSmaller(const C7Vector& box1Transformation,const C3
 
 simReal geom_getBoxBoxDistance(const C7Vector& box1Transformation,const C3Vector& box1HalfSize,const C7Vector& box2Transformation,const C3Vector& box2HalfSize,bool boxesAreSolid,C3Vector* distSegPt1/*=nullptr*/,C3Vector* distSegPt2/*=nullptr*/,bool altRoutine/*=false*/)
 {
-    simReal dist=REAL_MAX;
+    simReal dist=FLOAT_MAX;
     geom_getBoxBoxDistanceIfSmaller(box1Transformation.getMatrix(),box1HalfSize,box2Transformation.getMatrix(),box2HalfSize,boxesAreSolid,dist,distSegPt1,distSegPt2,altRoutine);
     return(dist);
 }
@@ -372,7 +372,7 @@ bool geom_getBoxTriangleDistanceIfSmaller(const C7Vector& boxTransformation,cons
 
 simReal geom_getBoxTriangleDistance(const C7Vector& boxTransformation,const C3Vector& boxHalfSize,bool boxIsSolid,const C3Vector& p,const C3Vector& v,const C3Vector& w,C3Vector* distSegPt1/*=nullptr*/,C3Vector* distSegPt2/*=nullptr*/,bool altRoutine/*=false*/)
 {
-    simReal dist=REAL_MAX;
+    simReal dist=FLOAT_MAX;
     geom_getBoxTriangleDistanceIfSmaller(boxTransformation,boxHalfSize,boxIsSolid,p,v,w,dist,distSegPt1,distSegPt2,altRoutine);
     return(dist);
 }
@@ -389,7 +389,7 @@ bool geom_getBoxSegmentDistanceIfSmaller(const C7Vector& boxTransformation,const
 
 simReal geom_getBoxSegmentDistance(const C7Vector& boxTransformation,const C3Vector& boxHalfSize,bool boxIsSolid,const C3Vector& segmentEndPoint,const C3Vector& segmentVector,C3Vector* distSegPt1/*=nullptr*/,C3Vector* distSegPt2/*=nullptr*/,bool altRoutine/*=false*/)
 {
-    simReal dist=REAL_MAX;
+    simReal dist=FLOAT_MAX;
     geom_getBoxSegmentDistanceIfSmaller(boxTransformation.getMatrix(),boxHalfSize,boxIsSolid,segmentEndPoint,segmentVector,dist,distSegPt1,distSegPt2,altRoutine);
     return(dist);
 }
@@ -402,7 +402,7 @@ bool geom_getBoxPointDistanceIfSmaller(const C7Vector& boxTransformation,const C
 
 simReal geom_getBoxPointDistance(const C7Vector& boxTransformation,const C3Vector& boxHalfSize,bool boxIsSolid,const C3Vector& point,C3Vector* distSegPt1/*=nullptr*/)
 {
-    simReal dist=REAL_MAX;
+    simReal dist=FLOAT_MAX;
     geom_getBoxPointDistanceIfSmaller(boxTransformation,boxHalfSize,boxIsSolid,point,dist,distSegPt1);
     return(dist);
 }
@@ -415,7 +415,7 @@ bool geom_getTriangleTriangleDistanceIfSmaller(const C3Vector& p1,const C3Vector
 
 simReal geom_getTriangleTriangleDistance(const C3Vector& p1,const C3Vector& v1,const C3Vector& w1,const C3Vector& p2,const C3Vector& v2,const C3Vector& w2,C3Vector* minDistSegPt1/*=nullptr*/,C3Vector* minDistSegPt2/*=nullptr*/)
 {
-    simReal dist=REAL_MAX;
+    simReal dist=FLOAT_MAX;
     geom_getTriangleTriangleDistanceIfSmaller(p1,v1,w1,p2,v2,w2,dist,minDistSegPt1,minDistSegPt2);
     return(dist);
 }
@@ -429,7 +429,7 @@ bool geom_getTriangleSegmentDistanceIfSmaller(const C3Vector& p,const C3Vector& 
 
 simReal geom_getTriangleSegmentDistance(const C3Vector& p,const C3Vector& v,const C3Vector& w,const C3Vector& segmentEndPoint,const C3Vector& segmentVector,C3Vector* minDistSegPt1/*=nullptr*/,C3Vector* minDistSegPt2/*=nullptr*/)
 {
-    simReal dist=REAL_MAX;
+    simReal dist=FLOAT_MAX;
     geom_getTriangleSegmentDistanceIfSmaller(p,v,w,segmentEndPoint,segmentVector,dist,minDistSegPt1,minDistSegPt2);
     return(dist);
 }
@@ -442,7 +442,7 @@ bool geom_getTrianglePointDistanceIfSmaller(const C3Vector& p,const C3Vector& v,
 
 simReal geom_getTrianglePointDistance(const C3Vector& p,const C3Vector& v,const C3Vector& w,const C3Vector& point,C3Vector* minDistSegPt/*=nullptr*/)
 {
-    simReal dist=REAL_MAX;
+    simReal dist=FLOAT_MAX;
     geom_getTrianglePointDistanceIfSmaller(p,v,w,point,dist,minDistSegPt);
     return(dist);
 }
@@ -455,7 +455,7 @@ bool geom_getSegmentSegmentDistanceIfSmaller(const C3Vector& segment1EndPoint,co
 
 simReal geom_getSegmentSegmentDistance(const C3Vector& segment1EndPoint,const C3Vector& segment1Vector,const C3Vector& segment2EndPoint,const C3Vector& segment2Vector,C3Vector* minDistSegPt1/*=nullptr*/,C3Vector* minDistSegPt2/*=nullptr*/)
 {
-    simReal dist=REAL_MAX;
+    simReal dist=FLOAT_MAX;
     geom_getSegmentSegmentDistanceIfSmaller(segment1EndPoint,segment1Vector,segment2EndPoint,segment2Vector,dist,minDistSegPt1,minDistSegPt2);
     return(dist);
 }
@@ -468,7 +468,7 @@ bool geom_getSegmentPointDistanceIfSmaller(const C3Vector& segmentEndPoint,const
 
 simReal geom_getSegmentPointDistance(const C3Vector& segmentEndPoint,const C3Vector& segmentVector,const C3Vector& point,C3Vector* minDistSegPt/*=nullptr*/)
 {
-    simReal dist=REAL_MAX;
+    simReal dist=FLOAT_MAX;
     geom_getSegmentPointDistanceIfSmaller(segmentEndPoint,segmentVector,point,dist,minDistSegPt);
     return(dist);
 }
@@ -594,14 +594,14 @@ bool geom_getMeshTriangleDistanceIfSmaller(const CObbStruct* meshObbStruct,const
 
 simReal geom_getMeshTriangleDistance(const CObbStruct* meshObbStruct,const C7Vector& meshTransformation,const C3Vector& p,const C3Vector& v,const C3Vector& w,C3Vector* minDistSegPt1/*=nullptr*/,C3Vector* minDistSegPt2/*=nullptr*/,int* caching/*=nullptr*/)
 {
-    simReal dist=REAL_MAX;
+    simReal dist=FLOAT_MAX;
     geom_getMeshTriangleDistanceIfSmaller(meshObbStruct,meshTransformation,p,v,w,dist,minDistSegPt1,minDistSegPt2,caching);
     return(dist);
 }
 
 simReal geom_getMeshMeshDistance(const CObbStruct* mesh1ObbStruct,const C7Vector& mesh1Transformation,const CObbStruct* mesh2ObbStruct,const C7Vector& mesh2Transformation,C3Vector* minDistSegPt1/*=nullptr*/,C3Vector* minDistSegPt2/*=nullptr*/,int* mesh1Caching/*=nullptr*/,int* mesh2Caching/*=nullptr*/)
 {
-    simReal dist=REAL_MAX;
+    simReal dist=FLOAT_MAX;
     geom_getMeshMeshDistanceIfSmaller(mesh1ObbStruct,mesh1Transformation,mesh2ObbStruct,mesh2Transformation,dist,minDistSegPt1,minDistSegPt2,mesh1Caching,mesh2Caching);
     return(dist);
 }
@@ -630,7 +630,7 @@ bool geom_getMeshSegmentDistanceIfSmaller(const CObbStruct* meshObbStruct,const 
 
 simReal geom_getMeshSegmentDistance(const CObbStruct* meshObbStruct,const C7Vector& meshTransformation,const C3Vector& segmentEndPoint,const C3Vector& segmentVector,C3Vector* minDistSegPt1/*=nullptr*/,C3Vector* minDistSegPt2/*=nullptr*/,int* caching/*=nullptr*/)
 {
-    simReal dist=REAL_MAX;
+    simReal dist=FLOAT_MAX;
     geom_getMeshSegmentDistanceIfSmaller(meshObbStruct,meshTransformation,segmentEndPoint,segmentVector,dist,minDistSegPt1,minDistSegPt2,caching);
     return(dist);
 }
@@ -659,7 +659,7 @@ bool geom_getMeshPointDistanceIfSmaller(const CObbStruct* meshObbStruct,const C7
 
 simReal geom_getMeshPointDistance(const CObbStruct* meshObbStruct,const C7Vector& meshTransformation,const C3Vector& point,C3Vector* minDistSegPt/*=nullptr*/,int* caching/*=nullptr*/)
 {
-    simReal dist=REAL_MAX;
+    simReal dist=FLOAT_MAX;
     geom_getMeshPointDistanceIfSmaller(meshObbStruct,meshTransformation,point,dist,minDistSegPt,caching);
     return(dist);
 }
@@ -683,7 +683,7 @@ bool geom_getMeshOctreeDistanceIfSmaller(const CObbStruct* meshObbStruct,const C
                 p1=cellMi*meshTransformation*p1;
                 p2=cellMi*meshTransformation*p2;
                 p3=cellMi*meshTransformation*p3;
-                retVal=CCalcUtils::getDistance_cell_tri(cellS*simHalf,true,p1,p2-p1,p3-p1,dist,ocMinDistPt,meshMinDistPt);
+                retVal=CCalcUtils::getDistance_cell_tri(cellS*0.5,true,p1,p2-p1,p3-p1,dist,ocMinDistPt,meshMinDistPt);
                 if (retVal)
                 {
                     if (ocMinDistPt!=nullptr)
@@ -701,7 +701,7 @@ bool geom_getMeshOctreeDistanceIfSmaller(const CObbStruct* meshObbStruct,const C
 
 simReal geom_getMeshOctreeDistance(const CObbStruct* meshObbStruct,const C7Vector& meshTransformation,const COcStruct* ocStruct,const C7Vector& octreeTransformation,C3Vector* meshMinDistPt/*=nullptr*/,C3Vector* ocMinDistPt/*=nullptr*/,int* meshCaching/*=nullptr*/,unsigned  long long int* ocCaching/*=nullptr*/)
 {
-    simReal dist=REAL_MAX;
+    simReal dist=FLOAT_MAX;
     geom_getMeshOctreeDistanceIfSmaller(meshObbStruct,meshTransformation,ocStruct,octreeTransformation,dist,meshMinDistPt,ocMinDistPt,meshCaching,ocCaching);
     return(dist);
 }
@@ -748,7 +748,7 @@ bool geom_getMeshPtcloudDistanceIfSmaller(const CObbStruct* meshObbStruct,const 
 
 simReal geom_getMeshPtcloudDistance(const CObbStruct* meshObbStruct,const C7Vector& meshTransformation,const CPcStruct* pcStruct,const C7Vector& pcTransformation,C3Vector* meshMinDistPt/*=nullptr*/,C3Vector* pcMinDistPt/*=nullptr*/,int* meshCaching/*=nullptr*/,unsigned  long long int* pcCaching/*=nullptr*/)
 {
-    simReal dist=REAL_MAX;
+    simReal dist=FLOAT_MAX;
     geom_getMeshPtcloudDistanceIfSmaller(meshObbStruct,meshTransformation,pcStruct,pcTransformation,dist,meshMinDistPt,pcMinDistPt,meshCaching,pcCaching);
     return(dist);
 }
@@ -772,7 +772,7 @@ bool geom_getOctreePtcloudDistanceIfSmaller(const COcStruct* ocStruct,const C7Ve
                 {
                     C3Vector pt(pts+3*i);
                     pt*=m;
-                    if (CCalcUtils::getDistance_cell_pt(cellS*simHalf,true,pt,dist,ocMinDistPt,nullptr))
+                    if (CCalcUtils::getDistance_cell_pt(cellS*0.5,true,pt,dist,ocMinDistPt,nullptr))
                     {
                         retVal=true;
                         if (ocMinDistPt!=nullptr)
@@ -791,7 +791,7 @@ bool geom_getOctreePtcloudDistanceIfSmaller(const COcStruct* ocStruct,const C7Ve
 
 simReal geom_getOctreePtcloudDistance(const COcStruct* ocStruct,const C7Vector& octreeTransformation,const CPcStruct* pcStruct,const C7Vector& pcTransformation,C3Vector* ocMinDistPt/*=nullptr*/,C3Vector* pcMinDistPt/*=nullptr*/,unsigned  long long int* ocCaching/*=nullptr*/,unsigned  long long int* pcCaching/*=nullptr*/)
 {
-    simReal dist=REAL_MAX;
+    simReal dist=FLOAT_MAX;
     geom_getOctreePtcloudDistanceIfSmaller(ocStruct,octreeTransformation,pcStruct,pcTransformation,dist,ocMinDistPt,pcMinDistPt,ocCaching,pcCaching);
     return(dist);
 }
@@ -808,7 +808,7 @@ bool geom_getOctreeOctreeDistanceIfSmaller(const COcStruct* oc1Struct,const C7Ve
             C4X4Matrix cell2M;
             simReal cell2S;
             if (oc2Struct->getCell(octree2Transformation.getMatrix(),(const unsigned long long int)oc2Caching[0],cell2S,cell2M,nullptr))
-                retVal=CCalcUtils::getDistance_cell_cell(cell1M,cell1S*simHalf,cell2M,cell2S*simHalf,true,dist,oc1MinDistPt,oc2MinDistPt);
+                retVal=CCalcUtils::getDistance_cell_cell(cell1M,cell1S*0.5,cell2M,cell2S*0.5,true,dist,oc1MinDistPt,oc2MinDistPt);
         }
     }
     bool b=oc1Struct->getDistance_octree(octree1Transformation.getMatrix(),oc2Struct,octree2Transformation.getMatrix(),dist,oc1MinDistPt,oc2MinDistPt,oc1Caching,oc2Caching);
@@ -818,7 +818,7 @@ bool geom_getOctreeOctreeDistanceIfSmaller(const COcStruct* oc1Struct,const C7Ve
 
 simReal geom_getOctreeOctreeDistance(const COcStruct* oc1Struct,const C7Vector& octree1Transformation,const COcStruct* oc2Struct,const C7Vector& octree2Transformation,C3Vector* oc1MinDistPt/*=nullptr*/,C3Vector* oc2MinDistPt/*=nullptr*/,unsigned  long long int* oc1Caching/*=nullptr*/,unsigned  long long int* oc2Caching/*=nullptr*/)
 {
-    simReal dist=REAL_MAX;
+    simReal dist=FLOAT_MAX;
     geom_getOctreeOctreeDistanceIfSmaller(oc1Struct,octree1Transformation,oc2Struct,octree2Transformation,dist,oc1MinDistPt,oc2MinDistPt,oc1Caching,oc2Caching);
     return(dist);
 }
@@ -837,7 +837,7 @@ bool geom_getOctreeTriangleDistanceIfSmaller(const COcStruct* ocStruct,const C7V
             cellMi.X.clear();
             C3Vector _v(cellMi*v);
             C3Vector _w(cellMi*w);
-            retVal=CCalcUtils::getDistance_cell_tri(cellS*simHalf,true,_p,_v,_w,dist,ocMinDistPt,triMinDistPt);
+            retVal=CCalcUtils::getDistance_cell_tri(cellS*0.5,true,_p,_v,_w,dist,ocMinDistPt,triMinDistPt);
             if (retVal)
             {
                 if (ocMinDistPt!=nullptr)
@@ -866,7 +866,7 @@ bool geom_getOctreeTriangleDistanceIfSmaller(const COcStruct* ocStruct,const C7V
 
 simReal geom_getOctreeTriangleDistance(const COcStruct* ocStruct,const C7Vector& octreeTransformation,const C3Vector& p,const C3Vector& v,const C3Vector&w,C3Vector* ocMinDistPt/*=nullptr*/,C3Vector* triMinDistPt/*=nullptr*/,unsigned  long long int* ocCaching/*=nullptr*/)
 {
-    simReal dist=REAL_MAX;
+    simReal dist=FLOAT_MAX;
     geom_getOctreeTriangleDistanceIfSmaller(ocStruct,octreeTransformation,p,v,w,dist,ocMinDistPt,triMinDistPt,ocCaching);
     return(dist);
 }
@@ -884,7 +884,7 @@ bool geom_getOctreeSegmentDistanceIfSmaller(const COcStruct* ocStruct,const C7Ve
             C3Vector _segP(cellMi*segmentEndPoint);
             cellMi.X.clear();
             C3Vector _segL(cellMi*segmentVector);
-            retVal=CCalcUtils::getDistance_cell_segp(cellS*simHalf,true,_segP,_segL,dist,ocMinDistPt,segMinDistPt);
+            retVal=CCalcUtils::getDistance_cell_segp(cellS*0.5,true,_segP,_segL,dist,ocMinDistPt,segMinDistPt);
             if (retVal)
             {
                 if (ocMinDistPt!=nullptr)
@@ -898,7 +898,7 @@ bool geom_getOctreeSegmentDistanceIfSmaller(const COcStruct* ocStruct,const C7Ve
     C3Vector _segP(trInv*segmentEndPoint);
     trInv.X.clear();
     C3Vector _segL(trInv*segmentVector);
-    bool b=ocStruct->getDistance_seg(_segP+_segL*simHalf,_segL*simHalf,dist,ocMinDistPt,segMinDistPt,ocCaching);
+    bool b=ocStruct->getDistance_seg(_segP+_segL*0.5,_segL*0.5,dist,ocMinDistPt,segMinDistPt,ocCaching);
     if (b)
     {
         if (ocMinDistPt!=nullptr)
@@ -912,7 +912,7 @@ bool geom_getOctreeSegmentDistanceIfSmaller(const COcStruct* ocStruct,const C7Ve
 
 simReal geom_getOctreeSegmentDistance(const COcStruct* ocStruct,const C7Vector& octreeTransformation,const C3Vector& segmentEndPoint,const C3Vector& segmentVector,C3Vector* ocMinDistPt/*=nullptr*/,C3Vector* segMinDistPt/*=nullptr*/,unsigned  long long int* ocCaching/*=nullptr*/)
 {
-    simReal dist=REAL_MAX;
+    simReal dist=FLOAT_MAX;
     geom_getOctreeSegmentDistanceIfSmaller(ocStruct,octreeTransformation,segmentEndPoint,segmentVector,dist,ocMinDistPt,segMinDistPt,ocCaching);
     return(dist);
 }
@@ -928,7 +928,7 @@ bool geom_getOctreePointDistanceIfSmaller(const COcStruct* ocStruct,const C7Vect
         {
             C4X4Matrix cellMi(cellM.getInverse());
             C3Vector _point(cellMi*point);
-            retVal=CCalcUtils::getDistance_cell_pt(cellS*simHalf,true,_point,dist,ocMinDistPt,nullptr);
+            retVal=CCalcUtils::getDistance_cell_pt(cellS*0.5,true,_point,dist,ocMinDistPt,nullptr);
             if (retVal)
             {
                 if (ocMinDistPt!=nullptr)
@@ -950,7 +950,7 @@ bool geom_getOctreePointDistanceIfSmaller(const COcStruct* ocStruct,const C7Vect
 
 simReal geom_getOctreePointDistance(const COcStruct* ocStruct,const C7Vector& octreeTransformation,const C3Vector& point,C3Vector* ocMinDistPt/*=nullptr*/,unsigned  long long int* ocCaching/*=nullptr*/)
 {
-    simReal dist=REAL_MAX;
+    simReal dist=FLOAT_MAX;
     geom_getOctreePointDistanceIfSmaller(ocStruct,octreeTransformation,point,dist,ocMinDistPt,ocCaching);
     return(dist);
 }
@@ -1000,7 +1000,7 @@ bool geom_getPtcloudPtcloudDistanceIfSmaller(const CPcStruct* pc1Struct,const C7
 
 simReal geom_getPtcloudPtcloudDistance(const CPcStruct* pc1Struct,const C7Vector& pc1Transformation,const CPcStruct* pc2Struct,const C7Vector& pc2Transformation,C3Vector* pc1MinDistPt/*=nullptr*/,C3Vector* pc2MinDistPt/*=nullptr*/,unsigned  long long int* pc1Caching/*=nullptr*/,unsigned  long long int* pc2Caching/*=nullptr*/)
 {
-    simReal dist=REAL_MAX;
+    simReal dist=FLOAT_MAX;
     geom_getPtcloudPtcloudDistanceIfSmaller(pc1Struct,pc1Transformation,pc2Struct,pc2Transformation,dist,pc1MinDistPt,pc2MinDistPt,pc1Caching,pc2Caching);
     return(dist);
 }
@@ -1035,7 +1035,7 @@ bool geom_getPtcloudTriangleDistanceIfSmaller(const CPcStruct* pcStruct,const C7
 
 simReal geom_getPtcloudTriangleDistance(const CPcStruct* pcStruct,const C7Vector& pcTransformation,const C3Vector& p,const C3Vector& v,const C3Vector& w,C3Vector* pcMinDistPt/*=nullptr*/,C3Vector* triMinDistPt/*=nullptr*/,unsigned  long long int* pcCaching/*=nullptr*/)
 {
-    simReal dist=REAL_MAX;
+    simReal dist=FLOAT_MAX;
     geom_getPtcloudTriangleDistanceIfSmaller(pcStruct,pcTransformation,p,v,w,dist,pcMinDistPt,triMinDistPt,pcCaching);
     return(dist);
 }
@@ -1063,14 +1063,14 @@ bool geom_getPtcloudSegmentDistanceIfSmaller(const CPcStruct* pcStruct,const C7V
             }
         }
     }
-    bool b=pcStruct->getDistance_seg(pcTransformation.getMatrix(),segmentEndPoint+segmentVector*simHalf,segmentVector*simHalf,dist,pcMinDistPt,segMinDistPt,pcCaching);
+    bool b=pcStruct->getDistance_seg(pcTransformation.getMatrix(),segmentEndPoint+segmentVector*0.5,segmentVector*0.5,dist,pcMinDistPt,segMinDistPt,pcCaching);
     retVal=retVal||b;
     return(retVal);
 }
 
 simReal geom_getPtcloudSegmentDistance(const CPcStruct* pcStruct,const C7Vector& pcTransformation,const C3Vector& segmentEndPoint,const C3Vector& segmentVector,C3Vector* pcMinDistPt/*=nullptr*/,C3Vector* segMinDistPt/*=nullptr*/,unsigned  long long int* pcCaching/*=nullptr*/)
 {
-    simReal dist=REAL_MAX;
+    simReal dist=FLOAT_MAX;
     geom_getPtcloudSegmentDistanceIfSmaller(pcStruct,pcTransformation,segmentEndPoint,segmentVector,dist,pcMinDistPt,segMinDistPt,pcCaching);
     return(dist);
 }
@@ -1107,7 +1107,7 @@ bool geom_getPtcloudPointDistanceIfSmaller(const CPcStruct* pcStruct,const C7Vec
 
 simReal geom_getPtcloudPointDistance(const CPcStruct* pcStruct,const C7Vector& pcTransformation,const C3Vector& point,C3Vector* pcMinDistPt/*=nullptr*/,unsigned  long long int* pcCaching/*=nullptr*/)
 {
-    simReal dist=REAL_MAX;
+    simReal dist=FLOAT_MAX;
     geom_getPtcloudPointDistanceIfSmaller(pcStruct,pcTransformation,point,dist,pcMinDistPt,pcCaching);
     return(dist);
 }
@@ -1338,9 +1338,9 @@ void geom_destroyPtcloud(CPcStruct* pcStruct)
     delete pcStruct;
 }
 
-void geom_getPtcloudPoints(const CPcStruct* pcStruct,std::vector<simReal>& pointData,simReal prop/*=simOne*/)
+void geom_getPtcloudPoints(const CPcStruct* pcStruct,std::vector<simReal>& pointData,simReal prop/*=1.0*/)
 {
-    if (prop==simOne)
+    if (prop==1.0)
         pcStruct->getPointsPosAndRgb_all(pointData);
     else
         pcStruct->getPointsPosAndRgb_subset(pointData,prop);
@@ -1363,18 +1363,18 @@ bool geom_isPointInVolume(const simReal* planesIn,int planesInSize,const C7Vecto
     return(retVal);
 }
 
-bool geom_volumeSensorDetectMeshIfSmaller(const simReal* planesIn,int planesInSize,const simReal* planesOut,int planesOutSize,const CObbStruct* obbStruct,const C7Vector& meshTransformation,simReal& dist,bool fast/*=false*/,bool frontDetection/*=true*/,bool backDetection/*=true*/,simReal maxAngle/*=simZero*/,C3Vector* detectPt/*=nullptr*/,C3Vector* triN/*=nullptr*/)
+bool geom_volumeSensorDetectMeshIfSmaller(const simReal* planesIn,int planesInSize,const simReal* planesOut,int planesOutSize,const CObbStruct* obbStruct,const C7Vector& meshTransformation,simReal& dist,bool fast/*=false*/,bool frontDetection/*=true*/,bool backDetection/*=true*/,simReal maxAngle/*=0.0*/,C3Vector* detectPt/*=nullptr*/,C3Vector* triN/*=nullptr*/)
 { // planesOutSize can be 0. Sensor is at the origin. Mesh is relative to sensor
     CVolumePlanes _planesIn(planesIn,(size_t)planesInSize);
     CVolumePlanes _planesOut(planesOut,(size_t)planesOutSize);
-    simReal cosAngle=simTwo; // means angle not taken into account
-    if ( (maxAngle>simZero)&&(maxAngle<=piValD2+simReal(0.001)) )
+    simReal cosAngle=2.0; // means angle not taken into account
+    if ( (maxAngle>0.0)&&(maxAngle<=piValD2+simReal(0.001)) )
         cosAngle=cos(maxAngle);
     bool retVal=obbStruct->obb->checkSensorDistance_obb(obbStruct,meshTransformation.getMatrix(),_planesIn,_planesOut,cosAngle,frontDetection,backDetection,fast,dist,detectPt,triN);
     return(retVal);
 }
 
-bool geom_volumeSensorDetectMeshIfSmaller(const simReal* planesIn,int planesInSize,const simReal* planesOut,int planesOutSize,const C7Vector& sensorTransformation,const CObbStruct* obbStruct,const C7Vector& meshTransformation,simReal& dist,bool fast/*=false*/,bool frontDetection/*=true*/,bool backDetection/*=true*/,simReal maxAngle/*=simZero*/,C3Vector* detectPt/*=nullptr*/,C3Vector* triN/*=nullptr*/)
+bool geom_volumeSensorDetectMeshIfSmaller(const simReal* planesIn,int planesInSize,const simReal* planesOut,int planesOutSize,const C7Vector& sensorTransformation,const CObbStruct* obbStruct,const C7Vector& meshTransformation,simReal& dist,bool fast/*=false*/,bool frontDetection/*=true*/,bool backDetection/*=true*/,simReal maxAngle/*=0.0*/,C3Vector* detectPt/*=nullptr*/,C3Vector* triN/*=nullptr*/)
 { // planesOutSize can be 0.
     C7Vector sensorTransformationInv=sensorTransformation.getInverse();
     bool retVal=geom_volumeSensorDetectMeshIfSmaller(planesIn,planesInSize,planesOut,planesOutSize,obbStruct,sensorTransformationInv*meshTransformation,dist,fast,frontDetection,backDetection,maxAngle,detectPt,triN);
@@ -1388,18 +1388,18 @@ bool geom_volumeSensorDetectMeshIfSmaller(const simReal* planesIn,int planesInSi
     return(retVal);
 }
 
-bool geom_volumeSensorDetectOctreeIfSmaller(const simReal* planesIn,int planesInSize,const simReal* planesOut,int planesOutSize,const COcStruct* ocStruct,const C7Vector& octreeTransformation,simReal& dist,bool fast/*=false*/,bool frontDetection/*=true*/,bool backDetection/*=true*/,simReal maxAngle/*=simZero*/,C3Vector* detectPt/*=nullptr*/,C3Vector* triN/*=nullptr*/)
+bool geom_volumeSensorDetectOctreeIfSmaller(const simReal* planesIn,int planesInSize,const simReal* planesOut,int planesOutSize,const COcStruct* ocStruct,const C7Vector& octreeTransformation,simReal& dist,bool fast/*=false*/,bool frontDetection/*=true*/,bool backDetection/*=true*/,simReal maxAngle/*=0.0*/,C3Vector* detectPt/*=nullptr*/,C3Vector* triN/*=nullptr*/)
 { // planesOutSize can be 0. Sensor is at the origin. Octree is relative to sensor
     CVolumePlanes _planesIn(planesIn,(size_t)planesInSize);
     CVolumePlanes _planesOut(planesOut,(size_t)planesOutSize);
-    simReal cosAngle=simTwo; // means angle not taken into account
-    if ( (maxAngle>simZero)&&(maxAngle<=piValD2+simReal(0.001)) )
+    simReal cosAngle=2.0; // means angle not taken into account
+    if ( (maxAngle>0.0)&&(maxAngle<=piValD2+simReal(0.001)) )
         cosAngle=cos(maxAngle);
     bool retVal=ocStruct->getSensorDistance(octreeTransformation.getMatrix(),_planesIn,_planesOut,cosAngle,frontDetection,backDetection,fast,dist,detectPt,triN);
     return(retVal);
 }
 
-bool geom_volumeSensorDetectOctreeIfSmaller(const simReal* planesIn,int planesInSize,const simReal* planesOut,int planesOutSize,const C7Vector& sensorTransformation,const COcStruct* ocStruct,const C7Vector& octreeTransformation,simReal& dist,bool fast/*=false*/,bool frontDetection/*=true*/,bool backDetection/*=true*/,simReal maxAngle/*=simZero*/,C3Vector* detectPt/*=nullptr*/,C3Vector* triN/*=nullptr*/)
+bool geom_volumeSensorDetectOctreeIfSmaller(const simReal* planesIn,int planesInSize,const simReal* planesOut,int planesOutSize,const C7Vector& sensorTransformation,const COcStruct* ocStruct,const C7Vector& octreeTransformation,simReal& dist,bool fast/*=false*/,bool frontDetection/*=true*/,bool backDetection/*=true*/,simReal maxAngle/*=0.0*/,C3Vector* detectPt/*=nullptr*/,C3Vector* triN/*=nullptr*/)
 { // planesOutSize can be 0.
     C7Vector sensorTransformationInv=sensorTransformation.getInverse();
     bool retVal=geom_volumeSensorDetectOctreeIfSmaller(planesIn,planesInSize,planesOut,planesOutSize,ocStruct,sensorTransformationInv*octreeTransformation,dist,fast,frontDetection,backDetection,maxAngle,detectPt,triN);
@@ -1433,18 +1433,18 @@ bool geom_volumeSensorDetectPtcloudIfSmaller(const simReal* planesIn,int planesI
     return(retVal);
  }
 
-bool geom_volumeSensorDetectTriangleIfSmaller(const simReal* planesIn,int planesInSize,const simReal* planesOut,int planesOutSize,const C3Vector& p,const C3Vector& v,const C3Vector& w,simReal& dist,bool frontDetection/*=true*/,bool backDetection/*=true*/,simReal maxAngle/*=simZero*/,C3Vector* detectPt/*=nullptr*/,C3Vector* triN/*=nullptr*/)
+bool geom_volumeSensorDetectTriangleIfSmaller(const simReal* planesIn,int planesInSize,const simReal* planesOut,int planesOutSize,const C3Vector& p,const C3Vector& v,const C3Vector& w,simReal& dist,bool frontDetection/*=true*/,bool backDetection/*=true*/,simReal maxAngle/*=0.0*/,C3Vector* detectPt/*=nullptr*/,C3Vector* triN/*=nullptr*/)
 { // planesOutSize can be 0. Sensor is at the origin. Triangle is relative to sensor
     CVolumePlanes _planesIn(planesIn,(size_t)planesInSize);
     CVolumePlanes _planesOut(planesOut,(size_t)planesOutSize);
-    simReal cosAngle=simTwo; // means angle not taken into account
-    if ( (maxAngle>simZero)&&(maxAngle<=piValD2+simReal(0.001)) )
+    simReal cosAngle=2.0; // means angle not taken into account
+    if ( (maxAngle>0.0)&&(maxAngle<=piValD2+simReal(0.001)) )
         cosAngle=cos(maxAngle);
     bool retVal=CCalcUtils::getSensorDistance_tri(_planesIn,_planesOut,cosAngle,frontDetection,backDetection,p,v,w,dist,detectPt,triN);
     return(retVal);
 }
 
-bool geom_volumeSensorDetectTriangleIfSmaller(const simReal* planesIn,int planesInSize,const simReal* planesOut,int planesOutSize,const C7Vector& sensorTransformation,const C3Vector& p,const C3Vector& v,const C3Vector& w,simReal& dist,bool frontDetection/*=true*/,bool backDetection/*=true*/,simReal maxAngle/*=simZero*/,C3Vector* detectPt/*=nullptr*/,C3Vector* triN/*=nullptr*/)
+bool geom_volumeSensorDetectTriangleIfSmaller(const simReal* planesIn,int planesInSize,const simReal* planesOut,int planesOutSize,const C7Vector& sensorTransformation,const C3Vector& p,const C3Vector& v,const C3Vector& w,simReal& dist,bool frontDetection/*=true*/,bool backDetection/*=true*/,simReal maxAngle/*=0.0*/,C3Vector* detectPt/*=nullptr*/,C3Vector* triN/*=nullptr*/)
 { // planesOutSize can be 0.
     C7Vector sensorTransformationInv=sensorTransformation.getInverse();
     bool retVal=geom_volumeSensorDetectTriangleIfSmaller(planesIn,planesInSize,planesOut,planesOutSize,sensorTransformationInv*p,sensorTransformationInv.Q*v,sensorTransformationInv.Q*w,dist,frontDetection,backDetection,maxAngle,detectPt,triN);
@@ -1458,18 +1458,18 @@ bool geom_volumeSensorDetectTriangleIfSmaller(const simReal* planesIn,int planes
     return(retVal);
 }
 
-bool geom_volumeSensorDetectSegmentIfSmaller(const simReal* planesIn,int planesInSize,const simReal* planesOut,int planesOutSize,const C3Vector& segmentEndPoint,const C3Vector& segmentVector,simReal& dist,simReal maxAngle/*=simZero*/,C3Vector* detectPt/*=nullptr*/)
+bool geom_volumeSensorDetectSegmentIfSmaller(const simReal* planesIn,int planesInSize,const simReal* planesOut,int planesOutSize,const C3Vector& segmentEndPoint,const C3Vector& segmentVector,simReal& dist,simReal maxAngle/*=0.0*/,C3Vector* detectPt/*=nullptr*/)
 { // planesOutSize can be 0. Sensor is at the origin. Segment is relative to sensor
     CVolumePlanes _planesIn(planesIn,(size_t)planesInSize);
     CVolumePlanes _planesOut(planesOut,(size_t)planesOutSize);
-    simReal cosAngle=simTwo; // means angle not taken into account
-    if ( (maxAngle>simZero)&&(maxAngle<=piValD2+simReal(0.001)) )
+    simReal cosAngle=2.0; // means angle not taken into account
+    if ( (maxAngle>0.0)&&(maxAngle<=piValD2+simReal(0.001)) )
         cosAngle=cos(maxAngle);
     bool retVal=CCalcUtils::getSensorDistance_segp(_planesIn,_planesOut,cosAngle,segmentEndPoint,segmentVector,dist,detectPt);
     return(retVal);
 }
 
-bool geom_volumeSensorDetectSegmentIfSmaller(const simReal* planesIn,int planesInSize,const simReal* planesOut,int planesOutSize,const C7Vector& sensorTransformation,const C3Vector& segmentEndPoint,const C3Vector& segmentVector,simReal& dist,simReal maxAngle/*=simZero*/,C3Vector* detectPt/*=nullptr*/)
+bool geom_volumeSensorDetectSegmentIfSmaller(const simReal* planesIn,int planesInSize,const simReal* planesOut,int planesOutSize,const C7Vector& sensorTransformation,const C3Vector& segmentEndPoint,const C3Vector& segmentVector,simReal& dist,simReal maxAngle/*=0.0*/,C3Vector* detectPt/*=nullptr*/)
 { // planesOutSize can be 0.
     C7Vector sensorTransformationInv=sensorTransformation.getInverse();
     bool retVal=geom_volumeSensorDetectSegmentIfSmaller(planesIn,planesInSize,planesOut,planesOutSize,sensorTransformationInv*segmentEndPoint,sensorTransformationInv.Q*segmentVector,dist,maxAngle,detectPt);
@@ -1481,20 +1481,20 @@ bool geom_volumeSensorDetectSegmentIfSmaller(const simReal* planesIn,int planesI
     return(retVal);
 }
 
-bool geom_raySensorDetectMeshIfSmaller(const C3Vector& rayStart,const C3Vector& rayVect,const CObbStruct* obbStruct,const C7Vector& meshTransformation,simReal& dist,simReal forbiddenDist/*=simZero*/,bool fast/*=false*/,bool frontDetection/*=true*/,bool backDetection/*=true*/,simReal maxAngle/*=simZero*/,C3Vector* detectPt/*=nullptr*/,C3Vector* triN/*=nullptr*/,bool* forbiddenDistTouched/*=nullptr*/)
+bool geom_raySensorDetectMeshIfSmaller(const C3Vector& rayStart,const C3Vector& rayVect,const CObbStruct* obbStruct,const C7Vector& meshTransformation,simReal& dist,simReal forbiddenDist/*=0.0*/,bool fast/*=false*/,bool frontDetection/*=true*/,bool backDetection/*=true*/,simReal maxAngle/*=0.0*/,C3Vector* detectPt/*=nullptr*/,C3Vector* triN/*=nullptr*/,bool* forbiddenDistTouched/*=nullptr*/)
 { // Sensor is at the origin. Mesh is relative to sensor
-    simReal cosAngle=simTwo; // means angle not taken into account
-    if ( (maxAngle>simZero)&&(maxAngle<=piValD2+simReal(0.001)) )
+    simReal cosAngle=2.0; // means angle not taken into account
+    if ( (maxAngle>0.0)&&(maxAngle<=piValD2+simReal(0.001)) )
         cosAngle=cos(maxAngle);
     bool retVal=obbStruct->obb->checkRaySensorDistance_obb(obbStruct,meshTransformation.getMatrix(),rayStart,rayVect,cosAngle,frontDetection,backDetection,forbiddenDist,fast,dist,detectPt,triN,forbiddenDistTouched);
     return(retVal);
 }
 
-bool geom_raySensorDetectMeshIfSmaller(const C7Vector& sensorTransformation,simReal rayOffset,simReal rayLength,const CObbStruct* obbStruct,const C7Vector& meshTransformation,simReal& dist,simReal forbiddenDist/*=simZero*/,bool fast/*=false*/,bool frontDetection/*=true*/,bool backDetection/*=true*/,simReal maxAngle/*=simZero*/,C3Vector* detectPt/*=nullptr*/,C3Vector* triN/*=nullptr*/,bool* forbiddenDistTouched/*=nullptr*/)
+bool geom_raySensorDetectMeshIfSmaller(const C7Vector& sensorTransformation,simReal rayOffset,simReal rayLength,const CObbStruct* obbStruct,const C7Vector& meshTransformation,simReal& dist,simReal forbiddenDist/*=0.0*/,bool fast/*=false*/,bool frontDetection/*=true*/,bool backDetection/*=true*/,simReal maxAngle/*=0.0*/,C3Vector* detectPt/*=nullptr*/,C3Vector* triN/*=nullptr*/,bool* forbiddenDistTouched/*=nullptr*/)
 {
     C7Vector sensorTransformationInv=sensorTransformation.getInverse();
-    C3Vector rayStart(simZero,simZero,rayOffset);
-    C3Vector rayVect(simZero,simZero,rayLength);
+    C3Vector rayStart(0.0,0.0,rayOffset);
+    C3Vector rayVect(0.0,0.0,rayLength);
     bool retVal=geom_raySensorDetectMeshIfSmaller(rayStart,rayVect,obbStruct,sensorTransformationInv*meshTransformation,dist,forbiddenDist,fast,frontDetection,backDetection,maxAngle,detectPt,triN,forbiddenDistTouched);
     if (retVal)
     {
@@ -1507,20 +1507,20 @@ bool geom_raySensorDetectMeshIfSmaller(const C7Vector& sensorTransformation,simR
 }
 
 
-bool geom_raySensorDetectOctreeIfSmaller(const C3Vector& rayStart,const C3Vector& rayVect,const COcStruct* ocStruct,const C7Vector& octreeTransformation,simReal& dist,simReal forbiddenDist/*=simZero*/,bool fast/*=false*/,bool frontDetection/*=true*/,bool backDetection/*=true*/,simReal maxAngle/*=simZero*/,C3Vector* detectPt/*=nullptr*/,C3Vector* triN/*=nullptr*/,bool* forbiddenDistTouched/*=nullptr*/)
+bool geom_raySensorDetectOctreeIfSmaller(const C3Vector& rayStart,const C3Vector& rayVect,const COcStruct* ocStruct,const C7Vector& octreeTransformation,simReal& dist,simReal forbiddenDist/*=0.0*/,bool fast/*=false*/,bool frontDetection/*=true*/,bool backDetection/*=true*/,simReal maxAngle/*=0.0*/,C3Vector* detectPt/*=nullptr*/,C3Vector* triN/*=nullptr*/,bool* forbiddenDistTouched/*=nullptr*/)
 { // Sensor is at the origin. octree is relative to sensor
-    simReal cosAngle=simTwo; // means angle not taken into account
-    if ( (maxAngle>simZero)&&(maxAngle<=piValD2+simReal(0.001)) )
+    simReal cosAngle=2.0; // means angle not taken into account
+    if ( (maxAngle>0.0)&&(maxAngle<=piValD2+simReal(0.001)) )
         cosAngle=cos(maxAngle);
     bool retVal=ocStruct->getRaySensorDistance(octreeTransformation.getMatrix(),rayStart,rayVect,forbiddenDist,cosAngle,frontDetection,backDetection,fast,dist,detectPt,triN,forbiddenDistTouched);
     return(retVal);
 }
 
-bool geom_raySensorDetectOctreeIfSmaller(const C7Vector& sensorTransformation,simReal rayOffset,simReal rayLength,const COcStruct* ocStruct,const C7Vector& octreeTransformation,simReal& dist,simReal forbiddenDist/*=simZero*/,bool fast/*=false*/,bool frontDetection/*=true*/,bool backDetection/*=true*/,simReal maxAngle/*=simZero*/,C3Vector* detectPt/*=nullptr*/,C3Vector* triN/*=nullptr*/,bool* forbiddenDistTouched/*=nullptr*/)
+bool geom_raySensorDetectOctreeIfSmaller(const C7Vector& sensorTransformation,simReal rayOffset,simReal rayLength,const COcStruct* ocStruct,const C7Vector& octreeTransformation,simReal& dist,simReal forbiddenDist/*=0.0*/,bool fast/*=false*/,bool frontDetection/*=true*/,bool backDetection/*=true*/,simReal maxAngle/*=0.0*/,C3Vector* detectPt/*=nullptr*/,C3Vector* triN/*=nullptr*/,bool* forbiddenDistTouched/*=nullptr*/)
 {
     C7Vector sensorTransformationInv=sensorTransformation.getInverse();
-    C3Vector rayStart(simZero,simZero,rayOffset);
-    C3Vector rayVect(simZero,simZero,rayLength);
+    C3Vector rayStart(0.0,0.0,rayOffset);
+    C3Vector rayVect(0.0,0.0,rayLength);
     bool retVal=geom_raySensorDetectOctreeIfSmaller(rayStart,rayVect,ocStruct,sensorTransformationInv*octreeTransformation,dist,forbiddenDist,fast,frontDetection,backDetection,maxAngle,detectPt,triN,forbiddenDistTouched);
     if (retVal)
     {

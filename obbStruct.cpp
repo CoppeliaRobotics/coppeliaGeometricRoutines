@@ -10,8 +10,8 @@ CObbStruct::CObbStruct()
 CObbStruct::CObbStruct(const simReal* ver,int verSize,const int* ind,int indSize,simReal triSize,int triCnt)
 {
     _triCnt=triCnt;
-    if (triSize<=simZero)
-        triSize=simZero;
+    if (triSize<=0.0)
+        triSize=0.0;
     else
     {
         if (triSize<simReal(0.005))
@@ -204,7 +204,7 @@ void CObbStruct::removeObbStruct(CObbStruct* obbStruct)
 
 void CObbStruct::reduceTriangleSizes(std::vector<simReal>& vert,std::vector<int>& ind,simReal triSize)
 {
-    if (triSize>simZero)
+    if (triSize>0.0)
     {
         std::vector<int> t1(ind);
         for (size_t loop=0;loop<8;loop++)
@@ -244,7 +244,7 @@ void CObbStruct::reduceTriangleSizes(std::vector<simReal>& vert,std::vector<int>
                 }
                 if (ll[a]>triSize)
                 { // tri gets divided
-                    C3Vector np(pts[a]+edges[a]*simHalf);
+                    C3Vector np(pts[a]+edges[a]*0.5);
                     t2.push_back(indd[a]+0);
                     t2.push_back(int(vert.size()/3));
                     t2.push_back(indd[a+2]);

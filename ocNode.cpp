@@ -46,7 +46,7 @@ COcNode::COcNode(simReal boxS,const C3Vector& boxCenter,simReal cellS,const std:
             }
             ocNodes=new COcNode* [8];
             for (size_t i=0;i<8;i++)
-                ocNodes[i]=new COcNode(boxS*simHalf,ocNodeTranslations[i]*boxS,cellS,pts,rgbs,usrs,dataForEachPt);
+                ocNodes[i]=new COcNode(boxS*0.5,ocNodeTranslations[i]*boxS,cellS,pts,rgbs,usrs,dataForEachPt);
         }
     }
     else
@@ -159,7 +159,7 @@ bool COcNode::getCell(const C3Vector& boxCenter,simReal boxSize,unsigned long lo
         {
             int index=(cellPath>>(6+(cellDepth-1)*3))&7;
             unsigned long long int _ocCaching=cellPath|(cellDepth-1);
-            retVal=ocNodes[index]->getCell(boxCenter+ocNodeTranslations[index]*boxSize,boxSize*simHalf,_ocCaching,totalTranslation,usrData);
+            retVal=ocNodes[index]->getCell(boxCenter+ocNodeTranslations[index]*boxSize,boxSize*0.5,_ocCaching,totalTranslation,usrData);
         }
     }
     else
@@ -191,7 +191,7 @@ void COcNode::getVoxelsPosAndRgb(std::vector<simReal>& voxelsPosAndRgb,simReal p
     if (ocNodes!=nullptr)
     {
         for (size_t i=0;i<8;i++)
-            ocNodes[i]->getVoxelsPosAndRgb(voxelsPosAndRgb,pBoxSize*simHalf,boxCenter+ocNodeTranslations[i]*pBoxSize*simHalf,usrData);
+            ocNodes[i]->getVoxelsPosAndRgb(voxelsPosAndRgb,pBoxSize*0.5,boxCenter+ocNodeTranslations[i]*pBoxSize*0.5,usrData);
     }
 }
 
@@ -210,7 +210,7 @@ void COcNode::getVoxelsCorners(std::vector<simReal>& points,simReal pBoxSize,con
     if (ocNodes!=nullptr)
     {
         for (size_t i=0;i<8;i++)
-            ocNodes[i]->getVoxelsCorners(points,pBoxSize*simHalf,boxCenter+ocNodeTranslations[i]*pBoxSize*simHalf);
+            ocNodes[i]->getVoxelsCorners(points,pBoxSize*0.5,boxCenter+ocNodeTranslations[i]*pBoxSize*0.5);
     }
 }
 
@@ -226,7 +226,7 @@ void COcNode::getOctreeCorners(std::vector<simReal>& points,simReal pBoxSize,con
     if (ocNodes!=nullptr)
     {
         for (size_t i=0;i<8;i++)
-            ocNodes[i]->getOctreeCorners(points,pBoxSize*simHalf,boxCenter+ocNodeTranslations[i]*pBoxSize*simHalf);
+            ocNodes[i]->getOctreeCorners(points,pBoxSize*0.5,boxCenter+ocNodeTranslations[i]*pBoxSize*0.5);
     }
 }
 
@@ -252,7 +252,7 @@ bool COcNode::deleteVoxels_pts(simReal boxS,const C3Vector& boxCenter,const std:
         {
             for (size_t i=0;i<8;i++)
             {
-                bool bb=ocNodes[i]->deleteVoxels_pts(boxS*simHalf,ocNodeTranslations[i]*boxS,pts);
+                bool bb=ocNodes[i]->deleteVoxels_pts(boxS*0.5,ocNodeTranslations[i]*boxS,pts);
                 retVal=retVal&&bb;
             }
         }
@@ -314,7 +314,7 @@ bool COcNode::deleteVoxels_shape(const C4X4Matrix& ocM,simReal boxS,const C3Vect
             {
                 for (size_t i=0;i<8;i++)
                 {
-                    bool bb=ocNodes[i]->deleteVoxels_shape(ocM,boxS*simHalf,boxCenter+ocNodeTranslations[i]*boxS,obbStruct,obb,shapeM);
+                    bool bb=ocNodes[i]->deleteVoxels_shape(ocM,boxS*0.5,boxCenter+ocNodeTranslations[i]*boxS,obbStruct,obb,shapeM);
                     retVal=retVal&&bb;
                 }
             }
@@ -391,13 +391,13 @@ bool COcNode::deleteVoxels_octree(const C4X4Matrix& oc1M,simReal box1S,const C3V
             {
                 retVal=false;
                 for (size_t i=0;i<8;i++)
-                    retVal=retVal||deleteVoxels_octree(oc1M,box1S,box1Center,oc2Node->ocNodes[i],oc2M,box2S*simHalf,box2Center+ocNodeTranslations[i]*box2S);
+                    retVal=retVal||deleteVoxels_octree(oc1M,box1S,box1Center,oc2Node->ocNodes[i],oc2M,box2S*0.5,box2Center+ocNodeTranslations[i]*box2S);
             }
             else
             {
                 for (size_t i=0;i<8;i++)
                 {
-                    bool bb=ocNodes[i]->deleteVoxels_octree(oc1M,box1S*simHalf,box1Center+ocNodeTranslations[i]*box1S,oc2Node,oc2M,box2S,box2Center);
+                    bool bb=ocNodes[i]->deleteVoxels_octree(oc1M,box1S*0.5,box1Center+ocNodeTranslations[i]*box1S,oc2Node,oc2M,box2S,box2Center);
                     retVal=retVal&&bb;
                 }
             }
@@ -415,7 +415,7 @@ bool COcNode::deleteVoxels_octree(const C4X4Matrix& oc1M,simReal box1S,const C3V
                 {
                     bool retVal=false;
                     for (size_t i=0;i<8;i++)
-                        retVal=retVal||deleteVoxels_octree(oc1M,box1S,box1Center,oc2Node->ocNodes[i],oc2M,box2S*simHalf,box2Center+ocNodeTranslations[i]*box2S);
+                        retVal=retVal||deleteVoxels_octree(oc1M,box1S,box1Center,oc2Node->ocNodes[i],oc2M,box2S*0.5,box2Center+ocNodeTranslations[i]*box2S);
                 }
             }
             else
@@ -475,12 +475,12 @@ void COcNode::add_pts(simReal cellS,simReal boxS,const C3Vector& boxCenter,const
             {
                 ocNodes=new COcNode* [8];
                 for (size_t i=0;i<8;i++)
-                    ocNodes[i]=new COcNode(boxS*simHalf,ocNodeTranslations[i]*boxS,cellS,pts,rgbs,usrs,dataForEachPt);
+                    ocNodes[i]=new COcNode(boxS*0.5,ocNodeTranslations[i]*boxS,cellS,pts,rgbs,usrs,dataForEachPt);
             }
             else
             {
                 for (size_t i=0;i<8;i++)
-                    ocNodes[i]->add_pts(cellS,boxS*simHalf,ocNodeTranslations[i]*boxS,pts,rgbs,usrs,dataForEachPt);
+                    ocNodes[i]->add_pts(cellS,boxS*0.5,ocNodeTranslations[i]*boxS,pts,rgbs,usrs,dataForEachPt);
             }
         }
     }
@@ -543,7 +543,7 @@ bool COcNode::add_shape(const C4X4Matrix& ocM,simReal cellS,simReal boxS,const C
                 }
                 for (size_t i=0;i<8;i++)
                 {
-                    bool bb=ocNodes[i]->add_shape(ocM,cellS,boxS*simHalf,boxCenter+ocNodeTranslations[i]*boxS,obbStruct,obb,shapeM,rgbData,usrData);
+                    bool bb=ocNodes[i]->add_shape(ocM,cellS,boxS*0.5,boxCenter+ocNodeTranslations[i]*boxS,obbStruct,obb,shapeM,rgbData,usrData);
                     retVal=retVal||bb;
                 }
             }
@@ -610,7 +610,7 @@ bool COcNode::add_octree(const C4X4Matrix& oc1M,simReal cell1S,simReal box1S,con
             { // Explore the OC node 2
                 for (size_t i=0;i<8;i++)
                 {
-                    bool bb=add_octree(oc1M,cell1S,box1S,box1Center,oc2Node->ocNodes[i],oc2M,box2S*simHalf,box2Center+ocNodeTranslations[i]*box2S,rgbData,usrData);
+                    bool bb=add_octree(oc1M,cell1S,box1S,box1Center,oc2Node->ocNodes[i],oc2M,box2S*0.5,box2Center+ocNodeTranslations[i]*box2S,rgbData,usrData);
                     retVal=retVal||bb;
                 }
             }
@@ -624,7 +624,7 @@ bool COcNode::add_octree(const C4X4Matrix& oc1M,simReal cell1S,simReal box1S,con
                 }
                 for (size_t i=0;i<8;i++)
                 {
-                    bool bb=ocNodes[i]->add_octree(oc1M,cell1S,box1S*simHalf,box1Center+ocNodeTranslations[i]*box1S,oc2Node,oc2M,box2S,box2Center,rgbData,usrData);
+                    bool bb=ocNodes[i]->add_octree(oc1M,cell1S,box1S*0.5,box1Center+ocNodeTranslations[i]*box1S,oc2Node,oc2M,box2S,box2Center,rgbData,usrData);
                     retVal=retVal||bb;
                 }
             }
@@ -640,7 +640,7 @@ bool COcNode::add_octree(const C4X4Matrix& oc1M,simReal cell1S,simReal box1S,con
                 {  // explore the node 2 since we are not yet at its leafs
                     for (size_t i=0;i<8;i++)
                     {
-                        retVal=add_octree(oc1M,cell1S,box1S,box1Center,oc2Node->ocNodes[i],oc2M,box2S*simHalf,box2Center+ocNodeTranslations[i]*box2S,rgbData,usrData);
+                        retVal=add_octree(oc1M,cell1S,box1S,box1Center,oc2Node->ocNodes[i],oc2M,box2S*0.5,box2Center+ocNodeTranslations[i]*box2S,rgbData,usrData);
                         if (retVal)
                             break; // the voxel was added, leave
                     }
@@ -677,7 +677,7 @@ bool COcNode::doCollide_pt(const C3Vector& point,simReal boxS,unsigned long long
                 unsigned long long int cellDepth=(boxCacheLocation&63);
                 for (size_t i=0;i<8;i++)
                 {
-                    retVal=ocNodes[i]->doCollide_pt(point-ocNodeTranslations[i]*boxS,boxS*simHalf,cellPath|(i<<6)|(cellDepth+1),usrData,ocCaching);
+                    retVal=ocNodes[i]->doCollide_pt(point-ocNodeTranslations[i]*boxS,boxS*0.5,cellPath|(i<<6)|(cellDepth+1),usrData,ocCaching);
                     if (retVal)
                         break;
                 }
@@ -724,7 +724,7 @@ bool COcNode::doCollide_pts(const std::vector<simReal>& points,const C3Vector& b
                 { // check children
                     for (size_t i=0;i<8;i++)
                     {
-                        retVal=ocNodes[i]->doCollide_pts(pts,ocNodeTranslations[i]*boxS,boxS*simHalf);
+                        retVal=ocNodes[i]->doCollide_pts(pts,ocNodeTranslations[i]*boxS,boxS*0.5);
                         if (retVal)
                             break;
                     }
@@ -751,7 +751,7 @@ bool COcNode::doCollide_seg(const C3Vector& segMiddle,const C3Vector& segHs,simR
                 unsigned long long int cellDepth=(boxCacheLocation&63);
                 for (size_t i=0;i<8;i++)
                 {
-                    retVal=ocNodes[i]->doCollide_seg(segMiddle-ocNodeTranslations[i]*boxS,segHs,boxS*simHalf,cellPath|(i<<6)|(cellDepth+1),usrData,ocCaching);
+                    retVal=ocNodes[i]->doCollide_seg(segMiddle-ocNodeTranslations[i]*boxS,segHs,boxS*0.5,cellPath|(i<<6)|(cellDepth+1),usrData,ocCaching);
                     if (retVal)
                         break;
                 }
@@ -786,7 +786,7 @@ bool COcNode::doCollide_tri(const C3Vector& p,const C3Vector& v,const C3Vector& 
                 unsigned long long int cellDepth=(boxCacheLocation&63);
                 for (size_t i=0;i<8;i++)
                 {
-                    retVal=ocNodes[i]->doCollide_tri(p-ocNodeTranslations[i]*boxS,v,w,boxS*simHalf,cellPath|(i<<6)|(cellDepth+1),usrData,ocCaching);
+                    retVal=ocNodes[i]->doCollide_tri(p-ocNodeTranslations[i]*boxS,v,w,boxS*0.5,cellPath|(i<<6)|(cellDepth+1),usrData,ocCaching);
                     if (retVal)
                         break;
                 }
@@ -837,7 +837,7 @@ bool COcNode::doCollide_shape(const C4X4Matrix& ocM,simReal cellS,simReal boxS,c
                     for (size_t i=0;i<8;i++)
                     {
                         unsigned long long int _ocCacheValueHere=cellPath|(i<<6)|(cellDepth+1);
-                        bool b=ocNodes[i]->doCollide_shape(ocM,cellS,boxS*simHalf,boxCenter+ocNodeTranslations[i]*boxS,_ocCacheValueHere,obbStruct,obb,shapeM,ocCaching,meshCaching);
+                        bool b=ocNodes[i]->doCollide_shape(ocM,cellS,boxS*0.5,boxCenter+ocNodeTranslations[i]*boxS,_ocCacheValueHere,obbStruct,obb,shapeM,ocCaching,meshCaching);
                         retVal=retVal||b;
                         if (retVal)
                             break;
@@ -915,7 +915,7 @@ bool COcNode::doCollide_octree(const C4X4Matrix& oc1M,simReal cell1S,simReal box
                 for (size_t i=0;i<8;i++)
                 {
                     unsigned long long int _oc2CacheValueThere=cellPath|(i<<6)|(cellDepth+1);
-                    retVal=doCollide_octree(oc1M,cell1S,box1S,box1Center,oc1CacheValueHere,oc2Node->ocNodes[i],oc2M,box2S*simHalf,box2Center+ocNodeTranslations[i]*box2S,_oc2CacheValueThere,oc1Caching,oc2Caching);
+                    retVal=doCollide_octree(oc1M,cell1S,box1S,box1Center,oc1CacheValueHere,oc2Node->ocNodes[i],oc2M,box2S*0.5,box2Center+ocNodeTranslations[i]*box2S,_oc2CacheValueThere,oc1Caching,oc2Caching);
                     if (retVal)
                         break;
                 }
@@ -929,7 +929,7 @@ bool COcNode::doCollide_octree(const C4X4Matrix& oc1M,simReal cell1S,simReal box
                     for (size_t i=0;i<8;i++)
                     {
                         unsigned long long int _oc1CacheValueThere=cellPath|(i<<6)|(cellDepth+1);
-                        retVal=ocNodes[i]->doCollide_octree(oc1M,cell1S,box1S*simHalf,box1Center+ocNodeTranslations[i]*box1S,_oc1CacheValueThere,oc2Node,oc2M,box2S,box2Center,oc2CacheValueHere,oc1Caching,oc2Caching);
+                        retVal=ocNodes[i]->doCollide_octree(oc1M,cell1S,box1S*0.5,box1Center+ocNodeTranslations[i]*box1S,_oc1CacheValueThere,oc2Node,oc2M,box2S,box2Center,oc2CacheValueHere,oc1Caching,oc2Caching);
                         if (retVal)
                             break;
                     }
@@ -950,7 +950,7 @@ bool COcNode::doCollide_octree(const C4X4Matrix& oc1M,simReal cell1S,simReal box
                     for (size_t i=0;i<8;i++)
                     {
                         unsigned long long int _oc2CacheValueThere=cellPath|(i<<6)|(cellDepth+1);
-                        retVal=doCollide_octree(oc1M,cell1S,box1S,box1Center,oc1CacheValueHere,oc2Node->ocNodes[i],oc2M,box2S*simHalf,box2Center+ocNodeTranslations[i]*box2S,_oc2CacheValueThere,oc1Caching,oc2Caching);
+                        retVal=doCollide_octree(oc1M,cell1S,box1S,box1Center,oc1CacheValueHere,oc2Node->ocNodes[i],oc2M,box2S*0.5,box2Center+ocNodeTranslations[i]*box2S,_oc2CacheValueThere,oc1Caching,oc2Caching);
                         if (retVal)
                             break;
                     }
@@ -993,7 +993,7 @@ bool COcNode::doCollide_ptcloud(const C4X4Matrix& ocM,simReal ocCellS,simReal oc
                 for (size_t i=0;i<8;i++)
                 {
                     unsigned long long int _pcCacheValueThere=cellPath|(i<<6)|(cellDepth+1);
-                    retVal=doCollide_ptcloud(ocM,ocCellS,ocBoxS,ocBoxCenter,ocCacheValueHere,pcNode->pcNodes[i],pcM,pcBoxS*simHalf,pcBoxCenter+ocNodeTranslations[i]*pcBoxS,_pcCacheValueThere,ocCaching,pcCaching);
+                    retVal=doCollide_ptcloud(ocM,ocCellS,ocBoxS,ocBoxCenter,ocCacheValueHere,pcNode->pcNodes[i],pcM,pcBoxS*0.5,pcBoxCenter+ocNodeTranslations[i]*pcBoxS,_pcCacheValueThere,ocCaching,pcCaching);
                     if (retVal)
                         break;
                 }
@@ -1007,7 +1007,7 @@ bool COcNode::doCollide_ptcloud(const C4X4Matrix& ocM,simReal ocCellS,simReal oc
                     for (size_t i=0;i<8;i++)
                     {
                         unsigned long long int _ocCacheValueThere=cellPath|(i<<6)|(cellDepth+1);
-                        retVal=ocNodes[i]->doCollide_ptcloud(ocM,ocCellS,ocBoxS*simHalf,ocBoxCenter+ocNodeTranslations[i]*ocBoxS,_ocCacheValueThere,pcNode,pcM,pcBoxS,pcBoxCenter,pcCacheValueHere,ocCaching,pcCaching);
+                        retVal=ocNodes[i]->doCollide_ptcloud(ocM,ocCellS,ocBoxS*0.5,ocBoxCenter+ocNodeTranslations[i]*ocBoxS,_ocCacheValueThere,pcNode,pcM,pcBoxS,pcBoxCenter,pcCacheValueHere,ocCaching,pcCaching);
                         if (retVal)
                             break;
                     }
@@ -1028,7 +1028,7 @@ bool COcNode::doCollide_ptcloud(const C4X4Matrix& ocM,simReal ocCellS,simReal oc
                     for (size_t i=0;i<8;i++)
                     {
                         unsigned long long int _pcCacheValueThere=cellPath|(i<<6)|(cellDepth+1);
-                        retVal=doCollide_ptcloud(ocM,ocCellS,ocBoxS,ocBoxCenter,ocCacheValueHere,pcNode->pcNodes[i],pcM,pcBoxS*simHalf,pcBoxCenter+ocNodeTranslations[i]*pcBoxS,_pcCacheValueThere,ocCaching,pcCaching);
+                        retVal=doCollide_ptcloud(ocM,ocCellS,ocBoxS,ocBoxCenter,ocCacheValueHere,pcNode->pcNodes[i],pcM,pcBoxS*0.5,pcBoxCenter+ocNodeTranslations[i]*pcBoxS,_pcCacheValueThere,ocCaching,pcCaching);
                         if (retVal)
                             break;
                     }
@@ -1062,12 +1062,12 @@ bool COcNode::doCollide_ptcloud(const C4X4Matrix& ocM,simReal ocCellS,simReal oc
 bool COcNode::getDistance_shape(const C4X4Matrix& ocM,simReal ocBoxS,const C3Vector& ocBoxCenter,unsigned long long int ocCacheValueHere,const CObbStruct* obbStruct,const CObbNode* obb,const C4X4Matrix& shapeM,simReal& dist,C3Vector* ocMinDistSegPt,C3Vector* shapeMinDistSegPt,unsigned long long int* ocCaching,int* obbCaching) const
 {
     bool retVal=false;
-    if (dist==simZero)
+    if (dist==0.0)
         return(retVal);
     C4X4Matrix ocTr(ocM);
     ocTr.X+=ocM.M*ocBoxCenter;
     C4X4Matrix shapeTr(shapeM*obb->boxM);
-    simReal dd=CCalcUtils::getApproxDistance_box_box(ocTr,C3Vector(ocBoxS*simHalf,ocBoxS*simHalf,ocBoxS*simHalf),shapeTr,obb->boxHs);
+    simReal dd=CCalcUtils::getApproxDistance_box_box(ocTr,C3Vector(ocBoxS*0.5,ocBoxS*0.5,ocBoxS*0.5),shapeTr,obb->boxHs);
     if (dd<dist)
     { // we may be closer than dist
         bool exploreObbNode=false;
@@ -1092,7 +1092,7 @@ bool COcNode::getDistance_shape(const C4X4Matrix& ocM,simReal ocBoxS,const C3Vec
                     C3Vector transl(nodesToExplore[i].second.transl);
                     size_t index=nodesToExplore[i].second.index;
                     unsigned long long int _ocCacheValueHere=cellPath|(index<<6)|(cellDepth+1);
-                    bool bb=ocNodes[index]->getDistance_shape(ocM,ocBoxS*simHalf,ocBoxCenter+transl,_ocCacheValueHere,obbStruct,obb,shapeM,dist,ocMinDistSegPt,shapeMinDistSegPt,ocCaching,obbCaching);
+                    bool bb=ocNodes[index]->getDistance_shape(ocM,ocBoxS*0.5,ocBoxCenter+transl,_ocCacheValueHere,obbStruct,obb,shapeM,dist,ocMinDistSegPt,shapeMinDistSegPt,ocCaching,obbCaching);
                     retVal=retVal||bb;
                 }
             }
@@ -1119,7 +1119,7 @@ bool COcNode::getDistance_shape(const C4X4Matrix& ocM,simReal ocBoxS,const C3Vec
                         w*=shapeMRel;
                         v-=p;
                         w-=p;
-                        if (CCalcUtils::getDistance_cell_tri(ocBoxS*simHalf,true,p,v,w,dist,ocMinDistSegPt,shapeMinDistSegPt))
+                        if (CCalcUtils::getDistance_cell_tri(ocBoxS*0.5,true,p,v,w,dist,ocMinDistSegPt,shapeMinDistSegPt))
                         {
                             retVal=true;
                             if (ocMinDistSegPt!=nullptr)
@@ -1166,7 +1166,7 @@ bool COcNode::getDistance_shape(const C4X4Matrix& ocM,simReal ocBoxS,const C3Vec
 bool COcNode::getDistance_pt(const C3Vector& point,simReal boxS,const C3Vector& boxCenter,unsigned long long int cacheValueHere,simReal& dist,C3Vector* minDistSegPt,unsigned long long int* caching) const
 {
     bool retVal=false;
-    if (dist==simZero)
+    if (dist==0.0)
         return(retVal);
     C3Vector relPoint(point-boxCenter);
     simReal ocBoxHsp=boxS*simReal(0.5001);
@@ -1182,7 +1182,7 @@ bool COcNode::getDistance_pt(const C3Vector& point,simReal boxS,const C3Vector& 
                 for (size_t i=0;i<8;i++)
                 {
                     unsigned long long int _cacheValueHere=cellPath|(i<<6)|(cellDepth+1);
-                    bool bb=ocNodes[i]->getDistance_pt(point,boxS*simHalf,boxCenter+ocNodeTranslations[i]*boxS,_cacheValueHere,dist,minDistSegPt,caching);
+                    bool bb=ocNodes[i]->getDistance_pt(point,boxS*0.5,boxCenter+ocNodeTranslations[i]*boxS,_cacheValueHere,dist,minDistSegPt,caching);
                     retVal=retVal||bb;
                 }
             }
@@ -1190,7 +1190,7 @@ bool COcNode::getDistance_pt(const C3Vector& point,simReal boxS,const C3Vector& 
         else
         { // voxel exists
             C3Vector pt(relPoint);
-            simReal ocBoxHs=boxS*simHalf;
+            simReal ocBoxHs=boxS*0.5;
             if (fabs(pt(0))>ocBoxHs)
                 pt(0)=ocBoxHs*pt(0)/fabs(pt(0));
             if (fabs(pt(1))>ocBoxHs)
@@ -1215,7 +1215,7 @@ bool COcNode::getDistance_pt(const C3Vector& point,simReal boxS,const C3Vector& 
 bool COcNode::getDistance_seg(const C3Vector& segMiddle,const C3Vector& segHs,simReal boxS,const C3Vector& boxCenter,unsigned long long int cacheValueHere,simReal& dist,C3Vector* ocMinDistSegPt,C3Vector* segMinDistSegPt,unsigned long long int* caching) const
 {
     bool retVal=false;
-    if (dist==simZero)
+    if (dist==0.0)
         return(retVal);
     C3Vector relSegMiddle(segMiddle-boxCenter);
     simReal ocBoxHsp=boxS*simReal(0.5001);
@@ -1231,14 +1231,14 @@ bool COcNode::getDistance_seg(const C3Vector& segMiddle,const C3Vector& segHs,si
                 for (size_t i=0;i<8;i++)
                 {
                     unsigned long long int _cacheValueHere=cellPath|(i<<6)|(cellDepth+1);
-                    bool bb=ocNodes[i]->getDistance_seg(segMiddle,segHs,boxS*simHalf,boxCenter+ocNodeTranslations[i]*boxS,_cacheValueHere,dist,ocMinDistSegPt,segMinDistSegPt,caching);
+                    bool bb=ocNodes[i]->getDistance_seg(segMiddle,segHs,boxS*0.5,boxCenter+ocNodeTranslations[i]*boxS,_cacheValueHere,dist,ocMinDistSegPt,segMinDistSegPt,caching);
                     retVal=retVal||bb;
                 }
             }
         }
         else
         { // voxel exists
-            if (CCalcUtils::getDistance_cell_segp(ocBoxHsp,true,relSegMiddle-segHs,segHs*simTwo,dist,ocMinDistSegPt,segMinDistSegPt))
+            if (CCalcUtils::getDistance_cell_segp(ocBoxHsp,true,relSegMiddle-segHs,segHs*2.0,dist,ocMinDistSegPt,segMinDistSegPt))
             {
                 retVal=true;
                 if (ocMinDistSegPt!=nullptr)
@@ -1256,7 +1256,7 @@ bool COcNode::getDistance_seg(const C3Vector& segMiddle,const C3Vector& segHs,si
 bool COcNode::getDistance_tri(const C3Vector& p,const C3Vector& v,const C3Vector& w,simReal boxS,const C3Vector& boxCenter,unsigned long long int cacheValueHere,simReal& dist,C3Vector* ocMinDistSegPt,C3Vector* triMinDistSegPt,unsigned long long int* caching) const
 {
     bool retVal=false;
-    if (dist==simZero)
+    if (dist==0.0)
         return(retVal);
     C3Vector relP(p-boxCenter);
     simReal ocBoxHsp=boxS*simReal(0.5001);
@@ -1272,7 +1272,7 @@ bool COcNode::getDistance_tri(const C3Vector& p,const C3Vector& v,const C3Vector
                 for (size_t i=0;i<8;i++)
                 {
                     unsigned long long int _cacheValueHere=cellPath|(i<<6)|(cellDepth+1);
-                    bool bb=ocNodes[i]->getDistance_tri(p,v,w,boxS*simHalf,boxCenter+ocNodeTranslations[i]*boxS,_cacheValueHere,dist,ocMinDistSegPt,triMinDistSegPt,caching);
+                    bool bb=ocNodes[i]->getDistance_tri(p,v,w,boxS*0.5,boxCenter+ocNodeTranslations[i]*boxS,_cacheValueHere,dist,ocMinDistSegPt,triMinDistSegPt,caching);
                     retVal=retVal||bb;
                 }
             }
@@ -1297,13 +1297,13 @@ bool COcNode::getDistance_tri(const C3Vector& p,const C3Vector& v,const C3Vector
 bool COcNode::getDistance_octree(const C4X4Matrix& oc1M,simReal ocBox1S,const C3Vector& ocBox1Center,unsigned long long int oc1CacheValueHere,const COcNode* oc2Node,const C4X4Matrix& oc2M,simReal ocBox2S,const C3Vector& ocBox2Center,unsigned long long int oc2CacheValueHere,simReal& dist,C3Vector* oc1MinDistSegPt,C3Vector* oc2MinDistSegPt,unsigned long long int* oc1Caching,unsigned long long int* oc2Caching) const
 {
     bool retVal=false;
-    if (dist==simZero)
+    if (dist==0.0)
         return(retVal);
     C4X4Matrix m1(oc1M);
     m1.X+=oc1M.M*ocBox1Center;
     C4X4Matrix m2(oc2M);
     m2.X+=oc2M.M*ocBox2Center;
-    simReal dd=CCalcUtils::getApproxDistance_box_box(m1,C3Vector(ocBox1S*simHalf,ocBox1S*simHalf,ocBox1S*simHalf),m2,C3Vector(ocBox2S*simHalf,ocBox2S*simHalf,ocBox2S*simHalf));
+    simReal dd=CCalcUtils::getApproxDistance_box_box(m1,C3Vector(ocBox1S*0.5,ocBox1S*0.5,ocBox1S*0.5),m2,C3Vector(ocBox2S*0.5,ocBox2S*0.5,ocBox2S*0.5));
     if (dd<dist)
     { // we might be closer
         int nodeToExplore=-1;
@@ -1327,7 +1327,7 @@ bool COcNode::getDistance_octree(const C4X4Matrix& oc1M,simReal ocBox1S,const C3
                 {
                     if (!oc2Node->empty)
                     { // check the voxel vs voxel:
-                        if (CCalcUtils::getDistance_cell_cell(m1,ocBox1S*simHalf,m2,ocBox2S*simHalf,true,dist,oc1MinDistSegPt,oc2MinDistSegPt))
+                        if (CCalcUtils::getDistance_cell_cell(m1,ocBox1S*0.5,m2,ocBox2S*0.5,true,dist,oc1MinDistSegPt,oc2MinDistSegPt))
                         {
                             retVal=true;
                             if (oc1Caching!=nullptr)
@@ -1369,7 +1369,7 @@ bool COcNode::getDistance_octree(const C4X4Matrix& oc1M,simReal ocBox1S,const C3
                 C3Vector transl(nodesToExplore[i].second.transl);
                 size_t index=nodesToExplore[i].second.index;
                 unsigned long long int _cacheValueHere=cellPath|(index<<6)|(cellDepth+1);
-                bool bb=twoNodes[nodeToExplore]->ocNodes[index]->getDistance_octree(twoOcMs[nodeToExplore][0],twoOcBoxSizes[nodeToExplore]*simHalf,twoOcBoxCenters[nodeToExplore][0]+transl,_cacheValueHere,twoNodes[nodeNotToExplore],twoOcMs[nodeNotToExplore][0],twoOcBoxSizes[nodeNotToExplore],twoOcBoxCenters[nodeNotToExplore][0],twoOcCacheValuesHere[nodeNotToExplore],dist,twoOcMinDistSegPts[nodeToExplore],twoOcMinDistSegPts[nodeNotToExplore],twoOcCaching[nodeToExplore],twoOcCaching[nodeNotToExplore]);
+                bool bb=twoNodes[nodeToExplore]->ocNodes[index]->getDistance_octree(twoOcMs[nodeToExplore][0],twoOcBoxSizes[nodeToExplore]*0.5,twoOcBoxCenters[nodeToExplore][0]+transl,_cacheValueHere,twoNodes[nodeNotToExplore],twoOcMs[nodeNotToExplore][0],twoOcBoxSizes[nodeNotToExplore],twoOcBoxCenters[nodeNotToExplore][0],twoOcCacheValuesHere[nodeNotToExplore],dist,twoOcMinDistSegPts[nodeToExplore],twoOcMinDistSegPts[nodeNotToExplore],twoOcCaching[nodeToExplore],twoOcCaching[nodeNotToExplore]);
                 retVal=retVal||bb;
             }
         }
@@ -1380,13 +1380,13 @@ bool COcNode::getDistance_octree(const C4X4Matrix& oc1M,simReal ocBox1S,const C3
 bool COcNode::getDistance_ptcloud(const C4X4Matrix& ocM,simReal ocBoxS,const C3Vector& ocBoxCenter,unsigned long long int ocCacheValueHere,const CPcNode* pcNode,const C4X4Matrix& pcM,const C3Vector& pcBoxCenter,simReal pcBoxS,unsigned long long int pcCacheValueHere,simReal& dist,C3Vector* ocMinDistSegPt,C3Vector* pcMinDistSegPt,unsigned long long int* ocCaching,unsigned long long int* pcCaching) const
 {
     bool retVal=false;
-    if (dist==simZero)
+    if (dist==0.0)
         return(retVal);
     C4X4Matrix m1(ocM);
     m1.X+=ocM.M*ocBoxCenter;
     C4X4Matrix m2(pcM);
     m2.X+=pcM.M*pcBoxCenter;
-    simReal dd=CCalcUtils::getApproxDistance_box_box(m1,C3Vector(ocBoxS*simHalf,ocBoxS*simHalf,ocBoxS*simHalf),m2,C3Vector(pcBoxS*simHalf,pcBoxS*simHalf,pcBoxS*simHalf));
+    simReal dd=CCalcUtils::getApproxDistance_box_box(m1,C3Vector(ocBoxS*0.5,ocBoxS*0.5,ocBoxS*0.5),m2,C3Vector(pcBoxS*0.5,pcBoxS*0.5,pcBoxS*0.5));
     if (dd<dist)
     { // we might be closer
         bool explorePc=false;
@@ -1413,7 +1413,7 @@ bool COcNode::getDistance_ptcloud(const C4X4Matrix& ocM,simReal ocBoxS,const C3V
                         C3Vector transl(nodesToExplore[i].second.transl);
                         size_t index=nodesToExplore[i].second.index;
                         unsigned long long int _ocCacheValueHere=cellPath|(index<<6)|(cellDepth+1);
-                        bool bb=ocNodes[index]->getDistance_ptcloud(ocM,ocBoxS*simHalf,ocBoxCenter+transl,_ocCacheValueHere,pcNode,pcM,pcBoxCenter,pcBoxS,pcCacheValueHere,dist,ocMinDistSegPt,pcMinDistSegPt,ocCaching,pcCaching);
+                        bool bb=ocNodes[index]->getDistance_ptcloud(ocM,ocBoxS*0.5,ocBoxCenter+transl,_ocCacheValueHere,pcNode,pcM,pcBoxCenter,pcBoxS,pcCacheValueHere,dist,ocMinDistSegPt,pcMinDistSegPt,ocCaching,pcCaching);
                         retVal=retVal||bb;
                     }
                 }
@@ -1435,12 +1435,12 @@ bool COcNode::getDistance_ptcloud(const C4X4Matrix& ocM,simReal ocBoxS,const C3V
                             C3Vector pt(&pcNode->pts[3*i]);
                             pt*=box2Rel;
                             C3Vector ptVoxel(pt);
-                            if (fabs(ptVoxel(0))>ocBoxS*simHalf)
-                                ptVoxel(0)=ocBoxS*simHalf*fabs(ptVoxel(0))/ptVoxel(0);
-                            if (fabs(ptVoxel(1))>ocBoxS*simHalf)
-                                ptVoxel(1)=ocBoxS*simHalf*fabs(ptVoxel(1))/ptVoxel(1);
-                            if (fabs(ptVoxel(2))>ocBoxS*simHalf)
-                                ptVoxel(2)=ocBoxS*simHalf*fabs(ptVoxel(2))/ptVoxel(2);
+                            if (fabs(ptVoxel(0))>ocBoxS*0.5)
+                                ptVoxel(0)=ocBoxS*0.5*fabs(ptVoxel(0))/ptVoxel(0);
+                            if (fabs(ptVoxel(1))>ocBoxS*0.5)
+                                ptVoxel(1)=ocBoxS*0.5*fabs(ptVoxel(1))/ptVoxel(1);
+                            if (fabs(ptVoxel(2))>ocBoxS*0.5)
+                                ptVoxel(2)=ocBoxS*0.5*fabs(ptVoxel(2))/ptVoxel(2);
                             dd=(pt-ptVoxel).getLength();
                             if (dd<dist)
                             {
@@ -1481,7 +1481,7 @@ bool COcNode::getDistance_ptcloud(const C4X4Matrix& ocM,simReal ocBoxS,const C3V
                 C3Vector transl(nodesToExplore[i].second.transl);
                 size_t index=nodesToExplore[i].second.index;
                 unsigned long long int _pcCacheValueHere=cellPath|(index<<6)|(cellDepth+1);
-                bool bb=getDistance_ptcloud(ocM,ocBoxS,ocBoxCenter,ocCacheValueHere,pcNode->pcNodes[index],pcM,pcBoxCenter+transl,pcBoxS*simHalf,_pcCacheValueHere,dist,ocMinDistSegPt,pcMinDistSegPt,ocCaching,pcCaching);
+                bool bb=getDistance_ptcloud(ocM,ocBoxS,ocBoxCenter,ocCacheValueHere,pcNode->pcNodes[index],pcM,pcBoxCenter+transl,pcBoxS*0.5,_pcCacheValueHere,dist,ocMinDistSegPt,pcMinDistSegPt,ocCaching,pcCaching);
                 retVal=retVal||bb;
             }
         }
@@ -1492,15 +1492,15 @@ bool COcNode::getDistance_ptcloud(const C4X4Matrix& ocM,simReal ocBoxS,const C3V
 bool COcNode::getSensorDistance(const C4X4Matrix& ocM,simReal boxS,const C3Vector& boxCenter,const CVolumePlanes& planesIn,const CVolumePlanes& planesOut,simReal cosAngle,bool frontDetection,bool backDetection,bool fast,simReal& dist,C3Vector* detectPt,C3Vector* triN) const
 {
     bool retVal=false;
-    if (dist==simZero)
+    if (dist==0.0)
         return(retVal);
     C4X4Matrix m(ocM);
     m.X+=ocM.M*boxCenter;
-    simReal dd=SIM_MAX_REAL;
-    CCalcUtils::getDistance_box_pt(m,C3Vector(boxS*simHalf,boxS*simHalf,boxS*simHalf),true,C3Vector::zeroVector,dd,nullptr,nullptr);
+    simReal dd=FLOAT_MAX;
+    CCalcUtils::getDistance_box_pt(m,C3Vector(boxS*0.5,boxS*0.5,boxS*0.5),true,C3Vector::zeroVector,dd,nullptr,nullptr);
     if (dd<dist)
     { // we are closer..
-        if (CCalcUtils::isBoxMaybeInSensorVolume(planesIn,planesOut,m,C3Vector(boxS*simHalf,boxS*simHalf,boxS*simHalf)))
+        if (CCalcUtils::isBoxMaybeInSensorVolume(planesIn,planesOut,m,C3Vector(boxS*0.5,boxS*0.5,boxS*0.5)))
         {
             if (ocNodes!=nullptr)
             { // continue exploration
@@ -1517,7 +1517,7 @@ bool COcNode::getSensorDistance(const C4X4Matrix& ocM,simReal boxS,const C3Vecto
                 {
                     C3Vector transl(nodesToExplore[i].second.transl);
                     size_t index=nodesToExplore[i].second.index;
-                    bool bb=ocNodes[index]->getSensorDistance(ocM,boxS*simHalf,boxCenter+transl,planesIn,planesOut,cosAngle,frontDetection,backDetection,fast,dist,detectPt,triN);
+                    bool bb=ocNodes[index]->getSensorDistance(ocM,boxS*0.5,boxCenter+transl,planesIn,planesOut,cosAngle,frontDetection,backDetection,fast,dist,detectPt,triN);
                     retVal=retVal||bb;
                     if (retVal&&fast)
                         break;
@@ -1526,7 +1526,7 @@ bool COcNode::getSensorDistance(const C4X4Matrix& ocM,simReal boxS,const C3Vecto
             else
             {
                 if (!empty)
-                    retVal=CCalcUtils::getSensorDistance_cell(planesIn,planesOut,cosAngle,frontDetection,backDetection,m,boxS*simHalf,dist,detectPt,triN);
+                    retVal=CCalcUtils::getSensorDistance_cell(planesIn,planesOut,cosAngle,frontDetection,backDetection,m,boxS*0.5,dist,detectPt,triN);
             }
         }
     }
@@ -1536,15 +1536,15 @@ bool COcNode::getSensorDistance(const C4X4Matrix& ocM,simReal boxS,const C3Vecto
 bool COcNode::getRaySensorDistance(const C4X4Matrix& ocM,simReal boxS,const C3Vector& boxCenter,const C3Vector& raySegP,const C3Vector& raySegL,simReal forbiddenDist,simReal cosAngle,bool frontDetection,bool backDetection,bool fast,simReal& dist,C3Vector* detectPt,C3Vector* triN,bool* forbiddenDistTouched) const
 {
     bool retVal=false;
-    if (dist==simZero)
+    if (dist==0.0)
         return(retVal);
     C4X4Matrix m(ocM);
     m.X+=ocM.M*boxCenter;
-    simReal dd=SIM_MAX_REAL;
-    CCalcUtils::getDistance_box_pt(m,C3Vector(boxS*simHalf,boxS*simHalf,boxS*simHalf),true,C3Vector::zeroVector,dd,nullptr,nullptr);
+    simReal dd=FLOAT_MAX;
+    CCalcUtils::getDistance_box_pt(m,C3Vector(boxS*0.5,boxS*0.5,boxS*0.5),true,C3Vector::zeroVector,dd,nullptr,nullptr);
     if (dd<dist)
     { // we are closer..
-        if (CCalcUtils::doCollide_box_seg(m,C3Vector(boxS*simHalf,boxS*simHalf,boxS*simHalf),true,raySegP+raySegL*simHalf,raySegL*simHalf))
+        if (CCalcUtils::doCollide_box_seg(m,C3Vector(boxS*0.5,boxS*0.5,boxS*0.5),true,raySegP+raySegL*0.5,raySegL*0.5))
         { // we collide..
             if (ocNodes!=nullptr)
             { // continue exploration
@@ -1561,7 +1561,7 @@ bool COcNode::getRaySensorDistance(const C4X4Matrix& ocM,simReal boxS,const C3Ve
                 {
                     C3Vector transl(nodesToExplore[i].second.transl);
                     size_t index=nodesToExplore[i].second.index;
-                    bool bb=ocNodes[index]->getRaySensorDistance(ocM,boxS*simHalf,boxCenter+transl,raySegP,raySegL,forbiddenDist,cosAngle,frontDetection,backDetection,fast,dist,detectPt,triN,forbiddenDistTouched);
+                    bool bb=ocNodes[index]->getRaySensorDistance(ocM,boxS*0.5,boxCenter+transl,raySegP,raySegL,forbiddenDist,cosAngle,frontDetection,backDetection,fast,dist,detectPt,triN,forbiddenDistTouched);
                     retVal=retVal||bb;
                     if ( retVal&&(fast||((forbiddenDistTouched!=nullptr)&&forbiddenDistTouched[0])) )
                         break;
@@ -1570,7 +1570,7 @@ bool COcNode::getRaySensorDistance(const C4X4Matrix& ocM,simReal boxS,const C3Ve
             else
             {
                 if (!empty)
-                    retVal=CCalcUtils::getRaySensorDistance_cell(raySegP,raySegL,cosAngle,frontDetection,backDetection,forbiddenDist,m,boxS*simHalf,forbiddenDistTouched,dist,detectPt,triN);
+                    retVal=CCalcUtils::getRaySensorDistance_cell(raySegP,raySegL,cosAngle,frontDetection,backDetection,forbiddenDist,m,boxS*0.5,forbiddenDistTouched,dist,detectPt,triN);
             }
         }
     }
