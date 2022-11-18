@@ -23,6 +23,8 @@ COcStruct* geom_createOctreeFromOctree(const COcStruct* otherOctreeStruct,const 
 COcStruct* geom_copyOctree(const COcStruct* ocStruct);
 COcStruct* geom_getOctreeFromSerializationData(const unsigned char* serializationData);
 void geom_getOctreeSerializationData(const COcStruct* ocStruct,std::vector<unsigned char>& serializationData);
+COcStruct* geom_getOctreeFromSerializationData_float(const unsigned char* serializationData);
+void geom_getOctreeSerializationData_float(const COcStruct* ocStruct,std::vector<unsigned char>& serializationData);
 void geom_scaleOctree(COcStruct* ocStruct,simReal scalingFactor);
 void geom_destroyOctree(COcStruct* ocStruct);
 void geom_getOctreeVoxelData(const COcStruct* ocStruct,std::vector<simReal>& voxelData,std::vector<unsigned int>* userData=nullptr);
@@ -42,6 +44,8 @@ CPcStruct* geom_createPtcloudFromColorPoints(const simReal* points,int pointCnt,
 CPcStruct* geom_copyPtcloud(const CPcStruct* pcStruct);
 CPcStruct* geom_getPtcloudFromSerializationData(const unsigned char* serializationData);
 void geom_getPtcloudSerializationData(const CPcStruct* pcStruct,std::vector<unsigned char>& serializationData);
+CPcStruct* geom_getPtcloudFromSerializationData_float(const unsigned char* serializationData);
+void geom_getPtcloudSerializationData_float(const CPcStruct* pcStruct,std::vector<unsigned char>& serializationData);
 void geom_scalePtcloud(CPcStruct* pcStruct,simReal scalingFactor);
 void geom_destroyPtcloud(CPcStruct* pcStruct);
 void geom_getPtcloudPoints(const CPcStruct* pcStruct,std::vector<simReal>& pointData,simReal prop=1.0);

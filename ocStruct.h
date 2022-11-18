@@ -22,6 +22,8 @@ public:
     void scaleYourself(simReal f);
     unsigned char* serialize(int& dataSize) const;
     bool deserialize(const unsigned char* data);
+    unsigned char* serializeOld(int& dataSize) const;
+    bool deserializeOld(const unsigned char* data);
 
     void getVoxelsPosAndRgb(std::vector<simReal>& voxelsPosAndRgb,std::vector<unsigned int>* userData=nullptr) const;
     void getVoxelsCorners(std::vector<simReal>& points) const;

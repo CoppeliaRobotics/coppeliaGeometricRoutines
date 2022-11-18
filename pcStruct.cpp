@@ -142,6 +142,54 @@ bool CPcStruct::deserialize(const unsigned char* data)
     return(false);
 }
 
+unsigned char* CPcStruct::serializeOld(int& dataSize) const
+{
+    std::vector<unsigned char> data;
+    data.push_back(2); // ser ver
+    floatFloat a;
+    a=(floatFloat)boxSize;
+    pushData(data,&a,sizeof(floatFloat));
+    a=(floatFloat)cellSize;
+    pushData(data,&a,sizeof(floatFloat));
+    a=(floatFloat)boxPos(0);
+    pushData(data,&a,sizeof(floatFloat));
+    a=(floatFloat)boxPos(1);
+    pushData(data,&a,sizeof(floatFloat));
+    a=(floatFloat)boxPos(2);
+    pushData(data,&a,sizeof(floatFloat));
+    pushData(data,&maxPtCnt,sizeof(int));
+    for (size_t i=0;i<8;i++)
+        pcNode->pcNodes[i]->serializeOld(data);
+    unsigned char* retVal=new unsigned char[data.size()];
+    for (size_t i=0;i<data.size();i++)
+        retVal[i]=data[i];
+    dataSize=int(data.size());
+    return(retVal);
+}
+
+bool CPcStruct::deserializeOld(const unsigned char* data)
+{
+    int pos=0;
+    unsigned char ver=data[pos++];
+    if (ver<=2)
+    {
+        boxSize=(floatDouble)(reinterpret_cast<const floatFloat*>(data+pos))[0];pos+=sizeof(floatFloat);
+        cellSize=(floatDouble)(reinterpret_cast<const floatFloat*>(data+pos))[0];pos+=sizeof(floatFloat);
+        boxPos(0)=(floatDouble)(reinterpret_cast<const floatFloat*>(data+pos))[0];pos+=sizeof(floatFloat);
+        boxPos(1)=(floatDouble)(reinterpret_cast<const floatFloat*>(data+pos))[0];pos+=sizeof(floatFloat);
+        boxPos(2)=(floatDouble)(reinterpret_cast<const floatFloat*>(data+pos))[0];pos+=sizeof(floatFloat);
+        maxPtCnt=(reinterpret_cast<const int*>(data+pos))[0];pos+=sizeof(int);
+        pcNode->pcNodes=new CPcNode* [8];
+        for (size_t i=0;i<8;i++)
+        {
+            pcNode->pcNodes[i]=new CPcNode();
+            pcNode->pcNodes[i]->deserializeOld(data,pos);
+        }
+        return(true);
+    }
+    return(false);
+}
+
 size_t CPcStruct::countCellsWithContent() const
 {
     size_t retVal=0;

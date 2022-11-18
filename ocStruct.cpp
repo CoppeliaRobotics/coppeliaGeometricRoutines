@@ -161,6 +161,52 @@ bool COcStruct::deserialize(const unsigned char* data)
     return(false);
 }
 
+unsigned char* COcStruct::serializeOld(int& dataSize) const
+{
+    std::vector<unsigned char> data;
+    data.push_back(2); // ser ver
+    floatFloat a;
+    a=(floatFloat)boxSize;
+    pushData(data,&a,sizeof(floatFloat));
+    a=(floatFloat)cellSize;
+    pushData(data,&a,sizeof(floatFloat));
+    a=(floatFloat)boxPos(0);
+    pushData(data,&a,sizeof(floatFloat));
+    a=(floatFloat)boxPos(1);
+    pushData(data,&a,sizeof(floatFloat));
+    a=(floatFloat)boxPos(2);
+    pushData(data,&a,sizeof(floatFloat));
+    for (size_t i=0;i<8;i++)
+        ocNode->ocNodes[i]->serialize(data);
+    unsigned char* retVal=new unsigned char[data.size()];
+    for (size_t i=0;i<data.size();i++)
+        retVal[i]=data[i];
+    dataSize=int(data.size());
+    return(retVal);
+}
+
+bool COcStruct::deserializeOld(const unsigned char* data)
+{
+    int pos=0;
+    unsigned char ver=data[pos++];
+    if (ver<=2)
+    {
+        boxSize=(floatDouble)(reinterpret_cast<const floatFloat*>(data+pos))[0];pos+=sizeof(floatFloat);
+        cellSize=(floatDouble)(reinterpret_cast<const floatFloat*>(data+pos))[0];pos+=sizeof(floatFloat);
+        boxPos(0)=(floatDouble)(reinterpret_cast<const floatFloat*>(data+pos))[0];pos+=sizeof(floatFloat);
+        boxPos(1)=(floatDouble)(reinterpret_cast<const floatFloat*>(data+pos))[0];pos+=sizeof(floatFloat);
+        boxPos(2)=(floatDouble)(reinterpret_cast<const floatFloat*>(data+pos))[0];pos+=sizeof(floatFloat);
+        ocNode->ocNodes=new COcNode* [8];
+        for (size_t i=0;i<8;i++)
+        {
+            ocNode->ocNodes[i]=new COcNode();
+            ocNode->ocNodes[i]->deserialize(data,pos);
+        }
+        return(true);
+    }
+    return(false);
+}
+
 void COcStruct::getVoxelsPosAndRgb(std::vector<simReal>& voxelsPosAndRgb,std::vector<unsigned int>* userData/*=nullptr*/) const
 {
     for (size_t i=0;i<8;i++)

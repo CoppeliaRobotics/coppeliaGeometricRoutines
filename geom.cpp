@@ -1248,6 +1248,26 @@ COcStruct* geom_getOctreeFromSerializationData(const unsigned char* serializatio
     }
 }
 
+void geom_getOctreeSerializationData_float(const COcStruct* ocStruct,std::vector<unsigned char>& serializationData)
+{
+    int s;
+    unsigned char* data=ocStruct->serializeOld(s);
+    serializationData.assign(data,data+s);
+    delete[] data;
+}
+
+COcStruct* geom_getOctreeFromSerializationData_float(const unsigned char* serializationData)
+{
+    COcStruct* newOctreeStruct=new COcStruct();
+    if (newOctreeStruct->deserializeOld(serializationData))
+        return(newOctreeStruct);
+    else
+    {
+        delete newOctreeStruct;
+        return(nullptr);
+    }
+}
+
 CPcStruct* geom_createPtcloudFromPoints(const simReal* points,int pointCnt,const C7Vector* ptcloudOrigin/*=nullptr*/,simReal cellS/*=simReal(0.05)*/,int maxPointCnt/*=20*/,const unsigned char rgbData[3]/*=nullptr*/,simReal proximityTol/*=simReal(0.005)*/)
 {
     std::vector<simReal> relPts;
@@ -1325,6 +1345,26 @@ CPcStruct* geom_getPtcloudFromSerializationData(const unsigned char* serializati
 {
     CPcStruct* newPcStruct=new CPcStruct();
     if (newPcStruct->deserialize(serializationData))
+        return(newPcStruct);
+    else
+    {
+        delete newPcStruct;
+        return(nullptr);
+    }
+}
+
+void geom_getPtcloudSerializationData_float(const CPcStruct* pcStruct,std::vector<unsigned char>& serializationData)
+{
+    int s;
+    unsigned char* data=pcStruct->serializeOld(s);
+    serializationData.assign(data,data+s);
+    delete[] data;
+}
+
+CPcStruct* geom_getPtcloudFromSerializationData_float(const unsigned char* serializationData)
+{
+    CPcStruct* newPcStruct=new CPcStruct();
+    if (newPcStruct->deserializeOld(serializationData))
         return(newPcStruct);
     else
     {

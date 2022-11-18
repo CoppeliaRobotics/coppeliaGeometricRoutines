@@ -161,6 +161,49 @@ void CPcNode::deserialize(const unsigned char* data,int& pos)
     }
 }
 
+void CPcNode::serializeOld(std::vector<unsigned char>& data) const
+{
+    int s=int(pts.size());
+    pushData(data,&s,sizeof(int));
+    for (size_t i=0;i<pts.size();i++)
+    {
+        floatFloat a=(floatFloat)pts[i];
+        pushData(data,&a,sizeof(floatFloat));
+    }
+    for (size_t i=0;i<rgbs.size();i++)
+        data.push_back(rgbs[i]);
+    if (pcNodes!=nullptr)
+    {
+        data.push_back(1);
+        for (size_t i=0;i<8;i++)
+            pcNodes[i]->serialize(data);
+    }
+    else
+        data.push_back(0);
+}
+
+void CPcNode::deserializeOld(const unsigned char* data,int& pos)
+{
+    int ptsize=(reinterpret_cast<const int*>(data+pos))[0];pos+=sizeof(int);
+    for (int i=0;i<ptsize;i++)
+    {
+        floatFloat a=(reinterpret_cast<const floatFloat*>(data+pos))[0];
+        pts.push_back((floatDouble)a);
+        pos+=sizeof(floatFloat);
+    }
+    for (int i=0;i<ptsize;i++)
+        rgbs.push_back(data[pos++]);
+    if (data[pos++]!=0)
+    {
+        pcNodes=new CPcNode* [8];
+        for (size_t i=0;i<8;i++)
+        {
+            pcNodes[i]=new CPcNode();
+            pcNodes[i]->deserialize(data,pos);
+        }
+    }
+}
+
 size_t CPcNode::countCellsWithContent() const
 {
     size_t retVal=0;

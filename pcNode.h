@@ -20,6 +20,8 @@ public:
     void scaleYourself(simReal f);
     void serialize(std::vector<unsigned char>& data) const;
     void deserialize(const unsigned char* data,int& pos);
+    void serializeOld(std::vector<unsigned char>& data) const;
+    void deserializeOld(const unsigned char* data,int& pos);
 
     size_t countCellsWithContent() const;
     void getPointsPosAndRgb_all(simReal boxS,const C3Vector& boxCenter,std::vector<simReal>& data) const;
