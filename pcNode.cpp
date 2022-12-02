@@ -7,12 +7,12 @@ CPcNode::CPcNode()
     pcNodes=nullptr;
 }
 
-CPcNode::CPcNode(simReal boxS,const C3Vector& boxCenter,simReal cellS,int cellPts,const std::vector<simReal>& points,std::vector<size_t>& ptsOriginalIndices,std::vector<bool>& ptsInvalidityIndicators,const std::vector<unsigned char>& rgbData,bool rgbForEachPt)
+CPcNode::CPcNode(double boxS,const C3Vector& boxCenter,double cellS,int cellPts,const std::vector<double>& points,std::vector<size_t>& ptsOriginalIndices,std::vector<bool>& ptsInvalidityIndicators,const std::vector<unsigned char>& rgbData,bool rgbForEachPt)
 {
-    simReal boxHsp=boxS*simReal(0.5001);
+    double boxHsp=boxS*double(0.5001);
     pcNodes=nullptr;
     // Compute points relative to this box:
-    std::vector<simReal> points2;
+    std::vector<double> points2;
     std::vector<unsigned char> rgbData2;
     std::vector<size_t> ptsOriginalIndices2;
     for (size_t i=0;i<points.size()/3;i++)
@@ -41,7 +41,7 @@ CPcNode::CPcNode(simReal boxS,const C3Vector& boxCenter,simReal cellS,int cellPt
     }
     if (points2.size()>0)
     {
-        if ( (boxS>cellS*simReal(1.001))||(int(points2.size()/3)>cellPts) )
+        if ( (boxS>cellS*double(1.001))||(int(points2.size()/3)>cellPts) )
         { // subdivide
             pcNodes=new CPcNode* [8];
             for (size_t i=0;i<8;i++)
@@ -105,7 +105,7 @@ CPcNode* CPcNode::copyYourself() const
     return(newPcNode);
 }
 
-void CPcNode::scaleYourself(simReal f)
+void CPcNode::scaleYourself(double f)
 {
     if (pts.size()>0)
     {
@@ -127,7 +127,7 @@ void CPcNode::serialize(std::vector<unsigned char>& data) const
     int s=int(pts.size());
     pushData(data,&s,sizeof(int));
     for (size_t i=0;i<pts.size();i++)
-        pushData(data,&pts[i],sizeof(simReal));
+        pushData(data,&pts[i],sizeof(double));
     for (size_t i=0;i<rgbs.size();i++)
         data.push_back(rgbs[i]);
     if (pcNodes!=nullptr)
@@ -145,8 +145,8 @@ void CPcNode::deserialize(const unsigned char* data,int& pos)
     int ptsize=(reinterpret_cast<const int*>(data+pos))[0];pos+=sizeof(int);
     for (int i=0;i<ptsize;i++)
     {
-        pts.push_back((reinterpret_cast<const simReal*>(data+pos))[0]);
-        pos+=sizeof(simReal);
+        pts.push_back((reinterpret_cast<const double*>(data+pos))[0]);
+        pos+=sizeof(double);
     }
     for (int i=0;i<ptsize;i++)
         rgbs.push_back(data[pos++]);
@@ -167,8 +167,8 @@ void CPcNode::serializeOld(std::vector<unsigned char>& data) const
     pushData(data,&s,sizeof(int));
     for (size_t i=0;i<pts.size();i++)
     {
-        floatFloat a=(floatFloat)pts[i];
-        pushData(data,&a,sizeof(floatFloat));
+        float a=(float)pts[i];
+        pushData(data,&a,sizeof(float));
     }
     for (size_t i=0;i<rgbs.size();i++)
         data.push_back(rgbs[i]);
@@ -176,7 +176,7 @@ void CPcNode::serializeOld(std::vector<unsigned char>& data) const
     {
         data.push_back(1);
         for (size_t i=0;i<8;i++)
-            pcNodes[i]->serialize(data);
+            pcNodes[i]->serializeOld(data);
     }
     else
         data.push_back(0);
@@ -185,11 +185,12 @@ void CPcNode::serializeOld(std::vector<unsigned char>& data) const
 void CPcNode::deserializeOld(const unsigned char* data,int& pos)
 {
     int ptsize=(reinterpret_cast<const int*>(data+pos))[0];pos+=sizeof(int);
+    pts.resize(ptsize);
     for (int i=0;i<ptsize;i++)
     {
-        floatFloat a=(reinterpret_cast<const floatFloat*>(data+pos))[0];
-        pts.push_back((floatDouble)a);
-        pos+=sizeof(floatFloat);
+        float a=((float*)(data+pos))[0];
+        pts[i]=(double)a;
+        pos+=sizeof(float);
     }
     for (int i=0;i<ptsize;i++)
         rgbs.push_back(data[pos++]);
@@ -199,7 +200,7 @@ void CPcNode::deserializeOld(const unsigned char* data,int& pos)
         for (size_t i=0;i<8;i++)
         {
             pcNodes[i]=new CPcNode();
-            pcNodes[i]->deserialize(data,pos);
+            pcNodes[i]->deserializeOld(data,pos);
         }
     }
 }
@@ -220,7 +221,7 @@ size_t CPcNode::countCellsWithContent() const
     return(retVal);
 }
 
-void CPcNode::getPointsPosAndRgb_all(simReal boxS,const C3Vector& boxCenter,std::vector<simReal>& data) const
+void CPcNode::getPointsPosAndRgb_all(double boxS,const C3Vector& boxCenter,std::vector<double>& data) const
 {
     if (pcNodes!=nullptr)
     {
@@ -234,34 +235,34 @@ void CPcNode::getPointsPosAndRgb_all(simReal boxS,const C3Vector& boxCenter,std:
         data.push_back(pt(0));
         data.push_back(pt(1));
         data.push_back(pt(2));
-        data.push_back(simReal(rgbs[3*i+0])/simReal(254.8));
-        data.push_back(simReal(rgbs[3*i+1])/simReal(254.8));
-        data.push_back(simReal(rgbs[3*i+2])/simReal(254.8));
+        data.push_back(double(rgbs[3*i+0])/double(254.8));
+        data.push_back(double(rgbs[3*i+1])/double(254.8));
+        data.push_back(double(rgbs[3*i+2])/double(254.8));
     }
 }
 
-void CPcNode::getPointsPosAndRgb_subset(simReal boxS,const C3Vector& boxCenter,simReal prop,std::vector<simReal>& data) const
+void CPcNode::getPointsPosAndRgb_subset(double boxS,const C3Vector& boxCenter,double prop,std::vector<double>& data) const
 {
     if (pcNodes!=nullptr)
     {
         for (size_t i=0;i<8;i++)
             pcNodes[i]->getPointsPosAndRgb_subset(boxS*0.5,boxCenter+ocNodeTranslations[i]*boxS,prop,data);
     }
-    simReal step=(1.0/prop)+simReal(0.0001);
-    for (simReal fi=0.0;size_t(fi)<pts.size()/3;fi+=step)
+    double step=(1.0/prop)+double(0.0001);
+    for (double fi=0.0;size_t(fi)<pts.size()/3;fi+=step)
     {
         C3Vector pt(&pts[3*size_t(fi)]);
         pt+=boxCenter;
         data.push_back(pt(0));
         data.push_back(pt(1));
         data.push_back(pt(2));
-        data.push_back(simReal(rgbs[3*size_t(fi)+0])/simReal(254.8));
-        data.push_back(simReal(rgbs[3*size_t(fi)+1])/simReal(254.8));
-        data.push_back(simReal(rgbs[3*size_t(fi)+2])/simReal(254.8));
+        data.push_back(double(rgbs[3*size_t(fi)+0])/double(254.8));
+        data.push_back(double(rgbs[3*size_t(fi)+1])/double(254.8));
+        data.push_back(double(rgbs[3*size_t(fi)+2])/double(254.8));
     }
 }
 
-void CPcNode::getOctreeCorners(simReal boxS,const C3Vector& boxCenter,std::vector<simReal>& data) const
+void CPcNode::getOctreeCorners(double boxS,const C3Vector& boxCenter,std::vector<double>& data) const
 {
     if (pcNodes!=nullptr)
     {
@@ -277,9 +278,9 @@ void CPcNode::getOctreeCorners(simReal boxS,const C3Vector& boxCenter,std::vecto
     }
 }
 
-const simReal* CPcNode::getPoints(simReal boxS,const C3Vector& boxCenter,unsigned long long int pcCaching,size_t* ptCnt,C3Vector& totalTransl) const
+const double* CPcNode::getPoints(double boxS,const C3Vector& boxCenter,unsigned long long int pcCaching,size_t* ptCnt,C3Vector& totalTransl) const
 {
-    const simReal* retVal=nullptr;
+    const double* retVal=nullptr;
     unsigned long long int cellPath=(pcCaching>>6)<<6;
     unsigned long long int cellDepth=pcCaching&63;
     if (cellDepth>0)
@@ -303,11 +304,11 @@ const simReal* CPcNode::getPoints(simReal boxS,const C3Vector& boxCenter,unsigne
     return(retVal);
 }
 
-void CPcNode::add_pts(simReal boxS,const C3Vector& boxCenter,simReal cellS,int cellPts,const std::vector<simReal>& points,std::vector<size_t>& ptsOriginalIndices,std::vector<bool>& ptsInvalidityIndicators,const std::vector<unsigned char>& rgbData,bool rgbForEachPt)
+void CPcNode::add_pts(double boxS,const C3Vector& boxCenter,double cellS,int cellPts,const std::vector<double>& points,std::vector<size_t>& ptsOriginalIndices,std::vector<bool>& ptsInvalidityIndicators,const std::vector<unsigned char>& rgbData,bool rgbForEachPt)
 {
-    simReal boxHsp=boxS*simReal(0.5001);
+    double boxHsp=boxS*double(0.5001);
     // Compute points relative to this box:
-    std::vector<simReal> points2;
+    std::vector<double> points2;
     std::vector<unsigned char> rgbData2;
     std::vector<size_t> ptsOriginalIndices2;
     for (size_t i=0;i<points.size()/3;i++)
@@ -340,7 +341,7 @@ void CPcNode::add_pts(simReal boxS,const C3Vector& boxCenter,simReal cellS,int c
         {
             if (pcNodes==nullptr)
             { // can we add the points here?
-                if ( ((points2.size()/3)<=size_t(cellPts))&&(boxS<cellS*simReal(1.5)) )
+                if ( ((points2.size()/3)<=size_t(cellPts))&&(boxS<cellS*double(1.5)) )
                 { // yes
                     for (size_t i=0;i<points2.size()/3;i++)
                     {
@@ -435,13 +436,13 @@ void CPcNode::add_pts(simReal boxS,const C3Vector& boxCenter,simReal cellS,int c
     }
 }
 
-bool CPcNode::delete_pts(simReal boxS,const C3Vector& boxCenter,const std::vector<simReal>& points,simReal proximityTol,int* count)
+bool CPcNode::delete_pts(double boxS,const C3Vector& boxCenter,const std::vector<double>& points,double proximityTol,int* count)
 {
     if ( (pcNodes==nullptr)&&(pts.size()==0) )
         return(true); // nothing to remove, node is empty. Remove this node (maybe)
-    simReal boxHsp=boxS*simReal(0.5001)+proximityTol;
+    double boxHsp=boxS*double(0.5001)+proximityTol;
     // Compute points relative to this box:
-    std::vector<simReal> points2;
+    std::vector<double> points2;
     for (size_t i=0;i<points.size()/3;i++)
     {
         C3Vector pt(&points[3*i]);
@@ -481,7 +482,7 @@ bool CPcNode::delete_pts(simReal boxS,const C3Vector& boxCenter,const std::vecto
         }
         else
         { // we have points here that could be removed...
-            simReal dTol=proximityTol*proximityTol;
+            double dTol=proximityTol*proximityTol;
             for (size_t i=0;i<points2.size()/3;i++)
             {
                 C3Vector pt1(&points2[3*i]);
@@ -489,7 +490,7 @@ bool CPcNode::delete_pts(simReal boxS,const C3Vector& boxCenter,const std::vecto
                 {
                     C3Vector pt2(&pts[3*j]);
                     pt2-=pt1;
-                    simReal d=pt2(0)*pt2(0)+pt2(1)*pt2(1)+pt2(2)*pt2(2);
+                    double d=pt2(0)*pt2(0)+pt2(1)*pt2(1)+pt2(2)*pt2(2);
                     if (d<dTol)
                     {
                         pts.erase(pts.begin()+3*j,pts.begin()+3*j+3);
@@ -508,12 +509,12 @@ bool CPcNode::delete_pts(simReal boxS,const C3Vector& boxCenter,const std::vecto
     return(false); // keep this node
 }
 
-bool CPcNode::delete_octree(simReal pcBoxS,const C3Vector& pcBoxCenter,const C4X4Matrix& pcM,simReal ocBoxS,const C3Vector& ocBoxCenter,const COcNode* ocNode,const C4X4Matrix& ocM,int* count)
+bool CPcNode::delete_octree(double pcBoxS,const C3Vector& pcBoxCenter,const C4X4Matrix& pcM,double ocBoxS,const C3Vector& ocBoxCenter,const COcNode* ocNode,const C4X4Matrix& ocM,int* count)
 {
     if ( (pcNodes==nullptr)&&(pts.size()==0) )
         return(true); // nothing to remove, node is empty. Remove this node (maybe)
-    simReal pcBoxHsp=pcBoxS*simReal(0.5001);
-    simReal ocBoxHsp=ocBoxS*simReal(0.5001);
+    double pcBoxHsp=pcBoxS*double(0.5001);
+    double ocBoxHsp=ocBoxS*double(0.5001);
     C4X4Matrix m1(pcM);
     m1.X+=pcM.M*pcBoxCenter;
     C4X4Matrix m2(ocM);
@@ -598,13 +599,13 @@ bool CPcNode::delete_octree(simReal pcBoxS,const C3Vector& pcBoxCenter,const C4X
     return(false); // keep this node
 }
 
-bool CPcNode::intersect_pts(simReal boxS,const C3Vector& boxCenter,const std::vector<simReal>& points,simReal proximityTol)
+bool CPcNode::intersect_pts(double boxS,const C3Vector& boxCenter,const std::vector<double>& points,double proximityTol)
 {
     if ( (pcNodes==nullptr)&&(pts.size()==0) )
         return(true); // nothing to intersect, node is empty. Remove this node (maybe)
-    simReal boxHsp=boxS*simReal(0.5001)+proximityTol;
+    double boxHsp=boxS*double(0.5001)+proximityTol;
     // Compute points relative to this box:
-    std::vector<simReal> points2;
+    std::vector<double> points2;
     for (size_t i=0;i<points.size()/3;i++)
     {
         C3Vector pt(&points[3*i]);
@@ -644,7 +645,7 @@ bool CPcNode::intersect_pts(simReal boxS,const C3Vector& boxCenter,const std::ve
         }
         else
         { //check the points here (cell points vs points2):
-            simReal dTol=proximityTol*proximityTol;
+            double dTol=proximityTol*proximityTol;
             size_t removableCnt=pts.size()/3;
             std::vector<bool> removableFlags(pts.size()/3,true);
             for (size_t i=0;i<points2.size()/3;i++)
@@ -656,7 +657,7 @@ bool CPcNode::intersect_pts(simReal boxS,const C3Vector& boxCenter,const std::ve
                     {
                         C3Vector pt2(&pts[3*j]);
                         pt2-=pt1;
-                        simReal d=pt2(0)*pt2(0)+pt2(1)*pt2(1)+pt2(2)*pt2(2);
+                        double d=pt2(0)*pt2(0)+pt2(1)*pt2(1)+pt2(2)*pt2(2);
                         if (d<dTol)
                         {
                             removableFlags[j]=false;
@@ -671,7 +672,7 @@ bool CPcNode::intersect_pts(simReal boxS,const C3Vector& boxCenter,const std::ve
                 rgbs.clear();
                 return(true); // this node could be removed
             }
-            std::vector<simReal> pts2(pts);
+            std::vector<double> pts2(pts);
             std::vector<unsigned char> rgbs2(rgbs);
             pts.clear();
             rgbs.clear();
@@ -693,13 +694,13 @@ bool CPcNode::intersect_pts(simReal boxS,const C3Vector& boxCenter,const std::ve
     return(true); // nothing to intersect, remove this node (maybe)
 }
 
-void CPcNode::flagDuplicates(simReal boxS,const C3Vector& boxCenter,const std::vector<simReal>& points,const std::vector<size_t>& ptsOriginalIndices,std::vector<bool>& duplicateIndicators,simReal proximityTol) const
+void CPcNode::flagDuplicates(double boxS,const C3Vector& boxCenter,const std::vector<double>& points,const std::vector<size_t>& ptsOriginalIndices,std::vector<bool>& duplicateIndicators,double proximityTol) const
 {
     if ( (pcNodes==nullptr)&&(pts.size()==0) )
         return; // no duplicates here
-    simReal boxHsp=boxS*simReal(0.5001)+proximityTol;
+    double boxHsp=boxS*double(0.5001)+proximityTol;
     // Compute points relative to this box:
-    std::vector<simReal> points2;
+    std::vector<double> points2;
     std::vector<size_t> ptsOriginalIndices2;
     for (size_t i=0;i<points.size()/3;i++)
     {
@@ -725,7 +726,7 @@ void CPcNode::flagDuplicates(simReal boxS,const C3Vector& boxCenter,const std::v
         }
         else
         { // check duplicates:
-            simReal dTol=proximityTol*proximityTol;
+            double dTol=proximityTol*proximityTol;
             for (size_t i=0;i<points2.size()/3;i++)
             {
                 C3Vector pt1(&points2[3*i]);
@@ -733,7 +734,7 @@ void CPcNode::flagDuplicates(simReal boxS,const C3Vector& boxCenter,const std::v
                 {
                     C3Vector pt2(&pts[3*j]);
                     pt2-=pt1;
-                    simReal d=pt2(0)*pt2(0)+pt2(1)*pt2(1)+pt2(2)*pt2(2);
+                    double d=pt2(0)*pt2(0)+pt2(1)*pt2(1)+pt2(2)*pt2(2);
                     if (d<dTol)
                     {
                         duplicateIndicators[ptsOriginalIndices2[i]]=true;
@@ -745,14 +746,14 @@ void CPcNode::flagDuplicates(simReal boxS,const C3Vector& boxCenter,const std::v
     }
 }
 
-bool CPcNode::getDistance_pt(simReal boxS,const C3Vector& boxCenter,const C3Vector& point,simReal& dist,C3Vector* pcMinDistSegPt,unsigned long long int* pcCaching,unsigned long long int pcCachePos) const
+bool CPcNode::getDistance_pt(double boxS,const C3Vector& boxCenter,const C3Vector& point,double& dist,C3Vector* pcMinDistSegPt,unsigned long long int* pcCaching,unsigned long long int pcCachePos) const
 {
     bool retVal=false;
     if (dist==0.0)
         return(retVal);
-    simReal pcBoxHsp=boxS*simReal(0.5001);
+    double pcBoxHsp=boxS*double(0.5001);
     C3Vector relPoint(point-boxCenter);
-    simReal l=relPoint.getLength();
+    double l=relPoint.getLength();
     l-=sqrtf(3*pcBoxHsp*pcBoxHsp);
     if (l<dist)
     { // we could be in that box..
@@ -774,7 +775,7 @@ bool CPcNode::getDistance_pt(simReal boxS,const C3Vector& boxCenter,const C3Vect
             for (size_t i=0;i<pts.size()/3;i++)
             {
                 C3Vector pt(&pts[3*i]);
-                simReal d=(relPoint-pt).getLength();
+                double d=(relPoint-pt).getLength();
                 if (d<dist)
                 {
                     dist=d;
@@ -790,14 +791,14 @@ bool CPcNode::getDistance_pt(simReal boxS,const C3Vector& boxCenter,const C3Vect
     return(retVal);
 }
 
-bool CPcNode::getDistance_seg(simReal boxS,const C3Vector& boxCenter,const C3Vector& segMiddle,const C3Vector& segHs,simReal& dist,C3Vector* pcMinDistSegPt,C3Vector* segMinDistSegPt,unsigned long long int* pcCaching,unsigned long long int pcCachePos) const
+bool CPcNode::getDistance_seg(double boxS,const C3Vector& boxCenter,const C3Vector& segMiddle,const C3Vector& segHs,double& dist,C3Vector* pcMinDistSegPt,C3Vector* segMinDistSegPt,unsigned long long int* pcCaching,unsigned long long int pcCachePos) const
 {
     bool retVal=false;
     if (dist==0.0)
         return(retVal);
-    simReal pcBoxHsp=boxS*simReal(0.5001);
+    double pcBoxHsp=boxS*double(0.5001);
     C3Vector relSegMiddle(segMiddle-boxCenter);
-    simReal l=relSegMiddle.getLength();
+    double l=relSegMiddle.getLength();
     l=l-sqrtf(3*pcBoxHsp*pcBoxHsp)-segHs.getLength();
     if (l<dist)
     { // we could be in that box..
@@ -835,15 +836,15 @@ bool CPcNode::getDistance_seg(simReal boxS,const C3Vector& boxCenter,const C3Vec
     return(retVal);
 }
 
-bool CPcNode::getDistance_tri(simReal boxS,const C3Vector& boxCenter,const C3Vector& p,const C3Vector& v,const C3Vector& w,simReal& dist,C3Vector* pcMinDistSegPt,C3Vector* triMinDistSegPt,unsigned long long int* pcCaching,unsigned long long int pcCachePos) const
+bool CPcNode::getDistance_tri(double boxS,const C3Vector& boxCenter,const C3Vector& p,const C3Vector& v,const C3Vector& w,double& dist,C3Vector* pcMinDistSegPt,C3Vector* triMinDistSegPt,unsigned long long int* pcCaching,unsigned long long int pcCachePos) const
 {
     bool retVal=false;
     if (dist==0.0)
         return(retVal);
-    simReal pcBoxHsp=boxS*simReal(0.5001);
+    double pcBoxHsp=boxS*double(0.5001);
     C3Vector relP(p-boxCenter);
-    simReal l=relP.getLength();
-    l=l-sqrtf(3*pcBoxHsp*pcBoxHsp)-std::max<simReal>(v.getLength(),w.getLength());
+    double l=relP.getLength();
+    l=l-sqrtf(3*pcBoxHsp*pcBoxHsp)-std::max<double>(v.getLength(),w.getLength());
     if (l<dist)
     { // we could be in that box..
         if (pts.size()==0)
@@ -880,7 +881,7 @@ bool CPcNode::getDistance_tri(simReal boxS,const C3Vector& boxCenter,const C3Vec
     return(retVal);
 }
 
-bool CPcNode::getDistance_shape(simReal boxS,const C3Vector& boxCenter,const C4X4Matrix& pcM,const CObbStruct* obbStruct,const CObbNode* obb,const C4X4Matrix& shapeM,simReal& dist,C3Vector* pcMinDistSegPt,C3Vector* shapeMinDistSegPt,unsigned long long int* pcCaching,unsigned long long int pcCachePos,int* obbCaching) const
+bool CPcNode::getDistance_shape(double boxS,const C3Vector& boxCenter,const C4X4Matrix& pcM,const CObbStruct* obbStruct,const CObbNode* obb,const C4X4Matrix& shapeM,double& dist,C3Vector* pcMinDistSegPt,C3Vector* shapeMinDistSegPt,unsigned long long int* pcCaching,unsigned long long int pcCachePos,int* obbCaching) const
 {
     bool retVal=false;
     if (dist==0.0)
@@ -889,7 +890,7 @@ bool CPcNode::getDistance_shape(simReal boxS,const C3Vector& boxCenter,const C4X
     pcTr.X+=pcM.M*boxCenter;
     C4X4Matrix shapeTr(shapeM*obb->boxM);
     // Make a quick check:
-    simReal d=CCalcUtils::getApproxDistance_box_box(pcTr,C3Vector(boxS*0.5,boxS*0.5,boxS*0.5),shapeTr,obb->boxHs);
+    double d=CCalcUtils::getApproxDistance_box_box(pcTr,C3Vector(boxS*0.5,boxS*0.5,boxS*0.5),shapeTr,obb->boxHs);
     if (d<dist)
     { // we may be closer than dist
         bool exploreObbNode=false;
@@ -898,7 +899,7 @@ bool CPcNode::getDistance_shape(simReal boxS,const C3Vector& boxCenter,const C4X
             if ( (obb->leafTris!=nullptr)||(boxS*boxS*boxS>obb->boxHs(0)*obb->boxHs(1)*obb->boxHs(2)) )
             { // explore the PC node. Pick the box closer to the OBB box
                 C4X4Matrix shapeTrRel(pcTr.getInverse()*shapeTr);
-                std::vector<std::pair<simReal,SNodeTranslation>> nodesToExplore;
+                std::vector<std::pair<double,SNodeTranslation>> nodesToExplore;
                 for (size_t i=0;i<8;i++)
                 {
                     SNodeTranslation nodeTranslation;
@@ -964,7 +965,7 @@ bool CPcNode::getDistance_shape(simReal boxS,const C3Vector& boxCenter,const C4X
         if (exploreObbNode)
         {
             const CObbNode* nodes[2];
-            simReal d[2]={dist,dist};
+            double d[2]={dist,dist};
             CCalcUtils::isApproxDistanceSmaller_box_box_fast(pcTr,C3Vector(boxS,boxS,boxS),shapeM*obb->obbNodes[0]->boxM,obb->obbNodes[0]->boxHs,d[0]);
             CCalcUtils::isApproxDistanceSmaller_box_box_fast(pcTr,C3Vector(boxS,boxS,boxS),shapeM*obb->obbNodes[1]->boxM,obb->obbNodes[1]->boxHs,d[1]);
             if (d[0]<=d[1])
@@ -989,7 +990,7 @@ bool CPcNode::getDistance_shape(simReal boxS,const C3Vector& boxCenter,const C4X
     return(retVal);
 }
 
-bool CPcNode::getDistance_ptcloud(simReal box1Size,const C3Vector& box1Center,const C4X4Matrix& pc1M,const CPcNode* pc2Node,simReal box2Size,const C3Vector& box2Center,const C4X4Matrix& pc2M,simReal& dist,C3Vector* pc1MinDistSegPt,C3Vector* pc2MinDistSegPt,unsigned long long int* pc1Caching,unsigned long long int pc1CachePos,unsigned long long int* pc2Caching,unsigned long long int pc2CachePos) const
+bool CPcNode::getDistance_ptcloud(double box1Size,const C3Vector& box1Center,const C4X4Matrix& pc1M,const CPcNode* pc2Node,double box2Size,const C3Vector& box2Center,const C4X4Matrix& pc2M,double& dist,C3Vector* pc1MinDistSegPt,C3Vector* pc2MinDistSegPt,unsigned long long int* pc1Caching,unsigned long long int pc1CachePos,unsigned long long int* pc2Caching,unsigned long long int pc2CachePos) const
 {
     bool retVal=false;
     if (dist==0.0)
@@ -998,9 +999,9 @@ bool CPcNode::getDistance_ptcloud(simReal box1Size,const C3Vector& box1Center,co
     m1.X+=pc1M.M*box1Center;
     C4X4Matrix m2(pc2M);
     m2.X+=pc2M.M*box2Center;
-    simReal pc1BoxHsp=box1Size*simReal(0.5001);
-    simReal pc2BoxHsp=box2Size*simReal(0.5001);
-    simReal d=((pc1M.X+pc1M.M*box1Center)-(pc2M.X+pc2M.M*box2Center)).getLength()-sqrtf(3*pc1BoxHsp*pc1BoxHsp)-sqrtf(3*pc2BoxHsp*pc2BoxHsp);
+    double pc1BoxHsp=box1Size*double(0.5001);
+    double pc2BoxHsp=box2Size*double(0.5001);
+    double d=((pc1M.X+pc1M.M*box1Center)-(pc2M.X+pc2M.M*box2Center)).getLength()-sqrtf(3*pc1BoxHsp*pc1BoxHsp)-sqrtf(3*pc2BoxHsp*pc2BoxHsp);
     if (d<dist)
     {   // We might be closer...
         int nodeIndexToExplore=-1;
@@ -1012,7 +1013,7 @@ bool CPcNode::getDistance_ptcloud(simReal box1Size,const C3Vector& box1Center,co
                 { // PC2 can't be explored either. Does it have points?
                     if (pc2Node->pts.size()>0)
                     { // yes. Check pt-pt distances:
-                        simReal dSquared=dist*dist;
+                        double dSquared=dist*dist;
                         for (size_t i=0;i<pts.size()/3;i++)
                         {
                             C3Vector pt1(&pts[3*i]);
@@ -1069,14 +1070,14 @@ bool CPcNode::getDistance_ptcloud(simReal box1Size,const C3Vector& box1Center,co
             C4X4Matrix m1Rel(m2.getInverse()*m1);
             C4X4Matrix* mRels[2]={&m2Rel,&m1Rel};
             const CPcNode* pcNodes[2]={this,pc2Node};
-            simReal boxSizes[2]={box1Size,box2Size};
+            double boxSizes[2]={box1Size,box2Size};
             const C3Vector* boxCenters[2]={&box1Center,&box2Center};
             const C4X4Matrix* pcMs[2]={&pc1M,&pc2M};
             C3Vector* pcMinDistSegPts[2]={pc1MinDistSegPt,pc2MinDistSegPt};
             unsigned long long int* pcCachings[2]={pc1Caching,pc2Caching};
             unsigned long long int pcCachePoss[2]={pc1CachePos,pc2CachePos};
             // Now check all 8 node pairs, explore closest node first:
-            std::vector<std::pair<simReal,SNodeTranslation>> nodesToExplore;
+            std::vector<std::pair<double,SNodeTranslation>> nodesToExplore;
             for (size_t i=0;i<8;i++)
             {
                 SNodeTranslation nodeTranslation;
@@ -1100,14 +1101,14 @@ bool CPcNode::getDistance_ptcloud(simReal box1Size,const C3Vector& box1Center,co
     return(retVal);
 }
 
-bool CPcNode::getSensorDistance(simReal boxS,const C3Vector& boxCenter,const C4X4Matrix& pcM,const CVolumePlanes& planesIn,const CVolumePlanes& planesOut,bool fast,simReal& dist,C3Vector* detectPt) const
+bool CPcNode::getSensorDistance(double boxS,const C3Vector& boxCenter,const C4X4Matrix& pcM,const CVolumePlanes& planesIn,const CVolumePlanes& planesOut,bool fast,double& dist,C3Vector* detectPt) const
 {
     bool retVal=false;
     if (dist==0.0)
         return(retVal);
     C4X4Matrix m(pcM);
     m.X+=pcM.M*boxCenter;
-    simReal d=dist;
+    double d=dist;
     if (CCalcUtils::getDistance_box_pt(m,C3Vector(boxS*0.5,boxS*0.5,boxS*0.5),true,C3Vector::zeroVector,d,nullptr,nullptr))
     { // we are closer than dist..
         if (CCalcUtils::isBoxMaybeInSensorVolume(planesIn,planesOut,m,C3Vector(boxS*0.5,boxS*0.5,boxS*0.5)))
@@ -1138,7 +1139,7 @@ bool CPcNode::getSensorDistance(simReal boxS,const C3Vector& boxCenter,const C4X
             }
             else
             { // continue exploration of the PC node. Explore closer nodes first:
-                std::vector<std::pair<simReal,SNodeTranslation>> nodesToExplore;
+                std::vector<std::pair<double,SNodeTranslation>> nodesToExplore;
                 for (size_t i=0;i<8;i++)
                 {
                     SNodeTranslation nodeTranslation;

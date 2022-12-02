@@ -7,15 +7,15 @@ CObbStruct::CObbStruct()
 {
 }
 
-CObbStruct::CObbStruct(const simReal* ver,int verSize,const int* ind,int indSize,simReal triSize,int triCnt)
+CObbStruct::CObbStruct(const double* ver,int verSize,const int* ind,int indSize,double triSize,int triCnt)
 {
     _triCnt=triCnt;
     if (triSize<=0.0)
         triSize=0.0;
     else
     {
-        if (triSize<simReal(0.005))
-            triSize=simReal(0.005);
+        if (triSize<double(0.005))
+            triSize=double(0.005);
     }
     _triSize=triSize;
     vertices.assign(ver,ver+verSize);
@@ -23,7 +23,7 @@ CObbStruct::CObbStruct(const simReal* ver,int verSize,const int* ind,int indSize
     _originalVerticesSize=verSize;
     _originalIndicesSize=indSize;
 
-    _originalVerticesHash=CCalcUtils::getDjb2Hash(reinterpret_cast<const char*>(ver),size_t(verSize)*sizeof(simReal));
+    _originalVerticesHash=CCalcUtils::getDjb2Hash(reinterpret_cast<const char*>(ver),size_t(verSize)*sizeof(double));
     _originalIndicesHash=CCalcUtils::getDjb2Hash(reinterpret_cast<const char*>(ind),size_t(indSize)*sizeof(int));
 
     reduceTriangleSizes(vertices,indices,_triSize);
@@ -55,14 +55,14 @@ CObbStruct* CObbStruct::copyYourself() const
     return(newObbStruct);
 }
 
-void CObbStruct::scaleYourself(simReal f)
+void CObbStruct::scaleYourself(double f)
 {
     obb->scaleYourself(f);
     for (size_t i=0;i<vertices.size();i++)
         vertices[i]*=f;
 }
 
-bool CObbStruct::isSame(const simReal* v,int vSize,const int* ind,int indSize,simReal triSize,int triCnt)
+bool CObbStruct::isSame(const double* v,int vSize,const int* ind,int indSize,double triSize,int triCnt)
 {
     if (_originalVerticesSize!=vSize)
         return(false);
@@ -77,7 +77,7 @@ bool CObbStruct::isSame(const simReal* v,int vSize,const int* ind,int indSize,si
     if (_originalIndicesHash==0)
         return(false);
 
-    unsigned long hash=CCalcUtils::getDjb2Hash(reinterpret_cast<const char*>(v),size_t(vSize)*sizeof(simReal));
+    unsigned long hash=CCalcUtils::getDjb2Hash(reinterpret_cast<const char*>(v),size_t(vSize)*sizeof(double));
     if (hash!=_originalVerticesHash)
         return(false);
 
@@ -104,7 +104,7 @@ unsigned char* CObbStruct::serialize(int& dataSize) const
     int s=int(vertices.size());
     pushData(data,&s,sizeof(int));
     for (size_t i=0;i<vertices.size();i++)
-        pushData(data,&vertices[i],sizeof(simReal));
+        pushData(data,&vertices[i],sizeof(double));
 
     s=int(indices.size());
     pushData(data,&s,sizeof(int));
@@ -127,13 +127,13 @@ bool CObbStruct::deserialize(const unsigned char* data)
     unsigned char ver=data[pos++];
     if (ver<=3)
     {
-        _triSize=(reinterpret_cast<const simReal*>(data+pos))[0];pos+=sizeof(simReal);
+        _triSize=(reinterpret_cast<const double*>(data+pos))[0];pos+=sizeof(double);
         _triCnt=(reinterpret_cast<const int*>(data+pos))[0];pos+=sizeof(int);
         _originalVerticesSize=(reinterpret_cast<const int*>(data+pos))[0];pos+=sizeof(int);
         if (ver==2)
         {
             _originalVerticesHash=0;
-            pos+=sizeof(simReal);
+            pos+=sizeof(double);
         }
         else
         {
@@ -156,8 +156,8 @@ bool CObbStruct::deserialize(const unsigned char* data)
         s=(reinterpret_cast<const int*>(data+pos))[0];pos+=sizeof(int);
         for (int i=0;i<s;i++)
         {
-            vertices.push_back((reinterpret_cast<const simReal*>(data+pos))[0]);
-            pos+=sizeof(simReal);
+            vertices.push_back((reinterpret_cast<const double*>(data+pos))[0]);
+            pos+=sizeof(double);
         }
 
         s=(reinterpret_cast<const int*>(data+pos))[0];pos+=sizeof(int);
@@ -174,7 +174,7 @@ bool CObbStruct::deserialize(const unsigned char* data)
     return(false);
 }
 
-CObbStruct* CObbStruct::copyObbStructFromExisting(const simReal* vert,int vertSize,const int* ind,int indSize,simReal triSize,int triCnt)
+CObbStruct* CObbStruct::copyObbStructFromExisting(const double* vert,int vertSize,const int* ind,int indSize,double triSize,int triCnt)
 {
     for (size_t i=0;i<_obbStructs.size();i++)
     {
@@ -202,7 +202,7 @@ void CObbStruct::removeObbStruct(CObbStruct* obbStruct)
     }
 }
 
-void CObbStruct::reduceTriangleSizes(std::vector<simReal>& vert,std::vector<int>& ind,simReal triSize)
+void CObbStruct::reduceTriangleSizes(std::vector<double>& vert,std::vector<int>& ind,double triSize)
 {
     if (triSize>0.0)
     {
@@ -223,7 +223,7 @@ void CObbStruct::reduceTriangleSizes(std::vector<simReal>& vert,std::vector<int>
                 C3Vector p3(&vert[3*size_t(indd[2])]);
                 C3Vector pts[5]={p1,p2,p3,p1,p2};
                 C3Vector edges[3];
-                simReal ll[3];
+                double ll[3];
                 edges[0]=p2-p1;
                 edges[1]=p3-p2;
                 edges[2]=p1-p3;

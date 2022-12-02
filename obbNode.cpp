@@ -2,163 +2,163 @@
 #include "obbNode.h"
 #include "obbStruct.h"
 
-const simReal q1[91*4]={
-    simReal(1.0),simReal(0.0),simReal(0.0),simReal(0.0),
-    simReal(0.99384415149689),simReal(-0.0061558117158711),simReal(0.078217260539532),simReal(0.078217305243015),
-    simReal(0.96937239170074),simReal(-0.018315907567739),simReal(0.23272576928139),simReal(0.076291389763355),
-    simReal(0.92103153467178),simReal(-0.030024981126189),simReal(0.38150382041931),simReal(0.072486810386181),
-    simReal(0.85001176595688),simReal(-0.040994759649038),simReal(0.52088803052902),simReal(0.066897414624691),
-    simReal(0.75806188583374),simReal(-0.050955086946487),simReal(0.64744603633881),simReal(0.059660792350769),
-    simReal(0.94550329446793),simReal(-0.05449678376317),simReal(0.22699527442455),simReal(0.22699521481991),
-    simReal(0.89835268259048),simReal(-0.089335732161999),simReal(0.37210986018181),simReal(0.21567536890507),
-    simReal(0.82908165454865),simReal(-0.1219749674201),simReal(0.5080618262291),simReal(0.19904483854771),
-    simReal(0.73939591646194),simReal(-0.15161071717739),simReal(0.63150370121002),simReal(0.17751318216324),
-    simReal(0.92103147506714),simReal(-0.03002499602735),simReal(0.072486750781536),simReal(0.38150382041931),
-    simReal(0.89835262298584),simReal(-0.089335650205612),simReal(0.21567541360855),simReal(0.3721099793911),
-    simReal(0.85355335474014),simReal(-0.14644660055637),simReal(0.35355341434479),simReal(0.3535535633564),
-    simReal(0.78773677349091),simReal(-0.19995146989822),simReal(0.48272582888603),simReal(0.3262914121151),
-    simReal(0.70252358913422),simReal(-0.2485329657793),simReal(0.60001170635223),simReal(0.29099488258362),
-    simReal(0.82908165454865),simReal(-0.12197487056255),simReal(0.19904492795467),simReal(0.50806188583374),
-    simReal(0.78773683309555),simReal(-0.19995151460171),simReal(0.32629129290581),simReal(0.48272570967674),
-    simReal(0.72699528932571),simReal(-0.27300474047661),simReal(0.44550329446793),simReal(0.44550329446793),
-    simReal(0.6483525633812),simReal(-0.33933570981026),simReal(0.5537456870079),simReal(0.39731112122536),
-    simReal(0.75806188583374),simReal(-0.05095511302352),simReal(0.059660773724318),simReal(0.64744603633881),
-    simReal(0.73939591646194),simReal(-0.15161070227623),simReal(0.17751322686672),simReal(0.63150376081467),
-    simReal(0.70252358913422),simReal(-0.24853309988976),simReal(0.29099479317665),simReal(0.60001170635223),
-    simReal(0.64835274219513),simReal(-0.33933570981026),simReal(0.39731100201607),simReal(0.55374538898468),
-    simReal(0.57821726799011),simReal(-0.42178285121918),simReal(0.49384421110153),simReal(0.49384415149689),
-    simReal(0.63150358200073),simReal(-0.17751328647137),simReal(0.15161070227623),simReal(0.73939609527588),
-    simReal(0.60001170635223),simReal(-0.29099473357201),simReal(0.24853305518627),simReal(0.70252352952957),
-    simReal(0.55374562740326),simReal(-0.39731097221375),simReal(0.33933568000793),simReal(0.64835262298584),
-    simReal(0.49384415149689),simReal(-0.49384415149689),simReal(0.42178285121918),simReal(0.57821726799011),
-    simReal(0.52088797092438),simReal(-0.066897362470627),simReal(0.040994789451361),simReal(0.85001170635223),
-    simReal(0.50806170701981),simReal(-0.199044957757),simReal(0.12197488546371),simReal(0.82908183336258),
-    simReal(0.4827256500721),simReal(-0.32629129290581),simReal(0.19995157420635),simReal(0.7877368927002),
-    simReal(0.4455032646656),simReal(-0.44550320506096),simReal(0.27300474047661),simReal(0.72699534893036),
-    simReal(0.39731097221375),simReal(-0.55374550819397),simReal(0.33933565020561),simReal(0.64835268259048),
-    simReal(0.37210977077484),simReal(-0.21567541360855),simReal(0.089335687458515),simReal(0.89835274219513),
-    simReal(0.35355335474014),simReal(-0.35355344414711),simReal(0.14644664525986),simReal(0.85355341434479),
-    simReal(0.32629126310349),simReal(-0.48272567987442),simReal(0.19995155930519),simReal(0.78773683309555),
-    simReal(0.29099473357201),simReal(-0.60001170635223),simReal(0.24853302538395),simReal(0.70252352952957),
-    simReal(0.23272578418255),simReal(-0.076291278004646),simReal(0.018315944820642),simReal(0.96937245130539),
-    simReal(0.22699522972107),simReal(-0.22699525952339),simReal(0.054496757686138),simReal(0.94550329446793),
-    simReal(0.21567545831203),simReal(-0.37210991978645),simReal(0.08933574706316),simReal(0.89835262298584),
-    simReal(0.19904497265816),simReal(-0.50806188583374),simReal(0.12197491526604),simReal(0.82908165454865),
-    simReal(0.17751327157021),simReal(-0.63150376081467),simReal(0.15161073207855),simReal(0.73939591646194),
-    simReal(0.076291263103485),simReal(-0.23272579908371),simReal(0.018315916880965),simReal(0.96937245130539),
-    simReal(0.072486750781536),simReal(-0.38150373101234),simReal(0.03002498857677),simReal(0.92103159427643),
-    simReal(0.066897392272949),simReal(-0.52088785171509),simReal(0.040994752198458),simReal(0.85001176595688),
-    simReal(0.059660766273737),simReal(-0.64744603633881),simReal(0.05095511674881),simReal(0.75806188583374),
-    simReal(-0.078217208385468),simReal(-0.078217223286629),simReal(-0.006155826151371),simReal(0.99384421110153),
-    simReal(-0.076291233301163),simReal(-0.23272578418255),simReal(-0.018315909430385),simReal(0.96937245130539),
-    simReal(-0.072486698627472),simReal(-0.38150376081467),simReal(-0.030024975538254),simReal(0.92103159427643),
-    simReal(-0.066897362470627),simReal(-0.52088785171509),simReal(-0.040994733572006),simReal(0.85001182556152),
-    simReal(-0.059660736471415),simReal(-0.64744603633881),simReal(-0.050955090671778),simReal(0.75806194543839),
-    simReal(-0.22699531912804),simReal(-0.22699527442455),simReal(-0.054496750235558),simReal(0.94550323486328),
-    simReal(-0.21567545831203),simReal(-0.37210991978645),simReal(-0.089335672557354),simReal(0.89835268259048),
-    simReal(-0.19904491305351),simReal(-0.50806188583374),simReal(-0.12197485566139),simReal(0.82908165454865),
-    simReal(-0.17751330137253),simReal(-0.63150376081467),simReal(-0.15161062777042),simReal(0.7393958568573),
-    simReal(-0.38150364160538),simReal(-0.072486743330956),simReal(-0.030024966225028),simReal(0.92103159427643),
-    simReal(-0.37210974097252),simReal(-0.21567544341087),simReal(-0.089335672557354),simReal(0.89835274219513),
-    simReal(-0.3535532951355),simReal(-0.35355341434479),simReal(-0.1464466303587),simReal(0.85355347394943),
-    simReal(-0.32629123330116),simReal(-0.48272570967674),simReal(-0.19995157420635),simReal(0.7877368927002),
-    simReal(-0.29099464416504),simReal(-0.60001176595688),simReal(-0.24853302538395),simReal(0.70252358913422),
-    simReal(0.50806170701981),simReal(0.199044957757),simReal(0.1219748929143),simReal(-0.82908171415329),
-    simReal(-0.48272567987442),simReal(-0.32629126310349),simReal(-0.19995151460171),simReal(0.78773683309555),
-    simReal(-0.44550320506096),simReal(-0.44550329446793),simReal(-0.27300471067429),simReal(0.72699534893036),
-    simReal(-0.39731097221375),simReal(-0.55374556779861),simReal(-0.33933565020561),simReal(0.64835274219513),
-    simReal(0.64744591712952),simReal(0.059660769999027),simReal(0.050955083221197),simReal(-0.75806200504303),
-    simReal(0.63150358200073),simReal(0.17751330137253),simReal(0.15161070227623),simReal(-0.73939609527588),
-    simReal(0.60001164674759),simReal(0.29099479317665),simReal(0.24853308498859),simReal(-0.70252364873886),
-    simReal(0.55374544858932),simReal(0.39731103181839),simReal(0.3393357694149),simReal(-0.64835274219513),
-    simReal(-0.49384412169456),simReal(-0.49384415149689),simReal(-0.42178279161453),simReal(0.57821726799011),
-    simReal(0.73939591646194),simReal(0.15161064267159),simReal(0.17751328647137),simReal(-0.63150376081467),
-    simReal(0.70252352952957),simReal(0.24853302538395),simReal(0.29099476337433),simReal(-0.60001170635223),
-    simReal(0.64835262298584),simReal(0.3393357694149),simReal(0.39731109142303),simReal(-0.55374556779861),
-    simReal(0.57821714878082),simReal(0.42178282141685),simReal(0.49384421110153),simReal(-0.49384421110153),
-    simReal(0.85001182556152),simReal(0.040994759649038),simReal(0.066897377371788),simReal(-0.52088791131973),
-    simReal(0.82908165454865),simReal(0.12197490036488),simReal(0.19904498755932),simReal(-0.50806188583374),
-    simReal(0.78773683309555),simReal(0.19995154440403),simReal(0.32629129290581),simReal(-0.48272573947906),
-    simReal(0.72699528932571),simReal(0.27300474047661),simReal(0.44550332427025),simReal(-0.4455032646656),
-    simReal(0.64835268259048),simReal(0.33933568000793),simReal(0.55374556779861),simReal(-0.39731100201607),
-    simReal(0.89835262298584),simReal(0.089335709810257),simReal(0.21567544341087),simReal(-0.37210991978645),
-    simReal(0.85355341434479),simReal(0.14644664525986),simReal(0.35355338454247),simReal(-0.35355335474014),
-    simReal(0.78773677349091),simReal(0.19995158910751),simReal(0.48272570967674),simReal(-0.32629129290581),
-    simReal(0.70252346992493),simReal(0.24853307008743),simReal(0.60001182556152),simReal(-0.29099479317665),
-    simReal(0.96937245130539),simReal(0.018315913155675),simReal(0.076291263103485),simReal(-0.2327257245779),
-    simReal(0.94550323486328),simReal(0.054496750235558),simReal(0.22699530422688),simReal(-0.22699522972107),
-    simReal(0.89835268259048),simReal(0.089335694909096),simReal(0.37210991978645),simReal(-0.21567544341087),
-    simReal(0.82908165454865),simReal(0.12197487801313),simReal(0.50806188583374),simReal(-0.19904491305351),
-    simReal(0.73939591646194),simReal(0.15161064267159),simReal(0.63150370121002),simReal(-0.17751325666904),
-    simReal(0.96937245130539),simReal(0.018315905705094),simReal(0.23272575438023),simReal(-0.076291218400002),
-    simReal(0.92103153467178),simReal(0.030024981126189),simReal(0.38150382041931),simReal(-0.072486713528633),
-    simReal(0.85001182556152),simReal(0.040994741022587),simReal(0.52088791131973),simReal(-0.066897377371788),
-    simReal(0.75806188583374),simReal(0.050955094397068),simReal(0.64744609594345),simReal(-0.059660740196705)
+const double q1[91*4]={
+    double(1.0),double(0.0),double(0.0),double(0.0),
+    double(0.99384415149689),double(-0.0061558117158711),double(0.078217260539532),double(0.078217305243015),
+    double(0.96937239170074),double(-0.018315907567739),double(0.23272576928139),double(0.076291389763355),
+    double(0.92103153467178),double(-0.030024981126189),double(0.38150382041931),double(0.072486810386181),
+    double(0.85001176595688),double(-0.040994759649038),double(0.52088803052902),double(0.066897414624691),
+    double(0.75806188583374),double(-0.050955086946487),double(0.64744603633881),double(0.059660792350769),
+    double(0.94550329446793),double(-0.05449678376317),double(0.22699527442455),double(0.22699521481991),
+    double(0.89835268259048),double(-0.089335732161999),double(0.37210986018181),double(0.21567536890507),
+    double(0.82908165454865),double(-0.1219749674201),double(0.5080618262291),double(0.19904483854771),
+    double(0.73939591646194),double(-0.15161071717739),double(0.63150370121002),double(0.17751318216324),
+    double(0.92103147506714),double(-0.03002499602735),double(0.072486750781536),double(0.38150382041931),
+    double(0.89835262298584),double(-0.089335650205612),double(0.21567541360855),double(0.3721099793911),
+    double(0.85355335474014),double(-0.14644660055637),double(0.35355341434479),double(0.3535535633564),
+    double(0.78773677349091),double(-0.19995146989822),double(0.48272582888603),double(0.3262914121151),
+    double(0.70252358913422),double(-0.2485329657793),double(0.60001170635223),double(0.29099488258362),
+    double(0.82908165454865),double(-0.12197487056255),double(0.19904492795467),double(0.50806188583374),
+    double(0.78773683309555),double(-0.19995151460171),double(0.32629129290581),double(0.48272570967674),
+    double(0.72699528932571),double(-0.27300474047661),double(0.44550329446793),double(0.44550329446793),
+    double(0.6483525633812),double(-0.33933570981026),double(0.5537456870079),double(0.39731112122536),
+    double(0.75806188583374),double(-0.05095511302352),double(0.059660773724318),double(0.64744603633881),
+    double(0.73939591646194),double(-0.15161070227623),double(0.17751322686672),double(0.63150376081467),
+    double(0.70252358913422),double(-0.24853309988976),double(0.29099479317665),double(0.60001170635223),
+    double(0.64835274219513),double(-0.33933570981026),double(0.39731100201607),double(0.55374538898468),
+    double(0.57821726799011),double(-0.42178285121918),double(0.49384421110153),double(0.49384415149689),
+    double(0.63150358200073),double(-0.17751328647137),double(0.15161070227623),double(0.73939609527588),
+    double(0.60001170635223),double(-0.29099473357201),double(0.24853305518627),double(0.70252352952957),
+    double(0.55374562740326),double(-0.39731097221375),double(0.33933568000793),double(0.64835262298584),
+    double(0.49384415149689),double(-0.49384415149689),double(0.42178285121918),double(0.57821726799011),
+    double(0.52088797092438),double(-0.066897362470627),double(0.040994789451361),double(0.85001170635223),
+    double(0.50806170701981),double(-0.199044957757),double(0.12197488546371),double(0.82908183336258),
+    double(0.4827256500721),double(-0.32629129290581),double(0.19995157420635),double(0.7877368927002),
+    double(0.4455032646656),double(-0.44550320506096),double(0.27300474047661),double(0.72699534893036),
+    double(0.39731097221375),double(-0.55374550819397),double(0.33933565020561),double(0.64835268259048),
+    double(0.37210977077484),double(-0.21567541360855),double(0.089335687458515),double(0.89835274219513),
+    double(0.35355335474014),double(-0.35355344414711),double(0.14644664525986),double(0.85355341434479),
+    double(0.32629126310349),double(-0.48272567987442),double(0.19995155930519),double(0.78773683309555),
+    double(0.29099473357201),double(-0.60001170635223),double(0.24853302538395),double(0.70252352952957),
+    double(0.23272578418255),double(-0.076291278004646),double(0.018315944820642),double(0.96937245130539),
+    double(0.22699522972107),double(-0.22699525952339),double(0.054496757686138),double(0.94550329446793),
+    double(0.21567545831203),double(-0.37210991978645),double(0.08933574706316),double(0.89835262298584),
+    double(0.19904497265816),double(-0.50806188583374),double(0.12197491526604),double(0.82908165454865),
+    double(0.17751327157021),double(-0.63150376081467),double(0.15161073207855),double(0.73939591646194),
+    double(0.076291263103485),double(-0.23272579908371),double(0.018315916880965),double(0.96937245130539),
+    double(0.072486750781536),double(-0.38150373101234),double(0.03002498857677),double(0.92103159427643),
+    double(0.066897392272949),double(-0.52088785171509),double(0.040994752198458),double(0.85001176595688),
+    double(0.059660766273737),double(-0.64744603633881),double(0.05095511674881),double(0.75806188583374),
+    double(-0.078217208385468),double(-0.078217223286629),double(-0.006155826151371),double(0.99384421110153),
+    double(-0.076291233301163),double(-0.23272578418255),double(-0.018315909430385),double(0.96937245130539),
+    double(-0.072486698627472),double(-0.38150376081467),double(-0.030024975538254),double(0.92103159427643),
+    double(-0.066897362470627),double(-0.52088785171509),double(-0.040994733572006),double(0.85001182556152),
+    double(-0.059660736471415),double(-0.64744603633881),double(-0.050955090671778),double(0.75806194543839),
+    double(-0.22699531912804),double(-0.22699527442455),double(-0.054496750235558),double(0.94550323486328),
+    double(-0.21567545831203),double(-0.37210991978645),double(-0.089335672557354),double(0.89835268259048),
+    double(-0.19904491305351),double(-0.50806188583374),double(-0.12197485566139),double(0.82908165454865),
+    double(-0.17751330137253),double(-0.63150376081467),double(-0.15161062777042),double(0.7393958568573),
+    double(-0.38150364160538),double(-0.072486743330956),double(-0.030024966225028),double(0.92103159427643),
+    double(-0.37210974097252),double(-0.21567544341087),double(-0.089335672557354),double(0.89835274219513),
+    double(-0.3535532951355),double(-0.35355341434479),double(-0.1464466303587),double(0.85355347394943),
+    double(-0.32629123330116),double(-0.48272570967674),double(-0.19995157420635),double(0.7877368927002),
+    double(-0.29099464416504),double(-0.60001176595688),double(-0.24853302538395),double(0.70252358913422),
+    double(0.50806170701981),double(0.199044957757),double(0.1219748929143),double(-0.82908171415329),
+    double(-0.48272567987442),double(-0.32629126310349),double(-0.19995151460171),double(0.78773683309555),
+    double(-0.44550320506096),double(-0.44550329446793),double(-0.27300471067429),double(0.72699534893036),
+    double(-0.39731097221375),double(-0.55374556779861),double(-0.33933565020561),double(0.64835274219513),
+    double(0.64744591712952),double(0.059660769999027),double(0.050955083221197),double(-0.75806200504303),
+    double(0.63150358200073),double(0.17751330137253),double(0.15161070227623),double(-0.73939609527588),
+    double(0.60001164674759),double(0.29099479317665),double(0.24853308498859),double(-0.70252364873886),
+    double(0.55374544858932),double(0.39731103181839),double(0.3393357694149),double(-0.64835274219513),
+    double(-0.49384412169456),double(-0.49384415149689),double(-0.42178279161453),double(0.57821726799011),
+    double(0.73939591646194),double(0.15161064267159),double(0.17751328647137),double(-0.63150376081467),
+    double(0.70252352952957),double(0.24853302538395),double(0.29099476337433),double(-0.60001170635223),
+    double(0.64835262298584),double(0.3393357694149),double(0.39731109142303),double(-0.55374556779861),
+    double(0.57821714878082),double(0.42178282141685),double(0.49384421110153),double(-0.49384421110153),
+    double(0.85001182556152),double(0.040994759649038),double(0.066897377371788),double(-0.52088791131973),
+    double(0.82908165454865),double(0.12197490036488),double(0.19904498755932),double(-0.50806188583374),
+    double(0.78773683309555),double(0.19995154440403),double(0.32629129290581),double(-0.48272573947906),
+    double(0.72699528932571),double(0.27300474047661),double(0.44550332427025),double(-0.4455032646656),
+    double(0.64835268259048),double(0.33933568000793),double(0.55374556779861),double(-0.39731100201607),
+    double(0.89835262298584),double(0.089335709810257),double(0.21567544341087),double(-0.37210991978645),
+    double(0.85355341434479),double(0.14644664525986),double(0.35355338454247),double(-0.35355335474014),
+    double(0.78773677349091),double(0.19995158910751),double(0.48272570967674),double(-0.32629129290581),
+    double(0.70252346992493),double(0.24853307008743),double(0.60001182556152),double(-0.29099479317665),
+    double(0.96937245130539),double(0.018315913155675),double(0.076291263103485),double(-0.2327257245779),
+    double(0.94550323486328),double(0.054496750235558),double(0.22699530422688),double(-0.22699522972107),
+    double(0.89835268259048),double(0.089335694909096),double(0.37210991978645),double(-0.21567544341087),
+    double(0.82908165454865),double(0.12197487801313),double(0.50806188583374),double(-0.19904491305351),
+    double(0.73939591646194),double(0.15161064267159),double(0.63150370121002),double(-0.17751325666904),
+    double(0.96937245130539),double(0.018315905705094),double(0.23272575438023),double(-0.076291218400002),
+    double(0.92103153467178),double(0.030024981126189),double(0.38150382041931),double(-0.072486713528633),
+    double(0.85001182556152),double(0.040994741022587),double(0.52088791131973),double(-0.066897377371788),
+    double(0.75806188583374),double(0.050955094397068),double(0.64744609594345),double(-0.059660740196705)
 };
 
-const simReal q2[36*4]={
-    simReal(0.98432183265686),simReal(-0.0054544419981539),simReal(0.030933555215597),simReal(0.17356246709824),
-    simReal(0.98345810174942),simReal(-0.0090880254283547),simReal(0.051540859043598),simReal(0.17341016232967),
-    simReal(0.98216301202774),simReal(-0.012717707082629),simReal(0.072125561535358),simReal(0.17318181693554),
-    simReal(0.98043715953827),simReal(-0.016341743990779),simReal(0.092678628861904),simReal(0.17287746071815),
-    simReal(0.86559802293777),simReal(-0.015705356374383),simReal(0.027202559635043),simReal(0.49975338578224),
-    simReal(0.86483854055405),simReal(-0.02616797760129),simReal(0.045324314385653),simReal(0.49931478500366),
-    simReal(0.86369961500168),simReal(-0.036619070917368),simReal(0.063426144421101),simReal(0.49865740537643),
-    simReal(0.86218190193176),simReal(-0.047054179012775),simReal(0.081500194966793),simReal(0.4977810382843),
-    simReal(0.64247047901154),simReal(-0.024062059819698),simReal(0.020190495997667),simReal(0.76566648483276),
-    simReal(0.64190673828125),simReal(-0.040091678500175),simReal(0.033640909940004),simReal(0.76499456167221),
-    simReal(0.64106142520905),simReal(-0.056103721261024),simReal(0.047076646238565),simReal(0.76398718357086),
-    simReal(0.63993483781815),simReal(-0.072091154754162),simReal(0.060491673648357),simReal(0.76264482736588),
-    simReal(0.34185141324997),simReal(-0.029516492038965),simReal(0.010743148624897),simReal(0.939228951931),
-    simReal(0.34155142307281),simReal(-0.049179725348949),simReal(0.017899960279465),simReal(0.93840479850769),
-    simReal(0.34110167622566),simReal(-0.068821407854557),simReal(0.025048969313502),simReal(0.93716907501221),
-    simReal(0.34050220251083),simReal(-0.088432893157005),simReal(0.032186944037676),simReal(0.93552225828171),
-    simReal(-2.9802322387695e-08),simReal(-0.031410802155733),simReal(2.0489096641541e-08),simReal(0.99950659275055),
-    simReal(-2.9802318834982e-08),simReal(-0.052335970103741),simReal(-1.8626449271864e-09),simReal(0.99862957000732),
-    simReal(-2.9802325940409e-08),simReal(-0.073238231241703),simReal(1.8626453268666e-08),simReal(0.99731451272964),
-    simReal(-1.1920928955078e-07),simReal(-0.094108313322067),simReal(-3.7252907425511e-09),simReal(0.99556201696396),
-    simReal(-0.34185135364532),simReal(-0.029516480863094),simReal(-0.010743118822575),simReal(0.93922901153564),
-    simReal(-0.34155142307281),simReal(-0.04917972907424),simReal(-0.017899954691529),simReal(0.93840485811234),
-    simReal(-0.34110155701637),simReal(-0.068821392953396),simReal(-0.025048937648535),simReal(0.93716907501221),
-    simReal(-0.34050226211548),simReal(-0.088432945311069),simReal(-0.032186958938837),simReal(0.93552225828171),
-    simReal(0.64247035980225),simReal(0.024062030017376),simReal(0.02019046805799),simReal(-0.76566654443741),
-    simReal(0.64190655946732),simReal(0.040091685950756),simReal(0.033640891313553),simReal(-0.76499480009079),
-    simReal(0.64106148481369),simReal(0.056103706359863),simReal(0.047076635062695),simReal(-0.76398718357086),
-    simReal(0.63993483781815),simReal(0.072091184556484),simReal(0.060491684824228),simReal(-0.76264482736588),
-    simReal(0.86559802293777),simReal(0.015705425292253),simReal(0.027202542871237),simReal(-0.49975338578224),
-    simReal(0.8648384809494),simReal(0.026167996227741),simReal(0.04532428830862),simReal(-0.4993149638176),
-    simReal(0.86369961500168),simReal(0.036619134247303),simReal(0.063426159322262),simReal(-0.49865740537643),
-    simReal(0.86218190193176),simReal(0.047054175287485),simReal(0.081500202417374),simReal(-0.49778109788895),
-    simReal(0.98432177305222),simReal(0.0054544052109122),simReal(0.030933560803533),simReal(-0.17356267571449),
-    simReal(0.98345810174942),simReal(0.0090880719944835),simReal(0.051540851593018),simReal(-0.17341040074825),
-    simReal(0.98216301202774),simReal(0.012717668898404),simReal(0.072125554084778),simReal(-0.17318204045296),
-    simReal(0.98043709993362),simReal(0.016341753304005),simReal(0.092678636312485),simReal(-0.17287777364254)
+const double q2[36*4]={
+    double(0.98432183265686),double(-0.0054544419981539),double(0.030933555215597),double(0.17356246709824),
+    double(0.98345810174942),double(-0.0090880254283547),double(0.051540859043598),double(0.17341016232967),
+    double(0.98216301202774),double(-0.012717707082629),double(0.072125561535358),double(0.17318181693554),
+    double(0.98043715953827),double(-0.016341743990779),double(0.092678628861904),double(0.17287746071815),
+    double(0.86559802293777),double(-0.015705356374383),double(0.027202559635043),double(0.49975338578224),
+    double(0.86483854055405),double(-0.02616797760129),double(0.045324314385653),double(0.49931478500366),
+    double(0.86369961500168),double(-0.036619070917368),double(0.063426144421101),double(0.49865740537643),
+    double(0.86218190193176),double(-0.047054179012775),double(0.081500194966793),double(0.4977810382843),
+    double(0.64247047901154),double(-0.024062059819698),double(0.020190495997667),double(0.76566648483276),
+    double(0.64190673828125),double(-0.040091678500175),double(0.033640909940004),double(0.76499456167221),
+    double(0.64106142520905),double(-0.056103721261024),double(0.047076646238565),double(0.76398718357086),
+    double(0.63993483781815),double(-0.072091154754162),double(0.060491673648357),double(0.76264482736588),
+    double(0.34185141324997),double(-0.029516492038965),double(0.010743148624897),double(0.939228951931),
+    double(0.34155142307281),double(-0.049179725348949),double(0.017899960279465),double(0.93840479850769),
+    double(0.34110167622566),double(-0.068821407854557),double(0.025048969313502),double(0.93716907501221),
+    double(0.34050220251083),double(-0.088432893157005),double(0.032186944037676),double(0.93552225828171),
+    double(-2.9802322387695e-08),double(-0.031410802155733),double(2.0489096641541e-08),double(0.99950659275055),
+    double(-2.9802318834982e-08),double(-0.052335970103741),double(-1.8626449271864e-09),double(0.99862957000732),
+    double(-2.9802325940409e-08),double(-0.073238231241703),double(1.8626453268666e-08),double(0.99731451272964),
+    double(-1.1920928955078e-07),double(-0.094108313322067),double(-3.7252907425511e-09),double(0.99556201696396),
+    double(-0.34185135364532),double(-0.029516480863094),double(-0.010743118822575),double(0.93922901153564),
+    double(-0.34155142307281),double(-0.04917972907424),double(-0.017899954691529),double(0.93840485811234),
+    double(-0.34110155701637),double(-0.068821392953396),double(-0.025048937648535),double(0.93716907501221),
+    double(-0.34050226211548),double(-0.088432945311069),double(-0.032186958938837),double(0.93552225828171),
+    double(0.64247035980225),double(0.024062030017376),double(0.02019046805799),double(-0.76566654443741),
+    double(0.64190655946732),double(0.040091685950756),double(0.033640891313553),double(-0.76499480009079),
+    double(0.64106148481369),double(0.056103706359863),double(0.047076635062695),double(-0.76398718357086),
+    double(0.63993483781815),double(0.072091184556484),double(0.060491684824228),double(-0.76264482736588),
+    double(0.86559802293777),double(0.015705425292253),double(0.027202542871237),double(-0.49975338578224),
+    double(0.8648384809494),double(0.026167996227741),double(0.04532428830862),double(-0.4993149638176),
+    double(0.86369961500168),double(0.036619134247303),double(0.063426159322262),double(-0.49865740537643),
+    double(0.86218190193176),double(0.047054175287485),double(0.081500202417374),double(-0.49778109788895),
+    double(0.98432177305222),double(0.0054544052109122),double(0.030933560803533),double(-0.17356267571449),
+    double(0.98345810174942),double(0.0090880719944835),double(0.051540851593018),double(-0.17341040074825),
+    double(0.98216301202774),double(0.012717668898404),double(0.072125554084778),double(-0.17318204045296),
+    double(0.98043709993362),double(0.016341753304005),double(0.092678636312485),double(-0.17287777364254)
 };
 
-const simReal q3[10*4]={
-    simReal(0.95105654001236),simReal(0.0),simReal(0.0),simReal(-0.30901706218719),
-    simReal(0.9723699092865),simReal(0.0),simReal(0.0),simReal(-0.23344537615776),
-    simReal(0.98768836259842),simReal(0.0),simReal(0.0),simReal(-0.1564345061779),
-    simReal(0.99691736698151),simReal(0.0),simReal(0.0),simReal(-0.078459121286869),
-    simReal(0.99691736698151),simReal(0.0),simReal(0.0),simReal(0.078459121286869),
-    simReal(0.98768836259842),simReal(0.0),simReal(0.0),simReal(0.1564345061779),
-    simReal(0.9723699092865),simReal(0.0),simReal(0.0),simReal(0.23344537615776),
-    simReal(0.95105654001236),simReal(0.0),simReal(0.0),simReal(0.30901706218719),
-    simReal(0.9238795042038),simReal(0.0),simReal(0.0),simReal(0.38268345594406),
-    simReal(0.89100652933121),simReal(0.0),simReal(0.0),simReal(0.45399054884911)
+const double q3[10*4]={
+    double(0.95105654001236),double(0.0),double(0.0),double(-0.30901706218719),
+    double(0.9723699092865),double(0.0),double(0.0),double(-0.23344537615776),
+    double(0.98768836259842),double(0.0),double(0.0),double(-0.1564345061779),
+    double(0.99691736698151),double(0.0),double(0.0),double(-0.078459121286869),
+    double(0.99691736698151),double(0.0),double(0.0),double(0.078459121286869),
+    double(0.98768836259842),double(0.0),double(0.0),double(0.1564345061779),
+    double(0.9723699092865),double(0.0),double(0.0),double(0.23344537615776),
+    double(0.95105654001236),double(0.0),double(0.0),double(0.30901706218719),
+    double(0.9238795042038),double(0.0),double(0.0),double(0.38268345594406),
+    double(0.89100652933121),double(0.0),double(0.0),double(0.45399054884911)
 };
 
-const simReal q4[10*4]={
-    simReal(0.9993908405304),simReal(0.0),simReal(0.0),simReal(-0.034899495542049),
-    simReal(0.99965733289719),simReal(0.0),simReal(0.0),simReal(-0.026176949962974),
-    simReal(0.9998477101326),simReal(0.0),simReal(0.0),simReal(-0.017452405765653),
-    simReal(0.99996191263199),simReal(0.0),simReal(0.0),simReal(-0.0087265353649855),
-    simReal(0.99996191263199),simReal(0.0),simReal(0.0),simReal(0.0087265353649855),
-    simReal(0.9998477101326),simReal(0.0),simReal(0.0),simReal(0.017452405765653),
-    simReal(0.99965733289719),simReal(0.0),simReal(0.0),simReal(0.026176949962974),
-    simReal(0.9993908405304),simReal(0.0),simReal(0.0),simReal(0.034899495542049),
-    simReal(0.99904823303223),simReal(0.0),simReal(0.0),simReal(0.043619386851788),
-    simReal(0.99862951040268),simReal(0.0),simReal(0.0),simReal(0.05233595892787)
+const double q4[10*4]={
+    double(0.9993908405304),double(0.0),double(0.0),double(-0.034899495542049),
+    double(0.99965733289719),double(0.0),double(0.0),double(-0.026176949962974),
+    double(0.9998477101326),double(0.0),double(0.0),double(-0.017452405765653),
+    double(0.99996191263199),double(0.0),double(0.0),double(-0.0087265353649855),
+    double(0.99996191263199),double(0.0),double(0.0),double(0.0087265353649855),
+    double(0.9998477101326),double(0.0),double(0.0),double(0.017452405765653),
+    double(0.99965733289719),double(0.0),double(0.0),double(0.026176949962974),
+    double(0.9993908405304),double(0.0),double(0.0),double(0.034899495542049),
+    double(0.99904823303223),double(0.0),double(0.0),double(0.043619386851788),
+    double(0.99862951040268),double(0.0),double(0.0),double(0.05233595892787)
 };
 
 CObbNode::CObbNode()
@@ -167,7 +167,7 @@ CObbNode::CObbNode()
     leafTris=nullptr;
 }
 
-CObbNode::CObbNode(const std::vector<simReal>& allVertices,const std::vector<int>& allTriangles,const std::vector<int>& triIndices,size_t maxTriCnt)
+CObbNode::CObbNode(const std::vector<double>& allVertices,const std::vector<int>& allTriangles,const std::vector<int>& triIndices,size_t maxTriCnt)
 {
     boxM=getNaturalFrame(allVertices,allTriangles,triIndices,boxHs);
     if (triIndices.size()>maxTriCnt)
@@ -214,7 +214,7 @@ CObbNode* CObbNode::copyYourself() const
     return(theCopy);
 }
 
-void CObbNode::scaleYourself(simReal f)
+void CObbNode::scaleYourself(double f)
 {
     boxM.X=boxM.X*f;
     boxHs=boxHs*f;
@@ -228,16 +228,16 @@ void CObbNode::scaleYourself(simReal f)
 void CObbNode::serialize(std::vector<unsigned char>& data) const
 {
     C7Vector tr(boxM);
-    pushData(data,&tr.X(0),sizeof(simReal));
-    pushData(data,&tr.X(1),sizeof(simReal));
-    pushData(data,&tr.X(2),sizeof(simReal));
-    pushData(data,&tr.Q(0),sizeof(simReal));
-    pushData(data,&tr.Q(1),sizeof(simReal));
-    pushData(data,&tr.Q(2),sizeof(simReal));
-    pushData(data,&tr.Q(3),sizeof(simReal));
-    pushData(data,&boxHs(0),sizeof(simReal));
-    pushData(data,&boxHs(1),sizeof(simReal));
-    pushData(data,&boxHs(2),sizeof(simReal));
+    pushData(data,&tr.X(0),sizeof(double));
+    pushData(data,&tr.X(1),sizeof(double));
+    pushData(data,&tr.X(2),sizeof(double));
+    pushData(data,&tr.Q(0),sizeof(double));
+    pushData(data,&tr.Q(1),sizeof(double));
+    pushData(data,&tr.Q(2),sizeof(double));
+    pushData(data,&tr.Q(3),sizeof(double));
+    pushData(data,&boxHs(0),sizeof(double));
+    pushData(data,&boxHs(1),sizeof(double));
+    pushData(data,&boxHs(2),sizeof(double));
     if (leafTris!=nullptr)
     {
         data.push_back(0);
@@ -257,17 +257,17 @@ void CObbNode::serialize(std::vector<unsigned char>& data) const
 void CObbNode::deserialize(const unsigned char* data,int& pos)
 {
     C7Vector tr;
-    tr.X(0)=(reinterpret_cast<const simReal*>(data+pos))[0];pos+=sizeof(simReal);
-    tr.X(1)=(reinterpret_cast<const simReal*>(data+pos))[0];pos+=sizeof(simReal);
-    tr.X(2)=(reinterpret_cast<const simReal*>(data+pos))[0];pos+=sizeof(simReal);
-    tr.Q(0)=(reinterpret_cast<const simReal*>(data+pos))[0];pos+=sizeof(simReal);
-    tr.Q(1)=(reinterpret_cast<const simReal*>(data+pos))[0];pos+=sizeof(simReal);
-    tr.Q(2)=(reinterpret_cast<const simReal*>(data+pos))[0];pos+=sizeof(simReal);
-    tr.Q(3)=(reinterpret_cast<const simReal*>(data+pos))[0];pos+=sizeof(simReal);
+    tr.X(0)=(reinterpret_cast<const double*>(data+pos))[0];pos+=sizeof(double);
+    tr.X(1)=(reinterpret_cast<const double*>(data+pos))[0];pos+=sizeof(double);
+    tr.X(2)=(reinterpret_cast<const double*>(data+pos))[0];pos+=sizeof(double);
+    tr.Q(0)=(reinterpret_cast<const double*>(data+pos))[0];pos+=sizeof(double);
+    tr.Q(1)=(reinterpret_cast<const double*>(data+pos))[0];pos+=sizeof(double);
+    tr.Q(2)=(reinterpret_cast<const double*>(data+pos))[0];pos+=sizeof(double);
+    tr.Q(3)=(reinterpret_cast<const double*>(data+pos))[0];pos+=sizeof(double);
     boxM=tr.getMatrix();
-    boxHs(0)=(reinterpret_cast<const simReal*>(data+pos))[0];pos+=sizeof(simReal);
-    boxHs(1)=(reinterpret_cast<const simReal*>(data+pos))[0];pos+=sizeof(simReal);
-    boxHs(2)=(reinterpret_cast<const simReal*>(data+pos))[0];pos+=sizeof(simReal);
+    boxHs(0)=(reinterpret_cast<const double*>(data+pos))[0];pos+=sizeof(double);
+    boxHs(1)=(reinterpret_cast<const double*>(data+pos))[0];pos+=sizeof(double);
+    boxHs(2)=(reinterpret_cast<const double*>(data+pos))[0];pos+=sizeof(double);
     unsigned char leafn=data[pos++];
     if (leafn==0)
     {
@@ -289,14 +289,14 @@ void CObbNode::deserialize(const unsigned char* data,int& pos)
     }
 }
 
-void CObbNode::splitTriangles(const std::vector<simReal>& allVertices,const std::vector<int>& allTriangles,const std::vector<int>& triIndices,std::vector<int>& triIndicesGroup1,std::vector<int>& triIndicesGroup2)
+void CObbNode::splitTriangles(const std::vector<double>& allVertices,const std::vector<int>& allTriangles,const std::vector<int>& triIndices,std::vector<int>& triIndicesGroup1,std::vector<int>& triIndicesGroup2)
 {
     C3Vector hs(boxHs);
 
     for (size_t loop=0;loop<3;loop++)
     {
         int bestAxis=0;
-        simReal bestAxisS=0.0;
+        double bestAxisS=0.0;
         for (size_t i=0;i<3;i++)
         {
             if (hs(i)>bestAxisS)
@@ -321,11 +321,11 @@ void CObbNode::splitTriangles(const std::vector<simReal>& allVertices,const std:
             v2=qInv*v2;
             C3Vector v3(&allVertices[0]+3*allTriangles[3*size_t(triIndices[i])+2]);
             v3=qInv*v3;
-            C3Vector avg=(v1+v2+v3)/simReal(3.0);
+            C3Vector avg=(v1+v2+v3)/double(3.0);
             triCenters.push_back(avg);
             avgTriCenter+=avg;
         }
-        avgTriCenter/=simReal(triIndices.size());
+        avgTriCenter/=double(triIndices.size());
 
         // Now split the triangles:
         for (size_t i=0;i<triCenters.size();i++)
@@ -338,32 +338,32 @@ void CObbNode::splitTriangles(const std::vector<simReal>& allVertices,const std:
         }
 
         // To avoid unbalanced situations:
-        simReal q=simReal(triIndicesGroup1.size())/simReal(triIndicesGroup2.size()+1);
+        double q=double(triIndicesGroup1.size())/double(triIndicesGroup2.size()+1);
         if (q>1.0)
             q=1.0/q;
-        if (q>simReal(0.25))
+        if (q>double(0.25))
             break;
         // If we have a bad ratio, we try a different axis
     }
 
     // To avoid unbalanced situations, last chance:
-    simReal q=simReal(triIndicesGroup1.size())/simReal(triIndicesGroup2.size()+1);
+    double q=double(triIndicesGroup1.size())/double(triIndicesGroup2.size()+1);
     if (q>1.0)
         q=1.0/q;
-    if (q<simReal(0.25))
+    if (q<double(0.25))
     { // we have a bad ratio. We simply equally split the triangles:
         triIndicesGroup1.assign(triIndices.begin(),triIndices.begin()+triIndices.size()/2);
         triIndicesGroup2.assign(triIndices.begin()+triIndices.size()/2,triIndices.end());
     }
 }
 
-C4X4Matrix CObbNode::getNaturalFrame(const std::vector<simReal>& allVertices,const std::vector<int>& allTriangles,const std::vector<int>& trianglesIndices,C3Vector& boxHs)
+C4X4Matrix CObbNode::getNaturalFrame(const std::vector<double>& allVertices,const std::vector<int>& allTriangles,const std::vector<int>& trianglesIndices,C3Vector& boxHs)
 {
     C4X4Matrix bestM;
     C4Vector bestQ;
     bestQ.setIdentity();
     bestM.setIdentity();
-    boxHs.setData(simReal(0.00001),simReal(0.00001),simReal(0.00001));
+    boxHs.setData(double(0.00001),double(0.00001),double(0.00001));
     if (trianglesIndices.size()!=0)
     {
         std::vector<C3Vector> usedVertices;
@@ -382,8 +382,8 @@ C4X4Matrix CObbNode::getNaturalFrame(const std::vector<simReal>& allVertices,con
             }
         }
 
-        simReal smallestZ=FLOAT_MAX;
-        const simReal* orientations[2]={q1,q2};
+        double smallestZ=FLOAT_MAX;
+        const double* orientations[2]={q1,q2};
         int orientationsCnt[2]={91,36};
         for (size_t l=0;l<2;l++)
         {
@@ -392,9 +392,9 @@ C4X4Matrix CObbNode::getNaturalFrame(const std::vector<simReal>& allVertices,con
                 C4Vector q(orientations[l]+4*i);
                 q=bestQ*q;
                 C4Vector qInv(q.getInverse());
-                simReal minV=FLOAT_MAX;
-                simReal maxV=-FLOAT_MAX;
-                simReal l;
+                double minV=FLOAT_MAX;
+                double maxV=-FLOAT_MAX;
+                double l;
                 for (size_t j=0;j<usedVertices.size();j++)
                 {
                     C3Vector v(qInv*usedVertices[j]);
@@ -414,8 +414,8 @@ C4X4Matrix CObbNode::getNaturalFrame(const std::vector<simReal>& allVertices,con
             }
         }
 
-        simReal smallestVolume=FLOAT_MAX;
-        const simReal* circularOrientations[2]={q3,q4};
+        double smallestVolume=FLOAT_MAX;
+        const double* circularOrientations[2]={q3,q4};
         int circularOrientationsCnt[2]={10,10};
         for (size_t l=0;l<2;l++)
         {
@@ -426,7 +426,7 @@ C4X4Matrix CObbNode::getNaturalFrame(const std::vector<simReal>& allVertices,con
                 C4Vector qInv(q.getInverse());
                 C3Vector minV(FLOAT_MAX,FLOAT_MAX,FLOAT_MAX);
                 C3Vector maxV(-FLOAT_MAX,-FLOAT_MAX,-FLOAT_MAX);
-                simReal vol;
+                double vol;
                 C3Vector dim;
                 for (size_t j=0;j<usedVertices.size();j++)
                 {
@@ -451,7 +451,7 @@ C4X4Matrix CObbNode::getNaturalFrame(const std::vector<simReal>& allVertices,con
     return(bestM);
 }
 
-bool CObbNode::checkCollision_obb(const CObbStruct* obbStruct1,const C4X4Matrix& shape1M,const CObbNode* obb2,const CObbStruct* obbStruct2,const C4X4Matrix& shape2M,std::vector<simReal>* intersections,int* cachingTri1,int* cachingTri2) const
+bool CObbNode::checkCollision_obb(const CObbStruct* obbStruct1,const C4X4Matrix& shape1M,const CObbNode* obb2,const CObbStruct* obbStruct2,const C4X4Matrix& shape2M,std::vector<double>* intersections,int* cachingTri1,int* cachingTri2) const
 {
     bool retVal=false;
     if (leafTris==nullptr)
@@ -507,7 +507,7 @@ bool CObbNode::checkCollision_obb(const CObbStruct* obbStruct1,const C4X4Matrix&
     return(retVal);
 }
 
-bool CObbNode::checkCollision_tri(const CObbStruct* obbStruct1,const C4X4Matrix& shape1M,const C3Vector& p2,const C3Vector& v2,const C3Vector& w2,int tri2Index,std::vector<simReal>* intersections,int* cachingTri1,int* cachingTri2) const
+bool CObbNode::checkCollision_tri(const CObbStruct* obbStruct1,const C4X4Matrix& shape1M,const C3Vector& p2,const C3Vector& v2,const C3Vector& w2,int tri2Index,std::vector<double>* intersections,int* cachingTri1,int* cachingTri2) const
 {
     bool retVal=false;
     if (leafTris==nullptr)
@@ -558,7 +558,7 @@ bool CObbNode::checkCollision_tri(const CObbStruct* obbStruct1,const C4X4Matrix&
     return(retVal);
 }
 
-bool CObbNode::checkCollision_segp(const CObbStruct* obbStruct1,const C4X4Matrix& shape1M,const C3Vector& segP,const C3Vector& segL,std::vector<simReal>* intersections,int* cachingTri1) const
+bool CObbNode::checkCollision_segp(const CObbStruct* obbStruct1,const C4X4Matrix& shape1M,const C3Vector& segP,const C3Vector& segL,std::vector<double>* intersections,int* cachingTri1) const
 {
     bool retVal=false;
     if (leafTris==nullptr)
@@ -674,7 +674,7 @@ bool CObbNode::checkCollision_segp_withTriInfo(const CObbStruct* obbStruct1,cons
     return(retVal);
 }
 
-bool CObbNode::checkDistance_obb(const CObbStruct* obbStruct1,const C4X4Matrix& shape1M,const CObbNode* obb2,const CObbStruct* obbStruct2,const C4X4Matrix& shape2M,simReal& dist,C3Vector* minDistSegPt1,C3Vector* minDistSegPt2,int* cachingTri1,int* cachingTri2) const
+bool CObbNode::checkDistance_obb(const CObbStruct* obbStruct1,const C4X4Matrix& shape1M,const CObbNode* obb2,const CObbStruct* obbStruct2,const C4X4Matrix& shape2M,double& dist,C3Vector* minDistSegPt1,C3Vector* minDistSegPt2,int* cachingTri1,int* cachingTri2) const
 {
     if (dist==0.0)
         return(false);
@@ -686,7 +686,7 @@ bool CObbNode::checkDistance_obb(const CObbStruct* obbStruct1,const C4X4Matrix& 
             const CObbNode* nodes[2];
 
             // Faster by exploring the closest sub-box first, instead of exploring the larger sub-box first
-            simReal d[2]={dist,dist};
+            double d[2]={dist,dist};
             bool one=CCalcUtils::isApproxDistanceSmaller_box_box_fast(shape1M*obbNodes[0]->boxM,obbNodes[0]->boxHs,shape2M*obb2->boxM,obb2->boxHs,d[0]);
             bool two=CCalcUtils::isApproxDistanceSmaller_box_box_fast(shape1M*obbNodes[1]->boxM,obbNodes[1]->boxHs,shape2M*obb2->boxM,obb2->boxHs,d[1]);
             if (one||two)
@@ -735,7 +735,7 @@ bool CObbNode::checkDistance_obb(const CObbStruct* obbStruct1,const C4X4Matrix& 
     return(retVal);
 }
 
-bool CObbNode::checkDistance_tri(const CObbStruct* obbStruct1,const C4X4Matrix& shape1M,const C3Vector& p2,const C3Vector& v2,const C3Vector& w2,int tri2Index,simReal& dist,C3Vector* minDistSegPt1,C3Vector* minDistSegPt2,int* cachingTri1,int* cachingTri2) const
+bool CObbNode::checkDistance_tri(const CObbStruct* obbStruct1,const C4X4Matrix& shape1M,const C3Vector& p2,const C3Vector& v2,const C3Vector& w2,int tri2Index,double& dist,C3Vector* minDistSegPt1,C3Vector* minDistSegPt2,int* cachingTri1,int* cachingTri2) const
 {
     if (dist==0.0)
         return(false);
@@ -745,7 +745,7 @@ bool CObbNode::checkDistance_tri(const CObbStruct* obbStruct1,const C4X4Matrix& 
         CObbNode* nodes[2];
 
         // Faster by exploring the closest box first, instead of exploring the larger box first
-        simReal d[2]={dist,dist};
+        double d[2]={dist,dist};
         bool one=CCalcUtils::isApproxDistanceSmaller_box_tri_fast(shape1M*obbNodes[0]->boxM,obbNodes[0]->boxHs,p2,v2,w2,d[0]);
         bool two=CCalcUtils::isApproxDistanceSmaller_box_tri_fast(shape1M*obbNodes[1]->boxM,obbNodes[1]->boxHs,p2,v2,w2,d[1]);
         if (one||two)
@@ -797,7 +797,7 @@ bool CObbNode::checkDistance_tri(const CObbStruct* obbStruct1,const C4X4Matrix& 
     return(retVal);
 }
 
-bool CObbNode::checkDistance_segp(const CObbStruct* obbStruct1,const C4X4Matrix& shape1M,const C3Vector& segP,const C3Vector& segL,simReal& dist,C3Vector* minDistSegPt1,C3Vector* minDistSegPt2,int* cachingTri1) const
+bool CObbNode::checkDistance_segp(const CObbStruct* obbStruct1,const C4X4Matrix& shape1M,const C3Vector& segP,const C3Vector& segL,double& dist,C3Vector* minDistSegPt1,C3Vector* minDistSegPt2,int* cachingTri1) const
 {
     if (dist==0.0)
         return(false);
@@ -807,7 +807,7 @@ bool CObbNode::checkDistance_segp(const CObbStruct* obbStruct1,const C4X4Matrix&
         CObbNode* nodes[2];
 
         // Faster by exploring the closest box first, instead of exploring the larger box first
-        simReal d[2]={dist,dist};
+        double d[2]={dist,dist};
         bool one=CCalcUtils::isApproxDistanceSmaller_box_segp_fast(shape1M*obbNodes[0]->boxM,obbNodes[0]->boxHs,segP,segL,d[0]);
         bool two=CCalcUtils::isApproxDistanceSmaller_box_segp_fast(shape1M*obbNodes[1]->boxM,obbNodes[1]->boxHs,segP,segL,d[1]);
         if (one||two)
@@ -857,7 +857,7 @@ bool CObbNode::checkDistance_segp(const CObbStruct* obbStruct1,const C4X4Matrix&
     return(retVal);
 }
 
-bool CObbNode::checkDistance_pt(const CObbStruct* obbStruct,const C4X4Matrix& shapeM,const C3Vector& pt,simReal& dist,C3Vector* minDistSegPt,int* cachingTri) const
+bool CObbNode::checkDistance_pt(const CObbStruct* obbStruct,const C4X4Matrix& shapeM,const C3Vector& pt,double& dist,C3Vector* minDistSegPt,int* cachingTri) const
 {
     if (dist==0.0)
         return(false);
@@ -867,7 +867,7 @@ bool CObbNode::checkDistance_pt(const CObbStruct* obbStruct,const C4X4Matrix& sh
         CObbNode* nodes[2];
 
         // Faster by exploring the closest box first, instead of exploring the larger box first
-        simReal d1=dist;
+        double d1=dist;
         bool b1=CCalcUtils::getDistance_box_pt(shapeM*obbNodes[0]->boxM,obbNodes[0]->boxHs,true,pt,d1,nullptr,nullptr);
         bool b2=CCalcUtils::getDistance_box_pt(shapeM*obbNodes[1]->boxM,obbNodes[1]->boxHs,true,pt,d1,nullptr,nullptr);
         if (b1||b2)
@@ -884,7 +884,7 @@ bool CObbNode::checkDistance_pt(const CObbStruct* obbStruct,const C4X4Matrix& sh
             }
             for (size_t i=0;i<2;i++)
             {
-                simReal d=dist;
+                double d=dist;
                 if ( (i==0)||CCalcUtils::getDistance_box_pt(shapeM*nodes[i]->boxM,nodes[i]->boxHs,true,pt,d,nullptr,nullptr) )
                 {
                     bool bb=nodes[i]->checkDistance_pt(obbStruct,shapeM,pt,dist,minDistSegPt,cachingTri);
@@ -917,7 +917,7 @@ bool CObbNode::checkDistance_pt(const CObbStruct* obbStruct,const C4X4Matrix& sh
     return(retVal);
 }
 
-bool CObbNode::checkSensorDistance_obb(const CObbStruct* obbStruct,const C4X4Matrix& shapeM,const CVolumePlanes& planesIn,const CVolumePlanes& planesOut,simReal cosAngle,bool frontDetection,bool backDetection,bool fast,simReal& dist,C3Vector* detectPt,C3Vector* triN)
+bool CObbNode::checkSensorDistance_obb(const CObbStruct* obbStruct,const C4X4Matrix& shapeM,const CVolumePlanes& planesIn,const CVolumePlanes& planesOut,double cosAngle,bool frontDetection,bool backDetection,bool fast,double& dist,C3Vector* detectPt,C3Vector* triN)
 {
     if (dist==0.0)
         return(false);
@@ -927,7 +927,7 @@ bool CObbNode::checkSensorDistance_obb(const CObbStruct* obbStruct,const C4X4Mat
         CObbNode* nodes[2];
 
         // Faster by exploring the closest box first, instead of exploring the larger box first
-        simReal d[2]={dist,dist};
+        double d[2]={dist,dist};
         bool one=CCalcUtils::getDistance_box_pt(shapeM*obbNodes[0]->boxM,obbNodes[0]->boxHs,true,C3Vector::zeroVector,d[0],nullptr,nullptr);
         if (one)
             one=CCalcUtils::isBoxMaybeInSensorVolume(planesIn,planesOut,shapeM*obbNodes[0]->boxM,obbNodes[0]->boxHs);
@@ -989,7 +989,7 @@ bool CObbNode::checkSensorDistance_obb(const CObbStruct* obbStruct,const C4X4Mat
     return(retVal);
 }
 
-bool CObbNode::checkRaySensorDistance_obb(const CObbStruct* obbStruct,const C4X4Matrix& shapeM,const C3Vector& raySegP,const C3Vector& raySegL,simReal cosAngle,bool frontDetection,bool backDetection,simReal forbiddenDist,bool fast,simReal& dist,C3Vector* detectPt,C3Vector* triN,bool* forbiddenDistTouched)
+bool CObbNode::checkRaySensorDistance_obb(const CObbStruct* obbStruct,const C4X4Matrix& shapeM,const C3Vector& raySegP,const C3Vector& raySegL,double cosAngle,bool frontDetection,bool backDetection,double forbiddenDist,bool fast,double& dist,C3Vector* detectPt,C3Vector* triN,bool* forbiddenDistTouched)
 {
     if (dist==0.0)
         return(false);
@@ -999,7 +999,7 @@ bool CObbNode::checkRaySensorDistance_obb(const CObbStruct* obbStruct,const C4X4
         CObbNode* nodes[2];
 
         // Faster by exploring the closest box first, instead of exploring the larger box first
-        simReal d[2]={dist,dist};
+        double d[2]={dist,dist};
         bool one=CCalcUtils::getDistance_box_pt(shapeM*obbNodes[0]->boxM,obbNodes[0]->boxHs,true,C3Vector::zeroVector,d[0],nullptr,nullptr);
         if (one)
             one=CCalcUtils::doCollide_box_segp(shapeM*obbNodes[0]->boxM,obbNodes[0]->boxHs,true,raySegP,raySegL);

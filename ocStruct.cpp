@@ -7,19 +7,19 @@ COcStruct::COcStruct()
     ocNode=new COcNode();
 }
 
-COcStruct::COcStruct(simReal cellS,const simReal* points,size_t pointCnt,const unsigned char* rgbData,const unsigned int* usrData,bool dataForEachPt)
+COcStruct::COcStruct(double cellS,const double* points,size_t pointCnt,const unsigned char* rgbData,const unsigned int* usrData,bool dataForEachPt)
 {
     // Create an OC tree from points
     ocNode=new COcNode();
     _create(cellS,points,pointCnt,rgbData,usrData,dataForEachPt);
 }
 
-COcStruct::COcStruct(const C4X4Matrix& ocM,simReal cellS,const CObbStruct* obbStruct,const C4X4Matrix& shapeM,const unsigned char* rgbData,unsigned int usrData)
+COcStruct::COcStruct(const C4X4Matrix& ocM,double cellS,const CObbStruct* obbStruct,const C4X4Matrix& shapeM,const unsigned char* rgbData,unsigned int usrData)
 {
     // Create an OC tree from a shape
     ocNode=new COcNode();
     C4X4Matrix tr(ocM.getInverse()*shapeM);
-    std::vector<simReal> points;
+    std::vector<double> points;
     for (size_t i=0;i<obbStruct->vertices.size()/3;i++)
     {
         C3Vector v(&obbStruct->vertices[3*i]);
@@ -32,12 +32,12 @@ COcStruct::COcStruct(const C4X4Matrix& ocM,simReal cellS,const CObbStruct* obbSt
     add_shape(ocM,obbStruct,shapeM,rgbData,usrData);
 }
 
-COcStruct::COcStruct(const C4X4Matrix& oc1M,simReal cell1S,const COcStruct* oc2Struct,const C4X4Matrix& oc2M,const unsigned char* rgbData,unsigned int usrData)
+COcStruct::COcStruct(const C4X4Matrix& oc1M,double cell1S,const COcStruct* oc2Struct,const C4X4Matrix& oc2M,const unsigned char* rgbData,unsigned int usrData)
 {
     // Create an OC tree from another OC tree
     ocNode=new COcNode();
     C4X4Matrix tr(oc1M.getInverse()*oc2M);
-    std::vector<simReal> points;
+    std::vector<double> points;
     oc2Struct->getVoxelsCorners(points);
     for (size_t i=0;i<points.size()/3;i++)
     {
@@ -51,11 +51,11 @@ COcStruct::COcStruct(const C4X4Matrix& oc1M,simReal cell1S,const COcStruct* oc2S
     add_octree(oc1M,oc2Struct,oc2M,rgbData,usrData);
 }
 
-void COcStruct::_create(simReal cellS,const simReal* points,size_t pointCnt,const unsigned char* rgbData,const unsigned int* usrData,bool dataForEachPt)
+void COcStruct::_create(double cellS,const double* points,size_t pointCnt,const unsigned char* rgbData,const unsigned int* usrData,bool dataForEachPt)
 {
     // Create an OC tree from points
     cellSize=cellS;
-    simReal ms=0.0;
+    double ms=0.0;
     for (size_t i=0;i<pointCnt;i++)
     {
         C3Vector v(points+3*i);
@@ -65,13 +65,13 @@ void COcStruct::_create(simReal cellS,const simReal* points,size_t pointCnt,cons
                 ms=fabs(v(j));
         }
     }
-    boxSize=ms*simReal(2.001);
-    simReal c=cellS*2.0;
+    boxSize=ms*double(2.001);
+    double c=cellS*2.0;
     while (c<boxSize)
         c*=2.0;
     boxSize=c;
     boxPos.clear();
-    std::vector<simReal> pts;
+    std::vector<double> pts;
     std::vector<unsigned char> rgbs;
     std::vector<unsigned int> usrs;
     if (!dataForEachPt)
@@ -114,7 +114,7 @@ COcStruct* COcStruct::copyYourself() const
     return(newOcStruct);
 }
 
-void COcStruct::scaleYourself(simReal f)
+void COcStruct::scaleYourself(double f)
 {
     cellSize*=f;
     boxSize*=f;
@@ -125,11 +125,11 @@ unsigned char* COcStruct::serialize(int& dataSize) const
 {
     std::vector<unsigned char> data;
     data.push_back(2); // ser ver
-    pushData(data,&boxSize,sizeof(simReal));
-    pushData(data,&cellSize,sizeof(simReal));
-    pushData(data,&boxPos(0),sizeof(simReal));
-    pushData(data,&boxPos(1),sizeof(simReal));
-    pushData(data,&boxPos(2),sizeof(simReal));
+    pushData(data,&boxSize,sizeof(double));
+    pushData(data,&cellSize,sizeof(double));
+    pushData(data,&boxPos(0),sizeof(double));
+    pushData(data,&boxPos(1),sizeof(double));
+    pushData(data,&boxPos(2),sizeof(double));
     for (size_t i=0;i<8;i++)
         ocNode->ocNodes[i]->serialize(data);
     unsigned char* retVal=new unsigned char[data.size()];
@@ -145,11 +145,11 @@ bool COcStruct::deserialize(const unsigned char* data)
     unsigned char ver=data[pos++];
     if (ver<=2)
     {
-        boxSize=(reinterpret_cast<const simReal*>(data+pos))[0];pos+=sizeof(simReal);
-        cellSize=(reinterpret_cast<const simReal*>(data+pos))[0];pos+=sizeof(simReal);
-        boxPos(0)=(reinterpret_cast<const simReal*>(data+pos))[0];pos+=sizeof(simReal);
-        boxPos(1)=(reinterpret_cast<const simReal*>(data+pos))[0];pos+=sizeof(simReal);
-        boxPos(2)=(reinterpret_cast<const simReal*>(data+pos))[0];pos+=sizeof(simReal);
+        boxSize=(reinterpret_cast<const double*>(data+pos))[0];pos+=sizeof(double);
+        cellSize=(reinterpret_cast<const double*>(data+pos))[0];pos+=sizeof(double);
+        boxPos(0)=(reinterpret_cast<const double*>(data+pos))[0];pos+=sizeof(double);
+        boxPos(1)=(reinterpret_cast<const double*>(data+pos))[0];pos+=sizeof(double);
+        boxPos(2)=(reinterpret_cast<const double*>(data+pos))[0];pos+=sizeof(double);
         ocNode->ocNodes=new COcNode* [8];
         for (size_t i=0;i<8;i++)
         {
@@ -165,17 +165,17 @@ unsigned char* COcStruct::serializeOld(int& dataSize) const
 {
     std::vector<unsigned char> data;
     data.push_back(2); // ser ver
-    floatFloat a;
-    a=(floatFloat)boxSize;
-    pushData(data,&a,sizeof(floatFloat));
-    a=(floatFloat)cellSize;
-    pushData(data,&a,sizeof(floatFloat));
-    a=(floatFloat)boxPos(0);
-    pushData(data,&a,sizeof(floatFloat));
-    a=(floatFloat)boxPos(1);
-    pushData(data,&a,sizeof(floatFloat));
-    a=(floatFloat)boxPos(2);
-    pushData(data,&a,sizeof(floatFloat));
+    float a;
+    a=(float)boxSize;
+    pushData(data,&a,sizeof(float));
+    a=(float)cellSize;
+    pushData(data,&a,sizeof(float));
+    a=(float)boxPos(0);
+    pushData(data,&a,sizeof(float));
+    a=(float)boxPos(1);
+    pushData(data,&a,sizeof(float));
+    a=(float)boxPos(2);
+    pushData(data,&a,sizeof(float));
     for (size_t i=0;i<8;i++)
         ocNode->ocNodes[i]->serialize(data);
     unsigned char* retVal=new unsigned char[data.size()];
@@ -191,11 +191,11 @@ bool COcStruct::deserializeOld(const unsigned char* data)
     unsigned char ver=data[pos++];
     if (ver<=2)
     {
-        boxSize=(floatDouble)(reinterpret_cast<const floatFloat*>(data+pos))[0];pos+=sizeof(floatFloat);
-        cellSize=(floatDouble)(reinterpret_cast<const floatFloat*>(data+pos))[0];pos+=sizeof(floatFloat);
-        boxPos(0)=(floatDouble)(reinterpret_cast<const floatFloat*>(data+pos))[0];pos+=sizeof(floatFloat);
-        boxPos(1)=(floatDouble)(reinterpret_cast<const floatFloat*>(data+pos))[0];pos+=sizeof(floatFloat);
-        boxPos(2)=(floatDouble)(reinterpret_cast<const floatFloat*>(data+pos))[0];pos+=sizeof(floatFloat);
+        boxSize=double((reinterpret_cast<const float*>(data+pos))[0]);pos+=sizeof(float);
+        cellSize=double((reinterpret_cast<const float*>(data+pos))[0]);pos+=sizeof(float);
+        boxPos(0)=double((reinterpret_cast<const float*>(data+pos))[0]);pos+=sizeof(float);
+        boxPos(1)=double((reinterpret_cast<const float*>(data+pos))[0]);pos+=sizeof(float);
+        boxPos(2)=double((reinterpret_cast<const float*>(data+pos))[0]);pos+=sizeof(float);
         ocNode->ocNodes=new COcNode* [8];
         for (size_t i=0;i<8;i++)
         {
@@ -207,19 +207,19 @@ bool COcStruct::deserializeOld(const unsigned char* data)
     return(false);
 }
 
-void COcStruct::getVoxelsPosAndRgb(std::vector<simReal>& voxelsPosAndRgb,std::vector<unsigned int>* userData/*=nullptr*/) const
+void COcStruct::getVoxelsPosAndRgb(std::vector<double>& voxelsPosAndRgb,std::vector<unsigned int>* userData/*=nullptr*/) const
 {
     for (size_t i=0;i<8;i++)
         ocNode->ocNodes[i]->getVoxelsPosAndRgb(voxelsPosAndRgb,boxSize,boxPos+ocNodeTranslations[i]*boxSize,userData);
 }
 
-void COcStruct::getVoxelsCorners(std::vector<simReal>& points) const
+void COcStruct::getVoxelsCorners(std::vector<double>& points) const
 {
     for (size_t i=0;i<8;i++)
         ocNode->ocNodes[i]->getVoxelsCorners(points,boxSize,boxPos+ocNodeTranslations[i]*boxSize);
 }
 
-void COcStruct::getOctreeCorners(std::vector<simReal>& points) const
+void COcStruct::getOctreeCorners(std::vector<double>& points) const
 {
     for (size_t i=0;i<8;i++)
         ocNode->ocNodes[i]->getOctreeCorners(points,boxSize,boxPos+ocNodeTranslations[i]*boxSize);
@@ -230,11 +230,11 @@ C3Vector COcStruct::getBoxPos() const
     return(boxPos);
 }
 
-bool COcStruct::deleteVoxels_pts(const simReal* points,size_t pointCnt)
+bool COcStruct::deleteVoxels_pts(const double* points,size_t pointCnt)
 {
     // Deletes voxels occupied by provided points
     bool retVal=true;
-    std::vector<simReal> pts;
+    std::vector<double> pts;
     for (size_t i=0;i<pointCnt;i++)
     {
         pts.push_back(points[3*i+0]-boxPos(0));
@@ -280,12 +280,12 @@ bool COcStruct::deleteVoxels_octree(const C4X4Matrix& oc1M,const COcStruct* oc2S
 }
 
 
-void COcStruct::add_pts(const simReal* points,size_t pointCnt,const unsigned char* rgbData,const unsigned int* usrData,bool dataForEachPt)
+void COcStruct::add_pts(const double* points,size_t pointCnt,const unsigned char* rgbData,const unsigned int* usrData,bool dataForEachPt)
 {
     // Adds points to an OC tree (extends it if needed)
     _extendOctreeIfNeeded(points,pointCnt);
     // Now add the points:
-    std::vector<simReal> pts;
+    std::vector<double> pts;
     std::vector<unsigned char> rgbs;
     std::vector<unsigned int> usrs;
     for (size_t i=0;i<pointCnt;i++)
@@ -316,7 +316,7 @@ void COcStruct::add_shape(const C4X4Matrix& ocM,const CObbStruct* obbStruct,cons
 {
     // First use the shape vertices to possibly extend the octree:
     C4X4Matrix tr(ocM.getInverse()*shapeM);
-    std::vector<simReal> pts;
+    std::vector<double> pts;
     for (size_t i=0;i<obbStruct->vertices.size()/3;i++)
     {
         C3Vector v(&obbStruct->vertices[3*i]);
@@ -339,7 +339,7 @@ void COcStruct::add_octree(const C4X4Matrix& oc1M,const COcStruct* oc2Struct,con
 {
     // First use the octree's corner vertices to possibly extend the octree:
     C4X4Matrix tr(oc1M.getInverse()*oc2M);
-    std::vector<simReal> pts;
+    std::vector<double> pts;
     oc2Struct->getVoxelsCorners(pts);
     for (size_t i=0;i<pts.size()/3;i++)
     {
@@ -362,7 +362,7 @@ void COcStruct::add_octree(const C4X4Matrix& oc1M,const COcStruct* oc2Struct,con
     }
 }
 
-void COcStruct::_extendOctreeIfNeeded(const simReal* points,size_t pointCnt)
+void COcStruct::_extendOctreeIfNeeded(const double* points,size_t pointCnt)
 {
     // Get bb around points:
     C3Vector maxV,minV;
@@ -413,7 +413,7 @@ void COcStruct::_extendOctreeIfNeeded(const simReal* points,size_t pointCnt)
             }
         }
 
-        boxPos+=C3Vector(simReal(dir[0]),simReal(dir[1]),simReal(dir[2]))*boxSize*0.5;
+        boxPos+=C3Vector(double(dir[0]),double(dir[1]),double(dir[2]))*boxSize*0.5;
         boxSize*=2.0;
         COcNode* newParentNode=new COcNode();
         newParentNode->ocNodes=new COcNode* [8];
@@ -438,7 +438,7 @@ bool COcStruct::doCollide_pt(const C3Vector& point,unsigned int* usrData,unsigne
     return(false);
 }
 
-bool COcStruct::doCollide_pts(const std::vector<simReal>& points) const
+bool COcStruct::doCollide_pts(const std::vector<double>& points) const
 {
     for (size_t i=0;i<8;i++)
     {
@@ -522,13 +522,13 @@ bool COcStruct::doCollide_ptcloud(const C4X4Matrix& ocM,const CPcStruct* pcStruc
 }
 //*
 
-bool COcStruct::getDistance_pt(const C3Vector& point,simReal& dist,C3Vector* minDistSegPt1,unsigned long long int* ocCaching) const
+bool COcStruct::getDistance_pt(const C3Vector& point,double& dist,C3Vector* minDistSegPt1,unsigned long long int* ocCaching) const
 {
     if (dist==0.0)
         return(false);
     bool retVal=false;
     // Check all 8 nodes, explore close nodes first:
-    std::vector<std::pair<simReal,SNodeTranslation>> nodesToExplore;
+    std::vector<std::pair<double,SNodeTranslation>> nodesToExplore;
     for (size_t i=0;i<8;i++)
     {
         SNodeTranslation nodeTranslation;
@@ -546,13 +546,13 @@ bool COcStruct::getDistance_pt(const C3Vector& point,simReal& dist,C3Vector* min
     return(retVal);
 }
 
-bool COcStruct::getDistance_seg(const C3Vector& segMiddle,const C3Vector& segHs,simReal& dist,C3Vector* ocMinDistSegPt,C3Vector* segMinDistSegPt,unsigned long long int* ocCaching) const
+bool COcStruct::getDistance_seg(const C3Vector& segMiddle,const C3Vector& segHs,double& dist,C3Vector* ocMinDistSegPt,C3Vector* segMinDistSegPt,unsigned long long int* ocCaching) const
 {
     if (dist==0.0)
         return(false);
     bool retVal=false;
     // Check all 8 nodes, explore close nodes first:
-    std::vector<std::pair<simReal,SNodeTranslation>> nodesToExplore;
+    std::vector<std::pair<double,SNodeTranslation>> nodesToExplore;
     for (size_t i=0;i<8;i++)
     {
         SNodeTranslation nodeTranslation;
@@ -570,13 +570,13 @@ bool COcStruct::getDistance_seg(const C3Vector& segMiddle,const C3Vector& segHs,
     return(retVal);
 }
 
-bool COcStruct::getDistance_tri(const C3Vector& p,const C3Vector& v,const C3Vector& w,simReal& dist,C3Vector* ocMinDistSegPt,C3Vector* triMinDistSegPt,unsigned long long int* ocCaching) const
+bool COcStruct::getDistance_tri(const C3Vector& p,const C3Vector& v,const C3Vector& w,double& dist,C3Vector* ocMinDistSegPt,C3Vector* triMinDistSegPt,unsigned long long int* ocCaching) const
 {
     if (dist==0.0)
         return(false);
     bool retVal=false;
     // Check all 8 nodes, explore close nodes first:
-    std::vector<std::pair<simReal,SNodeTranslation>> nodesToExplore;
+    std::vector<std::pair<double,SNodeTranslation>> nodesToExplore;
     for (size_t i=0;i<8;i++)
     {
         SNodeTranslation nodeTranslation;
@@ -594,7 +594,7 @@ bool COcStruct::getDistance_tri(const C3Vector& p,const C3Vector& v,const C3Vect
     return(retVal);
 }
 
-bool COcStruct::getDistance_shape(const C4X4Matrix& ocM,const CObbStruct* obbStruct,const C4X4Matrix& shapeM,simReal& dist,C3Vector* ocMinDistSegPt,C3Vector* shapeMinDistSegPt,unsigned long long int* ocCaching,int* obbCaching) const
+bool COcStruct::getDistance_shape(const C4X4Matrix& ocM,const CObbStruct* obbStruct,const C4X4Matrix& shapeM,double& dist,C3Vector* ocMinDistSegPt,C3Vector* shapeMinDistSegPt,unsigned long long int* ocCaching,int* obbCaching) const
 {
     if (dist==0.0)
         return(false);
@@ -604,7 +604,7 @@ bool COcStruct::getDistance_shape(const C4X4Matrix& ocM,const CObbStruct* obbStr
     return(retVal);
 }
 
-bool COcStruct::getCell(const C4X4Matrix& ocM,const unsigned long long int ocCaching,simReal& cellS,C4X4Matrix& cellPos,unsigned int* usrData) const
+bool COcStruct::getCell(const C4X4Matrix& ocM,const unsigned long long int ocCaching,double& cellS,C4X4Matrix& cellPos,unsigned int* usrData) const
 {
     bool retVal=false;
     unsigned long long int cellPath=(ocCaching>>6)<<6;
@@ -625,7 +625,7 @@ bool COcStruct::getCell(const C4X4Matrix& ocM,const unsigned long long int ocCac
     return(retVal);
 }
 
-bool COcStruct::getDistance_octree(const C4X4Matrix& oc1M,const COcStruct* oc2Struct,const C4X4Matrix& oc2M,simReal& dist,C3Vector* oc1MinDistSegPt,C3Vector* oc2MinDistSegPt,unsigned long long int* oc1Caching,unsigned long long int* oc2Caching) const
+bool COcStruct::getDistance_octree(const C4X4Matrix& oc1M,const COcStruct* oc2Struct,const C4X4Matrix& oc2M,double& dist,C3Vector* oc1MinDistSegPt,C3Vector* oc2MinDistSegPt,unsigned long long int* oc1Caching,unsigned long long int* oc2Caching) const
 {
     if (dist==0.0)
         return(false);
@@ -635,11 +635,11 @@ bool COcStruct::getDistance_octree(const C4X4Matrix& oc1M,const COcStruct* oc2St
     C4X4Matrix m2(oc2M);
     m2.X+=oc2M.M*oc2Struct->boxPos;
     // First check cached values to initially possibly reduce 'dist':
-    simReal cS1;
+    double cS1;
     C4X4Matrix m1p;
     if (getCell(oc1M,oc1Caching[0],cS1,m1p,nullptr))
     {
-        simReal cS2;
+        double cS2;
         C4X4Matrix m2p;
         if (getCell(oc2M,oc2Caching[0],cS2,m2p,nullptr))
         {
@@ -648,7 +648,7 @@ bool COcStruct::getDistance_octree(const C4X4Matrix& oc1M,const COcStruct* oc2St
         }
     }
     // Now check all 8*8 node pairs, explore close node pairs first:
-    std::vector<std::pair<simReal,SNodeTranslationPair>> nodePairsToExplore;
+    std::vector<std::pair<double,SNodeTranslationPair>> nodePairsToExplore;
     for (size_t i=0;i<8;i++)
     {
         SNodeTranslationPair nodeTranslationPairs;
@@ -658,7 +658,7 @@ bool COcStruct::getDistance_octree(const C4X4Matrix& oc1M,const COcStruct* oc2St
         {
             nodeTranslationPairs.transl2=ocNodeTranslations[j]*oc2Struct->boxSize;
             nodeTranslationPairs.index2=j;
-            simReal d=((m2*nodeTranslationPairs.transl2)-(m1*nodeTranslationPairs.transl1)).getLength();
+            double d=((m2*nodeTranslationPairs.transl2)-(m1*nodeTranslationPairs.transl1)).getLength();
             nodePairsToExplore.push_back(std::make_pair(d,nodeTranslationPairs));
         }
     }
@@ -675,7 +675,7 @@ bool COcStruct::getDistance_octree(const C4X4Matrix& oc1M,const COcStruct* oc2St
     return(retVal);
 }
 
-bool COcStruct::getDistance_ptcloud(const C4X4Matrix& ocM,const CPcStruct* pcStruct,const C4X4Matrix& pcM,simReal& dist,C3Vector* ocMinDistSegPt,C3Vector* pcMinDistSegPt,unsigned long long int* ocCaching,unsigned long long int* pcCaching) const
+bool COcStruct::getDistance_ptcloud(const C4X4Matrix& ocM,const CPcStruct* pcStruct,const C4X4Matrix& pcM,double& dist,C3Vector* ocMinDistSegPt,C3Vector* pcMinDistSegPt,unsigned long long int* ocCaching,unsigned long long int* pcCaching) const
 {
     if (dist==0.0)
         return(false);
@@ -685,7 +685,7 @@ bool COcStruct::getDistance_ptcloud(const C4X4Matrix& ocM,const CPcStruct* pcStr
     C4X4Matrix m2(pcM);
     m2.X+=pcM.M*pcStruct->boxPos;
     // Check all 8*8 node pairs, explore close node pairs first:
-    std::vector<std::pair<simReal,SNodeTranslationPair>> nodePairsToExplore;
+    std::vector<std::pair<double,SNodeTranslationPair>> nodePairsToExplore;
     for (size_t i=0;i<8;i++)
     {
         SNodeTranslationPair nodeTranslationPairs;
@@ -695,7 +695,7 @@ bool COcStruct::getDistance_ptcloud(const C4X4Matrix& ocM,const CPcStruct* pcStr
         {
             nodeTranslationPairs.transl2=ocNodeTranslations[j]*pcStruct->boxSize;
             nodeTranslationPairs.index2=j;
-            simReal d=((m2*nodeTranslationPairs.transl2)-(m1*nodeTranslationPairs.transl1)).getLength();
+            double d=((m2*nodeTranslationPairs.transl2)-(m1*nodeTranslationPairs.transl1)).getLength();
             nodePairsToExplore.push_back(std::make_pair(d,nodeTranslationPairs));
         }
     }
@@ -712,7 +712,7 @@ bool COcStruct::getDistance_ptcloud(const C4X4Matrix& ocM,const CPcStruct* pcStr
     return(retVal);
 }
 
-bool COcStruct::getSensorDistance(const C4X4Matrix& ocM,const CVolumePlanes& planesIn,const CVolumePlanes& planesOut,simReal cosAngle,bool frontDetection,bool backDetection,bool fast,simReal& dist,C3Vector* detectPt,C3Vector* triN) const
+bool COcStruct::getSensorDistance(const C4X4Matrix& ocM,const CVolumePlanes& planesIn,const CVolumePlanes& planesOut,double cosAngle,bool frontDetection,bool backDetection,bool fast,double& dist,C3Vector* detectPt,C3Vector* triN) const
 {
     if (dist==0.0)
         return(false);
@@ -720,13 +720,13 @@ bool COcStruct::getSensorDistance(const C4X4Matrix& ocM,const CVolumePlanes& pla
     C4X4Matrix m(ocM);
     m.X+=ocM.M*boxPos;
     // Check all 8 nodes, explore close nodes first (close to the sensor pt):
-    std::vector<std::pair<simReal,SNodeTranslation>> nodesToExplore;
+    std::vector<std::pair<double,SNodeTranslation>> nodesToExplore;
     for (size_t i=0;i<8;i++)
     {
         SNodeTranslation nodeTranslation;
         nodeTranslation.transl=ocNodeTranslations[i]*boxSize;
         nodeTranslation.index=i;
-        simReal d=(m*nodeTranslation.transl).getLength();
+        double d=(m*nodeTranslation.transl).getLength();
         nodesToExplore.push_back(std::make_pair(d,nodeTranslation));
     }
     std::sort(nodesToExplore.begin(),nodesToExplore.end());
@@ -742,7 +742,7 @@ bool COcStruct::getSensorDistance(const C4X4Matrix& ocM,const CVolumePlanes& pla
     return(retVal);
 }
 
-bool COcStruct::getRaySensorDistance(const C4X4Matrix& ocM,const C3Vector& raySegP,const C3Vector& raySegL,simReal forbiddenDist,simReal cosAngle,bool frontDetection,bool backDetection,bool fast,simReal& dist,C3Vector* detectPt,C3Vector* triN,bool* forbiddenDistTouched) const
+bool COcStruct::getRaySensorDistance(const C4X4Matrix& ocM,const C3Vector& raySegP,const C3Vector& raySegL,double forbiddenDist,double cosAngle,bool frontDetection,bool backDetection,bool fast,double& dist,C3Vector* detectPt,C3Vector* triN,bool* forbiddenDistTouched) const
 {
     if (dist==0.0)
         return(false);
@@ -750,13 +750,13 @@ bool COcStruct::getRaySensorDistance(const C4X4Matrix& ocM,const C3Vector& raySe
     C4X4Matrix m(ocM);
     m.X+=ocM.M*boxPos;
     // Check all 8 nodes, explore close nodes first (close to the sensor pt):
-    std::vector<std::pair<simReal,SNodeTranslation>> nodesToExplore;
+    std::vector<std::pair<double,SNodeTranslation>> nodesToExplore;
     for (size_t i=0;i<8;i++)
     {
         SNodeTranslation nodeTranslation;
         nodeTranslation.transl=ocNodeTranslations[i]*boxSize;
         nodeTranslation.index=i;
-        simReal d=(m*nodeTranslation.transl).getLength();
+        double d=(m*nodeTranslation.transl).getLength();
         nodesToExplore.push_back(std::make_pair(d,nodeTranslation));
     }
     std::sort(nodesToExplore.begin(),nodesToExplore.end());

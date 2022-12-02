@@ -7,14 +7,14 @@ COcNode::COcNode()
     ocNodes=nullptr;
 }
 
-COcNode::COcNode(simReal boxS,const C3Vector& boxCenter,simReal cellS,const std::vector<simReal>& points,const std::vector<unsigned char>& rgbData,const std::vector<unsigned int>& usrData,bool dataForEachPt)
+COcNode::COcNode(double boxS,const C3Vector& boxCenter,double cellS,const std::vector<double>& points,const std::vector<unsigned char>& rgbData,const std::vector<unsigned int>& usrData,bool dataForEachPt)
 {
     empty=true;
     ocNodes=nullptr;
-    simReal boxHsp=boxS*simReal(0.5001);
-    if (boxS>cellS*simReal(1.5))
+    double boxHsp=boxS*double(0.5001);
+    if (boxS>cellS*double(1.5))
     {
-        std::vector<simReal> pts;
+        std::vector<double> pts;
         std::vector<unsigned char> rgbs;
         std::vector<unsigned int> usrs;
         for (size_t i=0;i<points.size()/3;i++)
@@ -148,7 +148,7 @@ void COcNode::deserialize(const unsigned char* data,int& pos)
     }
 }
 
-bool COcNode::getCell(const C3Vector& boxCenter,simReal boxSize,unsigned long long int ocCaching,C3Vector& totalTranslation,unsigned int* usrData) const
+bool COcNode::getCell(const C3Vector& boxCenter,double boxSize,unsigned long long int ocCaching,C3Vector& totalTranslation,unsigned int* usrData) const
 {
     bool retVal=false;
     unsigned long long int cellPath=(ocCaching>>6)<<6;
@@ -175,16 +175,16 @@ bool COcNode::getCell(const C3Vector& boxCenter,simReal boxSize,unsigned long lo
     return(retVal);
 }
 
-void COcNode::getVoxelsPosAndRgb(std::vector<simReal>& voxelsPosAndRgb,simReal pBoxSize,const C3Vector& boxCenter,std::vector<unsigned int>* usrData/*=nullptr*/) const
+void COcNode::getVoxelsPosAndRgb(std::vector<double>& voxelsPosAndRgb,double pBoxSize,const C3Vector& boxCenter,std::vector<unsigned int>* usrData/*=nullptr*/) const
 {
     if (!empty)
     {
         voxelsPosAndRgb.push_back(boxCenter(0));
         voxelsPosAndRgb.push_back(boxCenter(1));
         voxelsPosAndRgb.push_back(boxCenter(2));
-        voxelsPosAndRgb.push_back(simReal(rgb[0])/simReal(254.99));
-        voxelsPosAndRgb.push_back(simReal(rgb[1])/simReal(254.99));
-        voxelsPosAndRgb.push_back(simReal(rgb[2])/simReal(254.99));
+        voxelsPosAndRgb.push_back(double(rgb[0])/double(254.99));
+        voxelsPosAndRgb.push_back(double(rgb[1])/double(254.99));
+        voxelsPosAndRgb.push_back(double(rgb[2])/double(254.99));
         if (usrData!=nullptr)
             usrData->push_back(userData);
     }
@@ -195,7 +195,7 @@ void COcNode::getVoxelsPosAndRgb(std::vector<simReal>& voxelsPosAndRgb,simReal p
     }
 }
 
-void COcNode::getVoxelsCorners(std::vector<simReal>& points,simReal pBoxSize,const C3Vector& boxCenter) const
+void COcNode::getVoxelsCorners(std::vector<double>& points,double pBoxSize,const C3Vector& boxCenter) const
 {
     if (!empty)
     {
@@ -214,7 +214,7 @@ void COcNode::getVoxelsCorners(std::vector<simReal>& points,simReal pBoxSize,con
     }
 }
 
-void COcNode::getOctreeCorners(std::vector<simReal>& points,simReal pBoxSize,const C3Vector& boxCenter) const
+void COcNode::getOctreeCorners(std::vector<double>& points,double pBoxSize,const C3Vector& boxCenter) const
 {
     for (size_t i=0;i<8;i++)
     {
@@ -230,13 +230,13 @@ void COcNode::getOctreeCorners(std::vector<simReal>& points,simReal pBoxSize,con
     }
 }
 
-bool COcNode::deleteVoxels_pts(simReal boxS,const C3Vector& boxCenter,const std::vector<simReal>& points)
+bool COcNode::deleteVoxels_pts(double boxS,const C3Vector& boxCenter,const std::vector<double>& points)
 {
     bool retVal=true;
-    simReal boxHsp=boxS*simReal(0.5001);
+    double boxHsp=boxS*double(0.5001);
     if (ocNodes!=nullptr)
     {
-        std::vector<simReal> pts;
+        std::vector<double> pts;
         for (size_t i=0;i<points.size()/3;i++)
         {
             C3Vector pt(&points[3*i]);
@@ -290,10 +290,10 @@ bool COcNode::deleteVoxels_pts(simReal boxS,const C3Vector& boxCenter,const std:
     return(retVal); // true: this OC node is empty
 }
 
-bool COcNode::deleteVoxels_shape(const C4X4Matrix& ocM,simReal boxS,const C3Vector& boxCenter,const CObbStruct* obbStruct,const CObbNode* obb,const C4X4Matrix& shapeM)
+bool COcNode::deleteVoxels_shape(const C4X4Matrix& ocM,double boxS,const C3Vector& boxCenter,const CObbStruct* obbStruct,const CObbNode* obb,const C4X4Matrix& shapeM)
 {
     bool retVal=true;
-    simReal boxHsp=boxS*simReal(0.5001);
+    double boxHsp=boxS*double(0.5001);
     C4X4Matrix tr(ocM);
     tr.X+=ocM.M*boxCenter;
     tr.inverse();
@@ -302,8 +302,8 @@ bool COcNode::deleteVoxels_shape(const C4X4Matrix& ocM,simReal boxS,const C3Vect
     {
         if (CCalcUtils::doCollide_box_cell(tr*obb->boxM,obb->boxHs,boxHsp,true))
         {
-            simReal cellV=boxHsp*boxHsp*boxHsp;
-            simReal nodeV=obb->boxHs(0)*obb->boxHs(1)*obb->boxHs(2);
+            double cellV=boxHsp*boxHsp*boxHsp;
+            double nodeV=obb->boxHs(0)*obb->boxHs(1)*obb->boxHs(2);
             if ( (cellV<nodeV)&&(obb->leafTris==nullptr) )
             {
                 retVal=false;
@@ -373,13 +373,13 @@ bool COcNode::deleteVoxels_shape(const C4X4Matrix& ocM,simReal boxS,const C3Vect
     return(retVal); // true: this OC node is empty
 }
 
-bool COcNode::deleteVoxels_octree(const C4X4Matrix& oc1M,simReal box1S,const C3Vector& box1Center,const COcNode* oc2Node,const C4X4Matrix& oc2M,simReal box2S,const C3Vector& box2Center)
+bool COcNode::deleteVoxels_octree(const C4X4Matrix& oc1M,double box1S,const C3Vector& box1Center,const COcNode* oc2Node,const C4X4Matrix& oc2M,double box2S,const C3Vector& box2Center)
 {
     bool retVal=true;
-    simReal box1Hsp=box1S*simReal(0.5001);
+    double box1Hsp=box1S*double(0.5001);
     C4X4Matrix tr1(oc1M);
     tr1.X+=oc1M.M*box1Center;
-    simReal box2Hsp=box2S*simReal(0.5001);
+    double box2Hsp=box2S*double(0.5001);
     C4X4Matrix tr2(oc2M);
     tr2.X+=oc2M.M*box2Center;
     C4X4Matrix oc2MRel(tr1.getInverse()*tr2);
@@ -436,12 +436,12 @@ bool COcNode::deleteVoxels_octree(const C4X4Matrix& oc1M,simReal box1S,const C3V
     return(retVal); // true: this OC node is empty
 }
 
-void COcNode::add_pts(simReal cellS,simReal boxS,const C3Vector& boxCenter,const std::vector<simReal>& points,const std::vector<unsigned char>& rgbData,const std::vector<unsigned int>& usrData,bool dataForEachPt)
+void COcNode::add_pts(double cellS,double boxS,const C3Vector& boxCenter,const std::vector<double>& points,const std::vector<unsigned char>& rgbData,const std::vector<unsigned int>& usrData,bool dataForEachPt)
 {
-    simReal boxHsp=boxS*simReal(0.5001);
-    if (boxS>cellS*simReal(1.5))
+    double boxHsp=boxS*double(0.5001);
+    if (boxS>cellS*double(1.5))
     { // not a leaf node yet..
-        std::vector<simReal> pts;
+        std::vector<double> pts;
         std::vector<unsigned char> rgbs;
         std::vector<unsigned int> usrs;
         for (size_t i=0;i<points.size()/3;i++)
@@ -515,14 +515,14 @@ void COcNode::add_pts(simReal cellS,simReal boxS,const C3Vector& boxCenter,const
     }
 }
 
-bool COcNode::add_shape(const C4X4Matrix& ocM,simReal cellS,simReal boxS,const C3Vector& boxCenter,const CObbStruct* obbStruct,const CObbNode* obb,const C4X4Matrix& shapeM,const unsigned char* rgbData,unsigned int usrData)
+bool COcNode::add_shape(const C4X4Matrix& ocM,double cellS,double boxS,const C3Vector& boxCenter,const CObbStruct* obbStruct,const CObbNode* obb,const C4X4Matrix& shapeM,const unsigned char* rgbData,unsigned int usrData)
 {
     bool retVal=false;
-    simReal boxHsp=boxS*simReal(0.5001);
+    double boxHsp=boxS*double(0.5001);
     C4X4Matrix shapeMRel(ocM);
     shapeMRel.X+=ocM.M*boxCenter;
     shapeMRel=shapeMRel.getInverse()*shapeM;
-    if (boxS>cellS*simReal(1.5))
+    if (boxS>cellS*double(1.5))
     { // not a leaf node yet..
         C4X4Matrix m(shapeMRel*obb->boxM);
         if (CCalcUtils::doCollide_box_cell(m,obb->boxHs,boxHsp,true))
@@ -592,17 +592,17 @@ bool COcNode::add_shape(const C4X4Matrix& ocM,simReal cellS,simReal boxS,const C
     return(retVal); // true: at least one new voxel was added
 }
 
-bool COcNode::add_octree(const C4X4Matrix& oc1M,simReal cell1S,simReal box1S,const C3Vector& box1Center,const COcNode* oc2Node,const C4X4Matrix& oc2M,simReal box2S,const C3Vector& box2Center,const unsigned char* rgbData,unsigned int usrData)
+bool COcNode::add_octree(const C4X4Matrix& oc1M,double cell1S,double box1S,const C3Vector& box1Center,const COcNode* oc2Node,const C4X4Matrix& oc2M,double box2S,const C3Vector& box2Center,const unsigned char* rgbData,unsigned int usrData)
 {
     bool retVal=false;
-    simReal box1Hsp=box1S*simReal(0.5001);
-    simReal box2Hsp=box2S*simReal(0.5001);
+    double box1Hsp=box1S*double(0.5001);
+    double box2Hsp=box2S*double(0.5001);
     C4X4Matrix m1(oc1M);
     m1.X+=oc1M.M*box1Center;
     C4X4Matrix m2(oc2M);
     m2.X+=oc2M.M*box2Center;
     C4X4Matrix oc2MRel(m1.getInverse()*m2);
-    if (box1S>cell1S*simReal(1.5))
+    if (box1S>cell1S*double(1.5))
     { // not a leaf node yet..
         if (CCalcUtils::doCollide_box_cell(oc2MRel,C3Vector(box2Hsp,box2Hsp,box2Hsp),box1Hsp,true))
         { // the two ocnode boxes collide. Continue exploration by exploring the largest volume first:
@@ -663,10 +663,10 @@ bool COcNode::add_octree(const C4X4Matrix& oc1M,simReal cell1S,simReal box1S,con
     return(retVal); // true: at least one new voxel was added
 }
 
-bool COcNode::doCollide_pt(const C3Vector& point,simReal boxS,unsigned long long int boxCacheLocation,unsigned int* usrData,unsigned long long int* ocCaching) const
+bool COcNode::doCollide_pt(const C3Vector& point,double boxS,unsigned long long int boxCacheLocation,unsigned int* usrData,unsigned long long int* ocCaching) const
 {
     bool retVal=false;
-    simReal boxHsp=boxS*simReal(0.5001);
+    double boxHsp=boxS*double(0.5001);
     if (empty)
     {
         if (ocNodes!=nullptr)
@@ -698,13 +698,13 @@ bool COcNode::doCollide_pt(const C3Vector& point,simReal boxS,unsigned long long
     return(retVal);
 }
 
-bool COcNode::doCollide_pts(const std::vector<simReal>& points,const C3Vector& boxPosRelToParent,simReal boxS) const
+bool COcNode::doCollide_pts(const std::vector<double>& points,const C3Vector& boxPosRelToParent,double boxS) const
 {
     bool retVal=false;
-    simReal boxHsp=boxS*simReal(0.5001);
+    double boxHsp=boxS*double(0.5001);
     if ( (!empty)||(ocNodes!=nullptr) )
     {   // compute pts rel to this box:
-        std::vector<simReal> pts;
+        std::vector<double> pts;
         for (size_t i=0;i<points.size()/3;i++)
         {
             C3Vector v(&points[3*i]);
@@ -737,10 +737,10 @@ bool COcNode::doCollide_pts(const std::vector<simReal>& points,const C3Vector& b
     return(retVal);
 }
 
-bool COcNode::doCollide_seg(const C3Vector& segMiddle,const C3Vector& segHs,simReal boxS,unsigned long long int boxCacheLocation,unsigned int* usrData,unsigned long long int* ocCaching) const
+bool COcNode::doCollide_seg(const C3Vector& segMiddle,const C3Vector& segHs,double boxS,unsigned long long int boxCacheLocation,unsigned int* usrData,unsigned long long int* ocCaching) const
 {
     bool retVal=false;
-    simReal boxHsp=boxS*simReal(0.5001);
+    double boxHsp=boxS*double(0.5001);
     if (empty)
     {
         if (ocNodes!=nullptr)
@@ -772,10 +772,10 @@ bool COcNode::doCollide_seg(const C3Vector& segMiddle,const C3Vector& segHs,simR
     return(retVal);
 }
 
-bool COcNode::doCollide_tri(const C3Vector& p,const C3Vector& v,const C3Vector& w,simReal boxS,unsigned long long int boxCacheLocation,unsigned int* usrData,unsigned long long int* ocCaching) const
+bool COcNode::doCollide_tri(const C3Vector& p,const C3Vector& v,const C3Vector& w,double boxS,unsigned long long int boxCacheLocation,unsigned int* usrData,unsigned long long int* ocCaching) const
 {
     bool retVal=false;
-    simReal boxHsp=boxS*simReal(0.5001);
+    double boxHsp=boxS*double(0.5001);
     if (empty)
     {
         if (ocNodes!=nullptr)
@@ -807,14 +807,14 @@ bool COcNode::doCollide_tri(const C3Vector& p,const C3Vector& v,const C3Vector& 
     return(retVal);
 }
 
-bool COcNode::doCollide_shape(const C4X4Matrix& ocM,simReal cellS,simReal boxS,const C3Vector& boxCenter,unsigned long long int ocCacheValueHere,const CObbStruct* obbStruct,const CObbNode* obb,const C4X4Matrix& shapeM,unsigned long long int* ocCaching,int* meshCaching) const
+bool COcNode::doCollide_shape(const C4X4Matrix& ocM,double cellS,double boxS,const C3Vector& boxCenter,unsigned long long int ocCacheValueHere,const CObbStruct* obbStruct,const CObbNode* obb,const C4X4Matrix& shapeM,unsigned long long int* ocCaching,int* meshCaching) const
 {
     bool retVal=false;
-    simReal boxHsp=boxS*simReal(0.5001);
+    double boxHsp=boxS*double(0.5001);
     C4X4Matrix shapeMRel(ocM);
     shapeMRel.X+=ocM.M*boxCenter;
     shapeMRel=shapeMRel.getInverse()*shapeM;
-    if (boxS>cellS*simReal(1.5))
+    if (boxS>cellS*double(1.5))
     { // not a leaf node yet..
         C4X4Matrix m(shapeMRel*obb->boxM);
         if (CCalcUtils::doCollide_box_cell(m,obb->boxHs,boxHsp,true))
@@ -894,17 +894,17 @@ bool COcNode::doCollide_shape(const C4X4Matrix& ocM,simReal cellS,simReal boxS,c
     return(retVal);
 }
 
-bool COcNode::doCollide_octree(const C4X4Matrix& oc1M,simReal cell1S,simReal box1S,const C3Vector& box1Center,unsigned long long int oc1CacheValueHere,const COcNode* oc2Node,const C4X4Matrix& oc2M,simReal box2S,const C3Vector& box2Center,unsigned long long int oc2CacheValueHere,unsigned long long* oc1Caching,unsigned long long* oc2Caching) const
+bool COcNode::doCollide_octree(const C4X4Matrix& oc1M,double cell1S,double box1S,const C3Vector& box1Center,unsigned long long int oc1CacheValueHere,const COcNode* oc2Node,const C4X4Matrix& oc2M,double box2S,const C3Vector& box2Center,unsigned long long int oc2CacheValueHere,unsigned long long* oc1Caching,unsigned long long* oc2Caching) const
 {
     bool retVal=false;
-    simReal box1Hsp=box1S*simReal(0.5001);
-    simReal box2Hsp=box2S*simReal(0.5001);
+    double box1Hsp=box1S*double(0.5001);
+    double box2Hsp=box2S*double(0.5001);
     C4X4Matrix m1(oc1M);
     m1.X+=oc1M.M*box1Center;
     C4X4Matrix m2(oc2M);
     m2.X+=oc2M.M*box2Center;
     C4X4Matrix oc2MRel(m1.getInverse()*m2);
-    if (box1S>cell1S*simReal(1.5))
+    if (box1S>cell1S*double(1.5))
     { // not a leaf node yet..
         if (CCalcUtils::doCollide_box_cell(oc2MRel,C3Vector(box2Hsp,box2Hsp,box2Hsp),box1Hsp,true))
         { // the two ocnode boxes collide. Continue exploration by exploring the largest volume first:
@@ -972,17 +972,17 @@ bool COcNode::doCollide_octree(const C4X4Matrix& oc1M,simReal cell1S,simReal box
     return(retVal);
 }
 
-bool COcNode::doCollide_ptcloud(const C4X4Matrix& ocM,simReal ocCellS,simReal ocBoxS,const C3Vector& ocBoxCenter,unsigned long long int ocCacheValueHere,const CPcNode* pcNode,const C4X4Matrix& pcM,simReal pcBoxS,const C3Vector& pcBoxCenter,unsigned long long int pcCacheValueHere,unsigned long long* ocCaching,unsigned long long* pcCaching) const
+bool COcNode::doCollide_ptcloud(const C4X4Matrix& ocM,double ocCellS,double ocBoxS,const C3Vector& ocBoxCenter,unsigned long long int ocCacheValueHere,const CPcNode* pcNode,const C4X4Matrix& pcM,double pcBoxS,const C3Vector& pcBoxCenter,unsigned long long int pcCacheValueHere,unsigned long long* ocCaching,unsigned long long* pcCaching) const
 {
     bool retVal=false;
-    simReal ocBoxHsp=ocBoxS*simReal(0.5001);
-    simReal pcBoxHsp=pcBoxS*simReal(0.5001);
+    double ocBoxHsp=ocBoxS*double(0.5001);
+    double pcBoxHsp=pcBoxS*double(0.5001);
     C4X4Matrix m1(ocM);
     m1.X+=ocM.M*ocBoxCenter;
     C4X4Matrix m2(pcM);
     m2.X+=pcM.M*pcBoxCenter;
     C4X4Matrix pcMRel(m1.getInverse()*m2);
-    if (ocBoxS>ocCellS*simReal(1.5))
+    if (ocBoxS>ocCellS*double(1.5))
     { // not a leaf node yet for the octree..
         if (CCalcUtils::doCollide_box_cell(pcMRel,C3Vector(pcBoxHsp,pcBoxHsp,pcBoxHsp),ocBoxHsp,true))
         { // the OC node box and the PC node box collide. Continue exploration by exploring the largest volume first:
@@ -1059,7 +1059,7 @@ bool COcNode::doCollide_ptcloud(const C4X4Matrix& ocM,simReal ocCellS,simReal oc
     return(retVal);
 }
 
-bool COcNode::getDistance_shape(const C4X4Matrix& ocM,simReal ocBoxS,const C3Vector& ocBoxCenter,unsigned long long int ocCacheValueHere,const CObbStruct* obbStruct,const CObbNode* obb,const C4X4Matrix& shapeM,simReal& dist,C3Vector* ocMinDistSegPt,C3Vector* shapeMinDistSegPt,unsigned long long int* ocCaching,int* obbCaching) const
+bool COcNode::getDistance_shape(const C4X4Matrix& ocM,double ocBoxS,const C3Vector& ocBoxCenter,unsigned long long int ocCacheValueHere,const CObbStruct* obbStruct,const CObbNode* obb,const C4X4Matrix& shapeM,double& dist,C3Vector* ocMinDistSegPt,C3Vector* shapeMinDistSegPt,unsigned long long int* ocCaching,int* obbCaching) const
 {
     bool retVal=false;
     if (dist==0.0)
@@ -1067,7 +1067,7 @@ bool COcNode::getDistance_shape(const C4X4Matrix& ocM,simReal ocBoxS,const C3Vec
     C4X4Matrix ocTr(ocM);
     ocTr.X+=ocM.M*ocBoxCenter;
     C4X4Matrix shapeTr(shapeM*obb->boxM);
-    simReal dd=CCalcUtils::getApproxDistance_box_box(ocTr,C3Vector(ocBoxS*0.5,ocBoxS*0.5,ocBoxS*0.5),shapeTr,obb->boxHs);
+    double dd=CCalcUtils::getApproxDistance_box_box(ocTr,C3Vector(ocBoxS*0.5,ocBoxS*0.5,ocBoxS*0.5),shapeTr,obb->boxHs);
     if (dd<dist)
     { // we may be closer than dist
         bool exploreObbNode=false;
@@ -1076,7 +1076,7 @@ bool COcNode::getDistance_shape(const C4X4Matrix& ocM,simReal ocBoxS,const C3Vec
             if ( (obb->leafTris!=nullptr)||(ocBoxS*ocBoxS*ocBoxS>obb->boxHs(0)*obb->boxHs(1)*obb->boxHs(2)) )
             { // explore the OC node. Pick the box closer to the OBB box
                 C4X4Matrix shapeTrRel(ocTr.getInverse()*shapeTr);
-                std::vector<std::pair<simReal,SNodeTranslation>> nodesToExplore;
+                std::vector<std::pair<double,SNodeTranslation>> nodesToExplore;
                 for (size_t i=0;i<8;i++)
                 {
                     SNodeTranslation nodeTranslation;
@@ -1138,7 +1138,7 @@ bool COcNode::getDistance_shape(const C4X4Matrix& ocM,simReal ocBoxS,const C3Vec
         if (exploreObbNode)
         {
             const CObbNode* nodes[2];
-            simReal d[2]={dist,dist};
+            double d[2]={dist,dist};
             CCalcUtils::isApproxDistanceSmaller_box_box_fast(ocTr,C3Vector(ocBoxS,ocBoxS,ocBoxS),shapeM*obb->obbNodes[0]->boxM,obb->obbNodes[0]->boxHs,d[0]);
             CCalcUtils::isApproxDistanceSmaller_box_box_fast(ocTr,C3Vector(ocBoxS,ocBoxS,ocBoxS),shapeM*obb->obbNodes[1]->boxM,obb->obbNodes[1]->boxHs,d[1]);
             if (d[0]<=d[1])
@@ -1163,14 +1163,14 @@ bool COcNode::getDistance_shape(const C4X4Matrix& ocM,simReal ocBoxS,const C3Vec
     return(retVal);
 }
 
-bool COcNode::getDistance_pt(const C3Vector& point,simReal boxS,const C3Vector& boxCenter,unsigned long long int cacheValueHere,simReal& dist,C3Vector* minDistSegPt,unsigned long long int* caching) const
+bool COcNode::getDistance_pt(const C3Vector& point,double boxS,const C3Vector& boxCenter,unsigned long long int cacheValueHere,double& dist,C3Vector* minDistSegPt,unsigned long long int* caching) const
 {
     bool retVal=false;
     if (dist==0.0)
         return(retVal);
     C3Vector relPoint(point-boxCenter);
-    simReal ocBoxHsp=boxS*simReal(0.5001);
-    simReal l=relPoint.getLength()-sqrtf(3*ocBoxHsp*ocBoxHsp);
+    double ocBoxHsp=boxS*double(0.5001);
+    double l=relPoint.getLength()-sqrtf(3*ocBoxHsp*ocBoxHsp);
     if (l<dist)
     { // we might be closer..
         if (empty)
@@ -1190,7 +1190,7 @@ bool COcNode::getDistance_pt(const C3Vector& point,simReal boxS,const C3Vector& 
         else
         { // voxel exists
             C3Vector pt(relPoint);
-            simReal ocBoxHs=boxS*0.5;
+            double ocBoxHs=boxS*0.5;
             if (fabs(pt(0))>ocBoxHs)
                 pt(0)=ocBoxHs*pt(0)/fabs(pt(0));
             if (fabs(pt(1))>ocBoxHs)
@@ -1212,14 +1212,14 @@ bool COcNode::getDistance_pt(const C3Vector& point,simReal boxS,const C3Vector& 
     return(retVal);
 }
 
-bool COcNode::getDistance_seg(const C3Vector& segMiddle,const C3Vector& segHs,simReal boxS,const C3Vector& boxCenter,unsigned long long int cacheValueHere,simReal& dist,C3Vector* ocMinDistSegPt,C3Vector* segMinDistSegPt,unsigned long long int* caching) const
+bool COcNode::getDistance_seg(const C3Vector& segMiddle,const C3Vector& segHs,double boxS,const C3Vector& boxCenter,unsigned long long int cacheValueHere,double& dist,C3Vector* ocMinDistSegPt,C3Vector* segMinDistSegPt,unsigned long long int* caching) const
 {
     bool retVal=false;
     if (dist==0.0)
         return(retVal);
     C3Vector relSegMiddle(segMiddle-boxCenter);
-    simReal ocBoxHsp=boxS*simReal(0.5001);
-    simReal l=relSegMiddle.getLength()-sqrtf(3*ocBoxHsp*ocBoxHsp)-segHs.getLength();
+    double ocBoxHsp=boxS*double(0.5001);
+    double l=relSegMiddle.getLength()-sqrtf(3*ocBoxHsp*ocBoxHsp)-segHs.getLength();
     if (l<dist)
     { // we might be closer..
         if (empty)
@@ -1253,14 +1253,14 @@ bool COcNode::getDistance_seg(const C3Vector& segMiddle,const C3Vector& segHs,si
     return(retVal);
 }
 
-bool COcNode::getDistance_tri(const C3Vector& p,const C3Vector& v,const C3Vector& w,simReal boxS,const C3Vector& boxCenter,unsigned long long int cacheValueHere,simReal& dist,C3Vector* ocMinDistSegPt,C3Vector* triMinDistSegPt,unsigned long long int* caching) const
+bool COcNode::getDistance_tri(const C3Vector& p,const C3Vector& v,const C3Vector& w,double boxS,const C3Vector& boxCenter,unsigned long long int cacheValueHere,double& dist,C3Vector* ocMinDistSegPt,C3Vector* triMinDistSegPt,unsigned long long int* caching) const
 {
     bool retVal=false;
     if (dist==0.0)
         return(retVal);
     C3Vector relP(p-boxCenter);
-    simReal ocBoxHsp=boxS*simReal(0.5001);
-    simReal l=relP.getLength()-sqrtf(3*ocBoxHsp*ocBoxHsp)-std::max<simReal>(v.getLength(),w.getLength());
+    double ocBoxHsp=boxS*double(0.5001);
+    double l=relP.getLength()-sqrtf(3*ocBoxHsp*ocBoxHsp)-std::max<double>(v.getLength(),w.getLength());
     if (l<dist)
     { // we might be closer..
         if (empty)
@@ -1294,7 +1294,7 @@ bool COcNode::getDistance_tri(const C3Vector& p,const C3Vector& v,const C3Vector
     return(retVal);
 }
 
-bool COcNode::getDistance_octree(const C4X4Matrix& oc1M,simReal ocBox1S,const C3Vector& ocBox1Center,unsigned long long int oc1CacheValueHere,const COcNode* oc2Node,const C4X4Matrix& oc2M,simReal ocBox2S,const C3Vector& ocBox2Center,unsigned long long int oc2CacheValueHere,simReal& dist,C3Vector* oc1MinDistSegPt,C3Vector* oc2MinDistSegPt,unsigned long long int* oc1Caching,unsigned long long int* oc2Caching) const
+bool COcNode::getDistance_octree(const C4X4Matrix& oc1M,double ocBox1S,const C3Vector& ocBox1Center,unsigned long long int oc1CacheValueHere,const COcNode* oc2Node,const C4X4Matrix& oc2M,double ocBox2S,const C3Vector& ocBox2Center,unsigned long long int oc2CacheValueHere,double& dist,C3Vector* oc1MinDistSegPt,C3Vector* oc2MinDistSegPt,unsigned long long int* oc1Caching,unsigned long long int* oc2Caching) const
 {
     bool retVal=false;
     if (dist==0.0)
@@ -1303,7 +1303,7 @@ bool COcNode::getDistance_octree(const C4X4Matrix& oc1M,simReal ocBox1S,const C3
     m1.X+=oc1M.M*ocBox1Center;
     C4X4Matrix m2(oc2M);
     m2.X+=oc2M.M*ocBox2Center;
-    simReal dd=CCalcUtils::getApproxDistance_box_box(m1,C3Vector(ocBox1S*0.5,ocBox1S*0.5,ocBox1S*0.5),m2,C3Vector(ocBox2S*0.5,ocBox2S*0.5,ocBox2S*0.5));
+    double dd=CCalcUtils::getApproxDistance_box_box(m1,C3Vector(ocBox1S*0.5,ocBox1S*0.5,ocBox1S*0.5),m2,C3Vector(ocBox2S*0.5,ocBox2S*0.5,ocBox2S*0.5));
     if (dd<dist)
     { // we might be closer
         int nodeToExplore=-1;
@@ -1346,14 +1346,14 @@ bool COcNode::getDistance_octree(const C4X4Matrix& oc1M,simReal ocBox1S,const C3
                 nodeNotToExplore=1;
             const COcNode* twoNodes[2]={this,oc2Node};
             const C4X4Matrix* twoOcMs[2]={&oc1M,&oc2M};
-            const simReal twoOcBoxSizes[2]={ocBox1S,ocBox2S};
+            const double twoOcBoxSizes[2]={ocBox1S,ocBox2S};
             const C3Vector* twoOcBoxCenters[2]={&ocBox1Center,&ocBox2Center};
             const unsigned long long int twoOcCacheValuesHere[2]={oc1CacheValueHere,oc2CacheValueHere};
             C3Vector* twoOcMinDistSegPts[2]={oc1MinDistSegPt,oc2MinDistSegPt};
             unsigned long long int* twoOcCaching[2]={oc1Caching,oc2Caching};
             const C4X4Matrix twoMRelBoxes[2]={m1.getInverse()*m2,m2.getInverse()*m1};
             // Now check all 8 node pairs, explore closest node first:
-            std::vector<std::pair<simReal,SNodeTranslation>> nodesToExplore;
+            std::vector<std::pair<double,SNodeTranslation>> nodesToExplore;
             for (size_t i=0;i<8;i++)
             {
                 SNodeTranslation nodeTranslation;
@@ -1377,7 +1377,7 @@ bool COcNode::getDistance_octree(const C4X4Matrix& oc1M,simReal ocBox1S,const C3
     return(retVal);
 }
 
-bool COcNode::getDistance_ptcloud(const C4X4Matrix& ocM,simReal ocBoxS,const C3Vector& ocBoxCenter,unsigned long long int ocCacheValueHere,const CPcNode* pcNode,const C4X4Matrix& pcM,const C3Vector& pcBoxCenter,simReal pcBoxS,unsigned long long int pcCacheValueHere,simReal& dist,C3Vector* ocMinDistSegPt,C3Vector* pcMinDistSegPt,unsigned long long int* ocCaching,unsigned long long int* pcCaching) const
+bool COcNode::getDistance_ptcloud(const C4X4Matrix& ocM,double ocBoxS,const C3Vector& ocBoxCenter,unsigned long long int ocCacheValueHere,const CPcNode* pcNode,const C4X4Matrix& pcM,const C3Vector& pcBoxCenter,double pcBoxS,unsigned long long int pcCacheValueHere,double& dist,C3Vector* ocMinDistSegPt,C3Vector* pcMinDistSegPt,unsigned long long int* ocCaching,unsigned long long int* pcCaching) const
 {
     bool retVal=false;
     if (dist==0.0)
@@ -1386,7 +1386,7 @@ bool COcNode::getDistance_ptcloud(const C4X4Matrix& ocM,simReal ocBoxS,const C3V
     m1.X+=ocM.M*ocBoxCenter;
     C4X4Matrix m2(pcM);
     m2.X+=pcM.M*pcBoxCenter;
-    simReal dd=CCalcUtils::getApproxDistance_box_box(m1,C3Vector(ocBoxS*0.5,ocBoxS*0.5,ocBoxS*0.5),m2,C3Vector(pcBoxS*0.5,pcBoxS*0.5,pcBoxS*0.5));
+    double dd=CCalcUtils::getApproxDistance_box_box(m1,C3Vector(ocBoxS*0.5,ocBoxS*0.5,ocBoxS*0.5),m2,C3Vector(pcBoxS*0.5,pcBoxS*0.5,pcBoxS*0.5));
     if (dd<dist)
     { // we might be closer
         bool explorePc=false;
@@ -1396,7 +1396,7 @@ bool COcNode::getDistance_ptcloud(const C4X4Matrix& ocM,simReal ocBoxS,const C3V
             {
                 if ( (ocBoxS>pcBoxS)||(pcNode->pts.size()>0) )
                 {
-                    std::vector<std::pair<simReal,SNodeTranslation>> nodesToExplore;
+                    std::vector<std::pair<double,SNodeTranslation>> nodesToExplore;
                     C4X4Matrix box2Rel(m1.getInverse()*m2);
                     for (size_t i=0;i<8;i++)
                     {
@@ -1464,7 +1464,7 @@ bool COcNode::getDistance_ptcloud(const C4X4Matrix& ocM,simReal ocBoxS,const C3V
         }
         if (explorePc)
         {
-            std::vector<std::pair<simReal,SNodeTranslation>> nodesToExplore;
+            std::vector<std::pair<double,SNodeTranslation>> nodesToExplore;
             C4X4Matrix box1Rel(m2.getInverse()*m1);
             for (size_t i=0;i<8;i++)
             {
@@ -1489,14 +1489,14 @@ bool COcNode::getDistance_ptcloud(const C4X4Matrix& ocM,simReal ocBoxS,const C3V
     return(retVal);
 }
 
-bool COcNode::getSensorDistance(const C4X4Matrix& ocM,simReal boxS,const C3Vector& boxCenter,const CVolumePlanes& planesIn,const CVolumePlanes& planesOut,simReal cosAngle,bool frontDetection,bool backDetection,bool fast,simReal& dist,C3Vector* detectPt,C3Vector* triN) const
+bool COcNode::getSensorDistance(const C4X4Matrix& ocM,double boxS,const C3Vector& boxCenter,const CVolumePlanes& planesIn,const CVolumePlanes& planesOut,double cosAngle,bool frontDetection,bool backDetection,bool fast,double& dist,C3Vector* detectPt,C3Vector* triN) const
 {
     bool retVal=false;
     if (dist==0.0)
         return(retVal);
     C4X4Matrix m(ocM);
     m.X+=ocM.M*boxCenter;
-    simReal dd=FLOAT_MAX;
+    double dd=FLOAT_MAX;
     CCalcUtils::getDistance_box_pt(m,C3Vector(boxS*0.5,boxS*0.5,boxS*0.5),true,C3Vector::zeroVector,dd,nullptr,nullptr);
     if (dd<dist)
     { // we are closer..
@@ -1504,7 +1504,7 @@ bool COcNode::getSensorDistance(const C4X4Matrix& ocM,simReal boxS,const C3Vecto
         {
             if (ocNodes!=nullptr)
             { // continue exploration
-                std::vector<std::pair<simReal,SNodeTranslation>> nodesToExplore;
+                std::vector<std::pair<double,SNodeTranslation>> nodesToExplore;
                 for (size_t i=0;i<8;i++)
                 {
                     SNodeTranslation nodeTranslation;
@@ -1533,14 +1533,14 @@ bool COcNode::getSensorDistance(const C4X4Matrix& ocM,simReal boxS,const C3Vecto
     return(retVal);
 }
 
-bool COcNode::getRaySensorDistance(const C4X4Matrix& ocM,simReal boxS,const C3Vector& boxCenter,const C3Vector& raySegP,const C3Vector& raySegL,simReal forbiddenDist,simReal cosAngle,bool frontDetection,bool backDetection,bool fast,simReal& dist,C3Vector* detectPt,C3Vector* triN,bool* forbiddenDistTouched) const
+bool COcNode::getRaySensorDistance(const C4X4Matrix& ocM,double boxS,const C3Vector& boxCenter,const C3Vector& raySegP,const C3Vector& raySegL,double forbiddenDist,double cosAngle,bool frontDetection,bool backDetection,bool fast,double& dist,C3Vector* detectPt,C3Vector* triN,bool* forbiddenDistTouched) const
 {
     bool retVal=false;
     if (dist==0.0)
         return(retVal);
     C4X4Matrix m(ocM);
     m.X+=ocM.M*boxCenter;
-    simReal dd=FLOAT_MAX;
+    double dd=FLOAT_MAX;
     CCalcUtils::getDistance_box_pt(m,C3Vector(boxS*0.5,boxS*0.5,boxS*0.5),true,C3Vector::zeroVector,dd,nullptr,nullptr);
     if (dd<dist)
     { // we are closer..
@@ -1548,7 +1548,7 @@ bool COcNode::getRaySensorDistance(const C4X4Matrix& ocM,simReal boxS,const C3Ve
         { // we collide..
             if (ocNodes!=nullptr)
             { // continue exploration
-                std::vector<std::pair<simReal,SNodeTranslation>> nodesToExplore;
+                std::vector<std::pair<double,SNodeTranslation>> nodesToExplore;
                 for (size_t i=0;i<8;i++)
                 {
                     SNodeTranslation nodeTranslation;

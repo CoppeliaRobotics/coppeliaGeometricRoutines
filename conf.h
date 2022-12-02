@@ -4,16 +4,11 @@
 #include <algorithm> // std::max, etc.
 #include <vector>
 #include "mathDefines.h"
-#ifdef SIM_MATH_DOUBLE
-    typedef double simReal;
-#else
-    typedef float simReal;
-#endif
 
 class CVolumePlanes
 {
 public:
-    CVolumePlanes(const simReal* planes,size_t size)
+    CVolumePlanes(const double* planes,size_t size)
     {
         s=size;
         if (s==0)
@@ -21,7 +16,7 @@ public:
         else
             p=planes;
     }
-    const simReal* ptr() const
+    const double* ptr() const
     {
         return(p);
     }
@@ -29,13 +24,13 @@ public:
     {
         return(s);
     }
-    simReal at(size_t pos) const
+    double at(size_t pos) const
     {
         return(p[pos]);
     }
 
 private:
-    const simReal* p;
+    const double* p;
     size_t s;
 };
 
