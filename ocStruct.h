@@ -2,7 +2,7 @@
 
 #include "conf.h"
 #include <vector>
-#include "3Vector.h"
+#include <simMath/3Vector.h>
 #include "obbStruct.h"
 #include "ocNode.h"
 

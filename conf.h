@@ -3,7 +3,7 @@
 #define _SECURE_SCL 0 // Disable bound checks (a bit faster)
 #include <algorithm> // std::max, etc.
 #include <vector>
-#include "mathDefines.h"
+#include <simMath/mathDefines.h>
 
 class CVolumePlanes
 {
