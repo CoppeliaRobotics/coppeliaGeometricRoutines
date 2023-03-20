@@ -382,7 +382,7 @@ C4X4Matrix CObbNode::getNaturalFrame(const std::vector<double>& allVertices,cons
             }
         }
 
-        double smallestZ=FLOAT_MAX;
+        double smallestZ=DBL_MAX;
         const double* orientations[2]={q1,q2};
         int orientationsCnt[2]={91,36};
         for (size_t l=0;l<2;l++)
@@ -392,8 +392,8 @@ C4X4Matrix CObbNode::getNaturalFrame(const std::vector<double>& allVertices,cons
                 C4Vector q(orientations[l]+4*i);
                 q=bestQ*q;
                 C4Vector qInv(q.getInverse());
-                double minV=FLOAT_MAX;
-                double maxV=-FLOAT_MAX;
+                double minV=DBL_MAX;
+                double maxV=-DBL_MAX;
                 double l;
                 for (size_t j=0;j<usedVertices.size();j++)
                 {
@@ -414,7 +414,7 @@ C4X4Matrix CObbNode::getNaturalFrame(const std::vector<double>& allVertices,cons
             }
         }
 
-        double smallestVolume=FLOAT_MAX;
+        double smallestVolume=DBL_MAX;
         const double* circularOrientations[2]={q3,q4};
         int circularOrientationsCnt[2]={10,10};
         for (size_t l=0;l<2;l++)
@@ -424,8 +424,8 @@ C4X4Matrix CObbNode::getNaturalFrame(const std::vector<double>& allVertices,cons
                 C4Vector q(circularOrientations[l]+4*i);
                 q=bestQ*q;
                 C4Vector qInv(q.getInverse());
-                C3Vector minV(FLOAT_MAX,FLOAT_MAX,FLOAT_MAX);
-                C3Vector maxV(-FLOAT_MAX,-FLOAT_MAX,-FLOAT_MAX);
+                C3Vector minV(DBL_MAX,DBL_MAX,DBL_MAX);
+                C3Vector maxV(-DBL_MAX,-DBL_MAX,-DBL_MAX);
                 double vol;
                 C3Vector dim;
                 for (size_t j=0;j<usedVertices.size();j++)

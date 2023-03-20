@@ -1496,7 +1496,7 @@ bool COcNode::getSensorDistance(const C4X4Matrix& ocM,double boxS,const C3Vector
         return(retVal);
     C4X4Matrix m(ocM);
     m.X+=ocM.M*boxCenter;
-    double dd=FLOAT_MAX;
+    double dd=DBL_MAX;
     CCalcUtils::getDistance_box_pt(m,C3Vector(boxS*0.5,boxS*0.5,boxS*0.5),true,C3Vector::zeroVector,dd,nullptr,nullptr);
     if (dd<dist)
     { // we are closer..
@@ -1540,7 +1540,7 @@ bool COcNode::getRaySensorDistance(const C4X4Matrix& ocM,double boxS,const C3Vec
         return(retVal);
     C4X4Matrix m(ocM);
     m.X+=ocM.M*boxCenter;
-    double dd=FLOAT_MAX;
+    double dd=DBL_MAX;
     CCalcUtils::getDistance_box_pt(m,C3Vector(boxS*0.5,boxS*0.5,boxS*0.5),true,C3Vector::zeroVector,dd,nullptr,nullptr);
     if (dd<dist)
     { // we are closer..

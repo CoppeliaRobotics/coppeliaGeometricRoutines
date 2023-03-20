@@ -911,70 +911,70 @@ bool CCalcUtils::isApproxDistanceSmaller_segp_segp_fast(const C3Vector& seg1P,C3
 
 double CCalcUtils::getApproxDistance_box_box(const C4X4Matrix& box1,const C3Vector& box1Hs,const C4X4Matrix& box2,const C3Vector& box2Hs)
 {   // Convenience function
-    double d=FLOAT_MAX;
+    double d=DBL_MAX;
     isApproxDistanceSmaller_box_box_fast(box1,box1Hs,box2,box2Hs,d);
     return(d);
 }
 
 double CCalcUtils::getApproxDistance_box_cell(const C4X4Matrix& box,const C3Vector& boxHs,double cellHs)
 {   // Convenience function
-    double d=FLOAT_MAX;
+    double d=DBL_MAX;
     isApproxDistanceSmaller_box_cell_fast(box,boxHs,cellHs,d);
     return(d);
 }
 
 double CCalcUtils::getApproxDistance_box_tri(const C4X4Matrix& box,const C3Vector& boxHs,const C3Vector& p,const C3Vector& v,const C3Vector& w)
 {   // Convenience function
-    double d=FLOAT_MAX;
+    double d=DBL_MAX;
     isApproxDistanceSmaller_box_tri_fast(box,boxHs,p,v,w,d);
     return(d);
 }
 
 double CCalcUtils::getApproxDistance_box_seg(const C4X4Matrix& box,const C3Vector& boxHs,const C3Vector& segCenter,const C3Vector& segHs)
 {   // Convenience function
-    double d=FLOAT_MAX;
+    double d=DBL_MAX;
     isApproxDistanceSmaller_box_seg_fast(box,boxHs,segCenter,segHs,d);
     return(d);
 }
 
 double CCalcUtils::getApproxDistance_box_segp(const C4X4Matrix& box,const C3Vector& boxHs,const C3Vector& segP,const C3Vector& segL)
 {   // Convenience function
-    double d=FLOAT_MAX;
+    double d=DBL_MAX;
     isApproxDistanceSmaller_box_segp_fast(box,boxHs,segP,segL,d);
     return(d);
 }
 
 double CCalcUtils::getApproxDistance_box_pt(const C4X4Matrix& box,const C3Vector& boxHs,const C3Vector& pt)
 {   // Convenience function
-    double d=FLOAT_MAX;
+    double d=DBL_MAX;
     isApproxDistanceSmaller_box_pt_fast(box,boxHs,pt,d);
     return(d);
 }
 
 double CCalcUtils::getApproxDistance_cell_tri(double cellHs,const C3Vector& p,const C3Vector& v,const C3Vector& w)
 {   // Convenience function
-    double d=FLOAT_MAX;
+    double d=DBL_MAX;
     isApproxDistanceSmaller_cell_tri_fast(cellHs,p,v,w,d);
     return(d);
 }
 
 double CCalcUtils::getApproxDistance_cell_seg(double cellHs,const C3Vector& segCenter,const C3Vector& segHs)
 {   // Convenience function
-    double d=FLOAT_MAX;
+    double d=DBL_MAX;
     isApproxDistanceSmaller_cell_seg_fast(cellHs,segCenter,segHs,d);
     return(d);
 }
 
 double CCalcUtils::getApproxDistance_cell_segp(double cellHs,const C3Vector& segP,const C3Vector& segL)
 {   // Convenience function
-    double d=FLOAT_MAX;
+    double d=DBL_MAX;
     isApproxDistanceSmaller_cell_segp_fast(cellHs,segP,segL,d);
     return(d);
 }
 
 double CCalcUtils::getApproxDistance_tri_tri(const C3Vector& p1,const C3Vector& v1,const C3Vector& w1,const C3Vector& p2,const C3Vector& v2,const C3Vector& w2)
 {   // Convenience function
-    double d=FLOAT_MAX;
+    double d=DBL_MAX;
     isApproxDistanceSmaller_tri_tri_fast(p1,v1,w1,p2,v2,w2,d);
     return(d);
 }

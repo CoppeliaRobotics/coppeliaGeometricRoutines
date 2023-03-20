@@ -45,8 +45,8 @@ void CPcStruct::_create(double cellS,int cellPts,const double* points,size_t poi
         delete allKdTreePts;
     }
     // Set box size and pos:
-    C3Vector maxV(-FLOAT_MAX,-FLOAT_MAX,-FLOAT_MAX);
-    C3Vector minV(FLOAT_MAX,FLOAT_MAX,FLOAT_MAX);
+    C3Vector maxV(-DBL_MAX,-DBL_MAX,-DBL_MAX);
+    C3Vector minV(DBL_MAX,DBL_MAX,DBL_MAX);
     for (size_t i=0;i<_points.size()/3;i++)
     {
         C3Vector v(&_points[3*i+0]);

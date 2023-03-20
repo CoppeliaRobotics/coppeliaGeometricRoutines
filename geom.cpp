@@ -335,7 +335,7 @@ bool geom_getBoxBoxDistanceIfSmaller(const C7Vector& box1Transformation,const C3
 
 double geom_getBoxBoxDistance(const C7Vector& box1Transformation,const C3Vector& box1HalfSize,const C7Vector& box2Transformation,const C3Vector& box2HalfSize,bool boxesAreSolid,C3Vector* distSegPt1/*=nullptr*/,C3Vector* distSegPt2/*=nullptr*/,bool altRoutine/*=false*/)
 {
-    double dist=FLOAT_MAX;
+    double dist=DBL_MAX;
     geom_getBoxBoxDistanceIfSmaller(box1Transformation.getMatrix(),box1HalfSize,box2Transformation.getMatrix(),box2HalfSize,boxesAreSolid,dist,distSegPt1,distSegPt2,altRoutine);
     return(dist);
 }
@@ -372,7 +372,7 @@ bool geom_getBoxTriangleDistanceIfSmaller(const C7Vector& boxTransformation,cons
 
 double geom_getBoxTriangleDistance(const C7Vector& boxTransformation,const C3Vector& boxHalfSize,bool boxIsSolid,const C3Vector& p,const C3Vector& v,const C3Vector& w,C3Vector* distSegPt1/*=nullptr*/,C3Vector* distSegPt2/*=nullptr*/,bool altRoutine/*=false*/)
 {
-    double dist=FLOAT_MAX;
+    double dist=DBL_MAX;
     geom_getBoxTriangleDistanceIfSmaller(boxTransformation,boxHalfSize,boxIsSolid,p,v,w,dist,distSegPt1,distSegPt2,altRoutine);
     return(dist);
 }
@@ -389,7 +389,7 @@ bool geom_getBoxSegmentDistanceIfSmaller(const C7Vector& boxTransformation,const
 
 double geom_getBoxSegmentDistance(const C7Vector& boxTransformation,const C3Vector& boxHalfSize,bool boxIsSolid,const C3Vector& segmentEndPoint,const C3Vector& segmentVector,C3Vector* distSegPt1/*=nullptr*/,C3Vector* distSegPt2/*=nullptr*/,bool altRoutine/*=false*/)
 {
-    double dist=FLOAT_MAX;
+    double dist=DBL_MAX;
     geom_getBoxSegmentDistanceIfSmaller(boxTransformation.getMatrix(),boxHalfSize,boxIsSolid,segmentEndPoint,segmentVector,dist,distSegPt1,distSegPt2,altRoutine);
     return(dist);
 }
@@ -402,7 +402,7 @@ bool geom_getBoxPointDistanceIfSmaller(const C7Vector& boxTransformation,const C
 
 double geom_getBoxPointDistance(const C7Vector& boxTransformation,const C3Vector& boxHalfSize,bool boxIsSolid,const C3Vector& point,C3Vector* distSegPt1/*=nullptr*/)
 {
-    double dist=FLOAT_MAX;
+    double dist=DBL_MAX;
     geom_getBoxPointDistanceIfSmaller(boxTransformation,boxHalfSize,boxIsSolid,point,dist,distSegPt1);
     return(dist);
 }
@@ -415,7 +415,7 @@ bool geom_getTriangleTriangleDistanceIfSmaller(const C3Vector& p1,const C3Vector
 
 double geom_getTriangleTriangleDistance(const C3Vector& p1,const C3Vector& v1,const C3Vector& w1,const C3Vector& p2,const C3Vector& v2,const C3Vector& w2,C3Vector* minDistSegPt1/*=nullptr*/,C3Vector* minDistSegPt2/*=nullptr*/)
 {
-    double dist=FLOAT_MAX;
+    double dist=DBL_MAX;
     geom_getTriangleTriangleDistanceIfSmaller(p1,v1,w1,p2,v2,w2,dist,minDistSegPt1,minDistSegPt2);
     return(dist);
 }
@@ -429,7 +429,7 @@ bool geom_getTriangleSegmentDistanceIfSmaller(const C3Vector& p,const C3Vector& 
 
 double geom_getTriangleSegmentDistance(const C3Vector& p,const C3Vector& v,const C3Vector& w,const C3Vector& segmentEndPoint,const C3Vector& segmentVector,C3Vector* minDistSegPt1/*=nullptr*/,C3Vector* minDistSegPt2/*=nullptr*/)
 {
-    double dist=FLOAT_MAX;
+    double dist=DBL_MAX;
     geom_getTriangleSegmentDistanceIfSmaller(p,v,w,segmentEndPoint,segmentVector,dist,minDistSegPt1,minDistSegPt2);
     return(dist);
 }
@@ -442,7 +442,7 @@ bool geom_getTrianglePointDistanceIfSmaller(const C3Vector& p,const C3Vector& v,
 
 double geom_getTrianglePointDistance(const C3Vector& p,const C3Vector& v,const C3Vector& w,const C3Vector& point,C3Vector* minDistSegPt/*=nullptr*/)
 {
-    double dist=FLOAT_MAX;
+    double dist=DBL_MAX;
     geom_getTrianglePointDistanceIfSmaller(p,v,w,point,dist,minDistSegPt);
     return(dist);
 }
@@ -455,7 +455,7 @@ bool geom_getSegmentSegmentDistanceIfSmaller(const C3Vector& segment1EndPoint,co
 
 double geom_getSegmentSegmentDistance(const C3Vector& segment1EndPoint,const C3Vector& segment1Vector,const C3Vector& segment2EndPoint,const C3Vector& segment2Vector,C3Vector* minDistSegPt1/*=nullptr*/,C3Vector* minDistSegPt2/*=nullptr*/)
 {
-    double dist=FLOAT_MAX;
+    double dist=DBL_MAX;
     geom_getSegmentSegmentDistanceIfSmaller(segment1EndPoint,segment1Vector,segment2EndPoint,segment2Vector,dist,minDistSegPt1,minDistSegPt2);
     return(dist);
 }
@@ -468,7 +468,7 @@ bool geom_getSegmentPointDistanceIfSmaller(const C3Vector& segmentEndPoint,const
 
 double geom_getSegmentPointDistance(const C3Vector& segmentEndPoint,const C3Vector& segmentVector,const C3Vector& point,C3Vector* minDistSegPt/*=nullptr*/)
 {
-    double dist=FLOAT_MAX;
+    double dist=DBL_MAX;
     geom_getSegmentPointDistanceIfSmaller(segmentEndPoint,segmentVector,point,dist,minDistSegPt);
     return(dist);
 }
@@ -594,14 +594,14 @@ bool geom_getMeshTriangleDistanceIfSmaller(const CObbStruct* meshObbStruct,const
 
 double geom_getMeshTriangleDistance(const CObbStruct* meshObbStruct,const C7Vector& meshTransformation,const C3Vector& p,const C3Vector& v,const C3Vector& w,C3Vector* minDistSegPt1/*=nullptr*/,C3Vector* minDistSegPt2/*=nullptr*/,int* caching/*=nullptr*/)
 {
-    double dist=FLOAT_MAX;
+    double dist=DBL_MAX;
     geom_getMeshTriangleDistanceIfSmaller(meshObbStruct,meshTransformation,p,v,w,dist,minDistSegPt1,minDistSegPt2,caching);
     return(dist);
 }
 
 double geom_getMeshMeshDistance(const CObbStruct* mesh1ObbStruct,const C7Vector& mesh1Transformation,const CObbStruct* mesh2ObbStruct,const C7Vector& mesh2Transformation,C3Vector* minDistSegPt1/*=nullptr*/,C3Vector* minDistSegPt2/*=nullptr*/,int* mesh1Caching/*=nullptr*/,int* mesh2Caching/*=nullptr*/)
 {
-    double dist=FLOAT_MAX;
+    double dist=DBL_MAX;
     geom_getMeshMeshDistanceIfSmaller(mesh1ObbStruct,mesh1Transformation,mesh2ObbStruct,mesh2Transformation,dist,minDistSegPt1,minDistSegPt2,mesh1Caching,mesh2Caching);
     return(dist);
 }
@@ -630,7 +630,7 @@ bool geom_getMeshSegmentDistanceIfSmaller(const CObbStruct* meshObbStruct,const 
 
 double geom_getMeshSegmentDistance(const CObbStruct* meshObbStruct,const C7Vector& meshTransformation,const C3Vector& segmentEndPoint,const C3Vector& segmentVector,C3Vector* minDistSegPt1/*=nullptr*/,C3Vector* minDistSegPt2/*=nullptr*/,int* caching/*=nullptr*/)
 {
-    double dist=FLOAT_MAX;
+    double dist=DBL_MAX;
     geom_getMeshSegmentDistanceIfSmaller(meshObbStruct,meshTransformation,segmentEndPoint,segmentVector,dist,minDistSegPt1,minDistSegPt2,caching);
     return(dist);
 }
@@ -659,7 +659,7 @@ bool geom_getMeshPointDistanceIfSmaller(const CObbStruct* meshObbStruct,const C7
 
 double geom_getMeshPointDistance(const CObbStruct* meshObbStruct,const C7Vector& meshTransformation,const C3Vector& point,C3Vector* minDistSegPt/*=nullptr*/,int* caching/*=nullptr*/)
 {
-    double dist=FLOAT_MAX;
+    double dist=DBL_MAX;
     geom_getMeshPointDistanceIfSmaller(meshObbStruct,meshTransformation,point,dist,minDistSegPt,caching);
     return(dist);
 }
@@ -701,7 +701,7 @@ bool geom_getMeshOctreeDistanceIfSmaller(const CObbStruct* meshObbStruct,const C
 
 double geom_getMeshOctreeDistance(const CObbStruct* meshObbStruct,const C7Vector& meshTransformation,const COcStruct* ocStruct,const C7Vector& octreeTransformation,C3Vector* meshMinDistPt/*=nullptr*/,C3Vector* ocMinDistPt/*=nullptr*/,int* meshCaching/*=nullptr*/,unsigned  long long int* ocCaching/*=nullptr*/)
 {
-    double dist=FLOAT_MAX;
+    double dist=DBL_MAX;
     geom_getMeshOctreeDistanceIfSmaller(meshObbStruct,meshTransformation,ocStruct,octreeTransformation,dist,meshMinDistPt,ocMinDistPt,meshCaching,ocCaching);
     return(dist);
 }
@@ -748,7 +748,7 @@ bool geom_getMeshPtcloudDistanceIfSmaller(const CObbStruct* meshObbStruct,const 
 
 double geom_getMeshPtcloudDistance(const CObbStruct* meshObbStruct,const C7Vector& meshTransformation,const CPcStruct* pcStruct,const C7Vector& pcTransformation,C3Vector* meshMinDistPt/*=nullptr*/,C3Vector* pcMinDistPt/*=nullptr*/,int* meshCaching/*=nullptr*/,unsigned  long long int* pcCaching/*=nullptr*/)
 {
-    double dist=FLOAT_MAX;
+    double dist=DBL_MAX;
     geom_getMeshPtcloudDistanceIfSmaller(meshObbStruct,meshTransformation,pcStruct,pcTransformation,dist,meshMinDistPt,pcMinDistPt,meshCaching,pcCaching);
     return(dist);
 }
@@ -791,7 +791,7 @@ bool geom_getOctreePtcloudDistanceIfSmaller(const COcStruct* ocStruct,const C7Ve
 
 double geom_getOctreePtcloudDistance(const COcStruct* ocStruct,const C7Vector& octreeTransformation,const CPcStruct* pcStruct,const C7Vector& pcTransformation,C3Vector* ocMinDistPt/*=nullptr*/,C3Vector* pcMinDistPt/*=nullptr*/,unsigned  long long int* ocCaching/*=nullptr*/,unsigned  long long int* pcCaching/*=nullptr*/)
 {
-    double dist=FLOAT_MAX;
+    double dist=DBL_MAX;
     geom_getOctreePtcloudDistanceIfSmaller(ocStruct,octreeTransformation,pcStruct,pcTransformation,dist,ocMinDistPt,pcMinDistPt,ocCaching,pcCaching);
     return(dist);
 }
@@ -818,7 +818,7 @@ bool geom_getOctreeOctreeDistanceIfSmaller(const COcStruct* oc1Struct,const C7Ve
 
 double geom_getOctreeOctreeDistance(const COcStruct* oc1Struct,const C7Vector& octree1Transformation,const COcStruct* oc2Struct,const C7Vector& octree2Transformation,C3Vector* oc1MinDistPt/*=nullptr*/,C3Vector* oc2MinDistPt/*=nullptr*/,unsigned  long long int* oc1Caching/*=nullptr*/,unsigned  long long int* oc2Caching/*=nullptr*/)
 {
-    double dist=FLOAT_MAX;
+    double dist=DBL_MAX;
     geom_getOctreeOctreeDistanceIfSmaller(oc1Struct,octree1Transformation,oc2Struct,octree2Transformation,dist,oc1MinDistPt,oc2MinDistPt,oc1Caching,oc2Caching);
     return(dist);
 }
@@ -866,7 +866,7 @@ bool geom_getOctreeTriangleDistanceIfSmaller(const COcStruct* ocStruct,const C7V
 
 double geom_getOctreeTriangleDistance(const COcStruct* ocStruct,const C7Vector& octreeTransformation,const C3Vector& p,const C3Vector& v,const C3Vector&w,C3Vector* ocMinDistPt/*=nullptr*/,C3Vector* triMinDistPt/*=nullptr*/,unsigned  long long int* ocCaching/*=nullptr*/)
 {
-    double dist=FLOAT_MAX;
+    double dist=DBL_MAX;
     geom_getOctreeTriangleDistanceIfSmaller(ocStruct,octreeTransformation,p,v,w,dist,ocMinDistPt,triMinDistPt,ocCaching);
     return(dist);
 }
@@ -912,7 +912,7 @@ bool geom_getOctreeSegmentDistanceIfSmaller(const COcStruct* ocStruct,const C7Ve
 
 double geom_getOctreeSegmentDistance(const COcStruct* ocStruct,const C7Vector& octreeTransformation,const C3Vector& segmentEndPoint,const C3Vector& segmentVector,C3Vector* ocMinDistPt/*=nullptr*/,C3Vector* segMinDistPt/*=nullptr*/,unsigned  long long int* ocCaching/*=nullptr*/)
 {
-    double dist=FLOAT_MAX;
+    double dist=DBL_MAX;
     geom_getOctreeSegmentDistanceIfSmaller(ocStruct,octreeTransformation,segmentEndPoint,segmentVector,dist,ocMinDistPt,segMinDistPt,ocCaching);
     return(dist);
 }
@@ -950,7 +950,7 @@ bool geom_getOctreePointDistanceIfSmaller(const COcStruct* ocStruct,const C7Vect
 
 double geom_getOctreePointDistance(const COcStruct* ocStruct,const C7Vector& octreeTransformation,const C3Vector& point,C3Vector* ocMinDistPt/*=nullptr*/,unsigned  long long int* ocCaching/*=nullptr*/)
 {
-    double dist=FLOAT_MAX;
+    double dist=DBL_MAX;
     geom_getOctreePointDistanceIfSmaller(ocStruct,octreeTransformation,point,dist,ocMinDistPt,ocCaching);
     return(dist);
 }
@@ -1000,7 +1000,7 @@ bool geom_getPtcloudPtcloudDistanceIfSmaller(const CPcStruct* pc1Struct,const C7
 
 double geom_getPtcloudPtcloudDistance(const CPcStruct* pc1Struct,const C7Vector& pc1Transformation,const CPcStruct* pc2Struct,const C7Vector& pc2Transformation,C3Vector* pc1MinDistPt/*=nullptr*/,C3Vector* pc2MinDistPt/*=nullptr*/,unsigned  long long int* pc1Caching/*=nullptr*/,unsigned  long long int* pc2Caching/*=nullptr*/)
 {
-    double dist=FLOAT_MAX;
+    double dist=DBL_MAX;
     geom_getPtcloudPtcloudDistanceIfSmaller(pc1Struct,pc1Transformation,pc2Struct,pc2Transformation,dist,pc1MinDistPt,pc2MinDistPt,pc1Caching,pc2Caching);
     return(dist);
 }
@@ -1035,7 +1035,7 @@ bool geom_getPtcloudTriangleDistanceIfSmaller(const CPcStruct* pcStruct,const C7
 
 double geom_getPtcloudTriangleDistance(const CPcStruct* pcStruct,const C7Vector& pcTransformation,const C3Vector& p,const C3Vector& v,const C3Vector& w,C3Vector* pcMinDistPt/*=nullptr*/,C3Vector* triMinDistPt/*=nullptr*/,unsigned  long long int* pcCaching/*=nullptr*/)
 {
-    double dist=FLOAT_MAX;
+    double dist=DBL_MAX;
     geom_getPtcloudTriangleDistanceIfSmaller(pcStruct,pcTransformation,p,v,w,dist,pcMinDistPt,triMinDistPt,pcCaching);
     return(dist);
 }
@@ -1070,7 +1070,7 @@ bool geom_getPtcloudSegmentDistanceIfSmaller(const CPcStruct* pcStruct,const C7V
 
 double geom_getPtcloudSegmentDistance(const CPcStruct* pcStruct,const C7Vector& pcTransformation,const C3Vector& segmentEndPoint,const C3Vector& segmentVector,C3Vector* pcMinDistPt/*=nullptr*/,C3Vector* segMinDistPt/*=nullptr*/,unsigned  long long int* pcCaching/*=nullptr*/)
 {
-    double dist=FLOAT_MAX;
+    double dist=DBL_MAX;
     geom_getPtcloudSegmentDistanceIfSmaller(pcStruct,pcTransformation,segmentEndPoint,segmentVector,dist,pcMinDistPt,segMinDistPt,pcCaching);
     return(dist);
 }
@@ -1107,7 +1107,7 @@ bool geom_getPtcloudPointDistanceIfSmaller(const CPcStruct* pcStruct,const C7Vec
 
 double geom_getPtcloudPointDistance(const CPcStruct* pcStruct,const C7Vector& pcTransformation,const C3Vector& point,C3Vector* pcMinDistPt/*=nullptr*/,unsigned  long long int* pcCaching/*=nullptr*/)
 {
-    double dist=FLOAT_MAX;
+    double dist=DBL_MAX;
     geom_getPtcloudPointDistanceIfSmaller(pcStruct,pcTransformation,point,dist,pcMinDistPt,pcCaching);
     return(dist);
 }
