@@ -94,7 +94,7 @@ unsigned char* CObbStruct::serialize(int& dataSize) const
 
     data.push_back(3); // ser ver
 
-    pushData(data,&_triSize,sizeof(int));
+    pushData(data,&_triSize,sizeof(double));
     pushData(data,&_triCnt,sizeof(int));
     pushData(data,&_originalVerticesSize,sizeof(int));
     pushData(data,&_originalVerticesHash,sizeof(unsigned long));
