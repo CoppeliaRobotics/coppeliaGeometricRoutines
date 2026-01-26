@@ -7,35 +7,38 @@
 #include "obbStruct.h"
 
 class COcNode;
+class CPcStruct;
 
 class CPcNode
 {
     friend class COcNode;
 public:
     CPcNode();
-    CPcNode(double boxS,const C3Vector& boxCenter,double cellS,int cellPts,const std::vector<double>& points,std::vector<size_t>& ptsOriginalIndices,std::vector<bool>& ptsInvalidityIndicators,const std::vector<unsigned char>& rgbData,bool rgbForEachPt);
+    CPcNode(CPcStruct* pc,double boxS,const C3Vector& boxCenter,double cellS,int cellPts,const std::vector<double>& points,std::vector<size_t>& ptsOriginalIndices,std::vector<bool>& ptsInvalidityIndicators,const std::vector<unsigned char>& rgbData,bool rgbForEachPt);
     virtual ~CPcNode();
 
     CPcNode* copyYourself() const;
     void scaleYourself(double f);
     void serialize(std::vector<unsigned char>& data) const;
-    void deserialize(const unsigned char* data,int& pos);
+    void deserialize(CPcStruct* pc,const unsigned char* data,int& pos);
     void serializeOld(std::vector<unsigned char>& data) const;
-    void deserializeOld(const unsigned char* data,int& pos);
+    void deserializeOld(CPcStruct* pc,const unsigned char* data,int& pos);
 
     size_t countCellsWithContent() const;
+    void resetAllIds(CPcStruct* pc);
+    void getDisplayPointsColorsAndIds(CPcStruct* pc,double boxS,const C3Vector& boxCenter,std::vector<float>& thePts,std::vector<unsigned char>& theRgbs,std::vector<unsigned int>& theIds) const;
     void getPointsPosAndRgb_all(double boxS,const C3Vector& boxCenter,std::vector<double>& data) const;
     void getPointsPosAndRgb_subset(double boxS,const C3Vector& boxCenter,double prop,std::vector<double>& data) const;
     void getOctreeCorners(double boxS,const C3Vector& boxCenter,std::vector<double>& data) const;
 
     const double* getPoints(double boxS,const C3Vector& boxCenter,unsigned long long int pcCaching,size_t* ptCnt,C3Vector& totalTransl) const;
 
-    void add_pts(double boxS,const C3Vector& boxCenter,double cellS,int cellPts,const std::vector<double>& points,std::vector<size_t>& ptsOriginalIndices,std::vector<bool>& ptsInvalidityIndicators,const std::vector<unsigned char>& rgbData,bool rgbForEachPt);
+    void add_pts(CPcStruct* pc,double boxS,const C3Vector& boxCenter,double cellS,int cellPts,const std::vector<double>& points,std::vector<size_t>& ptsOriginalIndices,std::vector<bool>& ptsInvalidityIndicators,const std::vector<unsigned char>& rgbData,bool rgbForEachPt);
 
-    bool delete_pts(double boxS,const C3Vector& boxCenter,const std::vector<double>& points,double proximityTol,int* count);
-    bool delete_octree(double pcBoxS,const C3Vector& pcBoxCenter,const C4X4Matrix& pcM,double ocBoxS,const C3Vector& ocBoxCenter,const COcNode* ocNode,const C4X4Matrix& ocM,int* count);
+    bool delete_pts(CPcStruct* pc,double boxS,const C3Vector& boxCenter,const std::vector<double>& points,double proximityTol,int* count);
+    bool delete_octree(CPcStruct* pc,double pcBoxS,const C3Vector& pcBoxCenter,const C4X4Matrix& pcM,double ocBoxS,const C3Vector& ocBoxCenter,const COcNode* ocNode,const C4X4Matrix& ocM,int* count);
 
-    bool intersect_pts(double boxS,const C3Vector& boxCenter,const std::vector<double>& points,double proximityTol);
+    bool intersect_pts(CPcStruct* pc,double boxS,const C3Vector& boxCenter,const std::vector<double>& points,double proximityTol);
 
     void flagDuplicates(double boxS,const C3Vector& boxCenter,const std::vector<double>& points,const std::vector<size_t>& ptsOriginalIndices,std::vector<bool>& duplicateIndicators,double proximityTol) const;
 
@@ -50,4 +53,5 @@ public:
     CPcNode** pcNodes;
     std::vector<double> pts;
     std::vector<unsigned char> rgbs;
+    std::vector<unsigned int> ids;
 };

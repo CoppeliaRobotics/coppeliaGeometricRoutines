@@ -5,12 +5,16 @@
 
 CPcStruct::CPcStruct()
 {
+    nextId = MAX_ID; // triggers a full data retrieval next time data is fetched
+    allIds.resize(MAX_ID, false);
     pcNode=new CPcNode();
 }
 
 CPcStruct::CPcStruct(double cellS,int cellPts,const double* points,size_t pointCnt,const unsigned char* rgbData,bool rgbForEachPt,double proximityTol)
 {
     // Create an PC tree from points
+    nextId = MAX_ID; // triggers a full data retrieval next time data is fetched
+    allIds.resize(MAX_ID, false);
     pcNode=new CPcNode();
     _create(cellS,cellPts,points,pointCnt,rgbData,rgbForEachPt,proximityTol);
 }
@@ -73,7 +77,7 @@ void CPcStruct::_create(double cellS,int cellPts,const double* points,size_t poi
     std::vector<bool> ptsInvalidityIndicators(pts.size()/3,false);
     pcNode->pcNodes=new CPcNode* [8];
     for (size_t i=0;i<8;i++)
-        pcNode->pcNodes[i]=new CPcNode(boxSize*0.5,ocNodeTranslations[i]*boxSize,cellSize,maxPtCnt,pts,ptsOriginalIndices,ptsInvalidityIndicators,_rgbData,true);
+        pcNode->pcNodes[i]=new CPcNode(this,boxSize*0.5,ocNodeTranslations[i]*boxSize,cellSize,maxPtCnt,pts,ptsOriginalIndices,ptsInvalidityIndicators,_rgbData,true);
 }
 
 CPcStruct::~CPcStruct()
@@ -135,7 +139,7 @@ bool CPcStruct::deserialize(const unsigned char* data)
         for (size_t i=0;i<8;i++)
         {
             pcNode->pcNodes[i]=new CPcNode();
-            pcNode->pcNodes[i]->deserialize(data,pos);
+            pcNode->pcNodes[i]->deserialize(this,data,pos);
         }
         return(true);
     }
@@ -183,7 +187,7 @@ bool CPcStruct::deserializeOld(const unsigned char* data)
         for (size_t i=0;i<8;i++)
         {
             pcNode->pcNodes[i]=new CPcNode();
-            pcNode->pcNodes[i]->deserializeOld(data,pos);
+            pcNode->pcNodes[i]->deserializeOld(this,data,pos);
         }
         return(true);
     }
@@ -196,6 +200,24 @@ size_t CPcStruct::countCellsWithContent() const
     for (size_t i=0;i<8;i++)
         retVal+=pcNode->pcNodes[i]->countCellsWithContent();
     return(retVal);
+}
+
+bool CPcStruct::getDisplayPointsColorsAndIds(bool forceFresh, std::vector<float>& thePts,std::vector<unsigned char>& theRgbs,std::vector<unsigned int>& theIds)
+{
+    bool retVal = false;
+    if ((nextId >= MAX_ID) || forceFresh)
+    {
+        retVal = true;
+        nextId = 0;
+        allIds.clear();
+        allIds.resize(MAX_ID, false);
+        for (size_t i=0;i<8;i++)
+            pcNode->pcNodes[i]->resetAllIds(this);
+        removedIds.clear();
+    }
+    for (size_t i=0;i<8;i++)
+        pcNode->pcNodes[i]->getDisplayPointsColorsAndIds(this,boxSize*0.5,boxPos+ocNodeTranslations[i]*boxSize,thePts, theRgbs, theIds);
+    return retVal;
 }
 
 void CPcStruct::getPointsPosAndRgb_all(std::vector<double>& pointsPosAndRgb) const
@@ -366,7 +388,7 @@ void CPcStruct::add_pts(const double* points,size_t pointCnt,const unsigned char
             rgbs.push_back(rgbData[2]);
         }
         for (size_t i=0;i<8;i++)
-            pcNode->pcNodes[i]->add_pts(boxSize*0.5,ocNodeTranslations[i]*boxSize,cellSize,maxPtCnt,pts,ptsOriginalIndices,ptsInvalidityIndicators,rgbs,dataForEachPt);
+            pcNode->pcNodes[i]->add_pts(this,boxSize*0.5,ocNodeTranslations[i]*boxSize,cellSize,maxPtCnt,pts,ptsOriginalIndices,ptsInvalidityIndicators,rgbs,dataForEachPt);
     }
 }
 
@@ -384,7 +406,7 @@ bool CPcStruct::delete_pts(const double* points,size_t pointCnt,double proximity
     bool retVal=true;
     for (size_t i=0;i<8;i++)
     {
-        bool bb=pcNode->pcNodes[i]->delete_pts(boxSize*0.5,ocNodeTranslations[i]*boxSize,pts,proximityTol,count);
+        bool bb=pcNode->pcNodes[i]->delete_pts(this,boxSize*0.5,ocNodeTranslations[i]*boxSize,pts,proximityTol,count);
         retVal=retVal&&bb;
     }
     return(retVal);
@@ -404,7 +426,7 @@ bool CPcStruct::delete_octree(const C4X4Matrix& pcM,const COcStruct* ocStruct,co
         bool bb=false;
         for (size_t j=0;j<8;j++)
         {
-            bb=pcNode->pcNodes[i]->delete_octree(boxSize*0.5,ocNodeTranslations[i]*boxSize,m1,ocStruct->boxSize*0.5,ocNodeTranslations[j]*ocStruct->boxSize,ocStruct->ocNode->ocNodes[j],m2,count);
+            bb=pcNode->pcNodes[i]->delete_octree(this,boxSize*0.5,ocNodeTranslations[i]*boxSize,m1,ocStruct->boxSize*0.5,ocNodeTranslations[j]*ocStruct->boxSize,ocStruct->ocNode->ocNodes[j],m2,count);
             if (bb)
                 break;
         }
@@ -425,7 +447,7 @@ bool CPcStruct::intersect_pts(const double* points,size_t pointCnt,double proxim
     bool retVal=true;
     for (size_t i=0;i<8;i++)
     {
-        bool bb=pcNode->pcNodes[i]->intersect_pts(boxSize*0.5,ocNodeTranslations[i]*boxSize,pts,proximityTol);
+        bool bb=pcNode->pcNodes[i]->intersect_pts(this,boxSize*0.5,ocNodeTranslations[i]*boxSize,pts,proximityTol);
         retVal=retVal&&bb;
     }
     return(retVal);
@@ -637,4 +659,26 @@ const double* CPcStruct::getPoints(const C4X4Matrix& pcM,unsigned long long int 
         }
     }
     return(retVal);
+}
+
+unsigned int CPcStruct::genId()
+{
+    unsigned int retVal = nextId;
+    if (nextId < MAX_ID)
+        nextId++;
+    allIds[retVal] = true;
+    return retVal;
+}
+
+void CPcStruct::remId(unsigned int id)
+{
+    allIds[id] = false;
+    removedIds.push_back(id);
+}
+
+void CPcStruct::remIds(const std::vector<unsigned int>& ids)
+{
+    for (size_t i = 0; i < ids.size(); i++)
+        allIds[ids[i]] = false;
+    removedIds.insert(removedIds.end(), ids.begin(), ids.end());
 }

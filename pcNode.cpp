@@ -1,13 +1,14 @@
 #include "calcUtils.h"
 #include "pcNode.h"
 #include "ocNode.h"
+#include "pcStruct.h"
 
 CPcNode::CPcNode()
 {
     pcNodes=nullptr;
 }
 
-CPcNode::CPcNode(double boxS,const C3Vector& boxCenter,double cellS,int cellPts,const std::vector<double>& points,std::vector<size_t>& ptsOriginalIndices,std::vector<bool>& ptsInvalidityIndicators,const std::vector<unsigned char>& rgbData,bool rgbForEachPt)
+CPcNode::CPcNode(CPcStruct* pc,double boxS,const C3Vector& boxCenter,double cellS,int cellPts,const std::vector<double>& points,std::vector<size_t>& ptsOriginalIndices,std::vector<bool>& ptsInvalidityIndicators,const std::vector<unsigned char>& rgbData,bool rgbForEachPt)
 {
     double boxHsp=boxS*double(0.5001);
     pcNodes=nullptr;
@@ -45,7 +46,7 @@ CPcNode::CPcNode(double boxS,const C3Vector& boxCenter,double cellS,int cellPts,
         { // subdivide
             pcNodes=new CPcNode* [8];
             for (size_t i=0;i<8;i++)
-                pcNodes[i]=new CPcNode(boxS*0.5,ocNodeTranslations[i]*boxS,cellS,cellPts,points2,ptsOriginalIndices2,ptsInvalidityIndicators,rgbData2,rgbForEachPt);
+                pcNodes[i]=new CPcNode(pc,boxS*0.5,ocNodeTranslations[i]*boxS,cellS,cellPts,points2,ptsOriginalIndices2,ptsInvalidityIndicators,rgbData2,rgbForEachPt);
         }
         else
         { // we are at a leaf. Populate it
@@ -54,6 +55,7 @@ CPcNode::CPcNode(double boxS,const C3Vector& boxCenter,double cellS,int cellPts,
                 if (!ptsInvalidityIndicators[ptsOriginalIndices2[i]])
                 {
                     ptsInvalidityIndicators[ptsOriginalIndices2[i]]=true;
+                    ids.push_back(pc->genId());
                     pts.push_back(points2[3*i+0]);
                     pts.push_back(points2[3*i+1]);
                     pts.push_back(points2[3*i+2]);
@@ -92,6 +94,8 @@ CPcNode* CPcNode::copyYourself() const
     {
         newPcNode->pts.assign(pts.begin(),pts.end());
         newPcNode->rgbs.assign(rgbs.begin(),rgbs.end());
+        for (size_t i = 0; i < pts.size() / 3; i++)
+            newPcNode->ids.push_back(0); // will be generated again when next fetched
     }
     else
     {
@@ -140,7 +144,7 @@ void CPcNode::serialize(std::vector<unsigned char>& data) const
         data.push_back(0);
 }
 
-void CPcNode::deserialize(const unsigned char* data,int& pos)
+void CPcNode::deserialize(CPcStruct* pc,const unsigned char* data,int& pos)
 {
     int ptsize=(reinterpret_cast<const int*>(data+pos))[0];pos+=sizeof(int);
     for (int i=0;i<ptsize;i++)
@@ -150,13 +154,15 @@ void CPcNode::deserialize(const unsigned char* data,int& pos)
     }
     for (int i=0;i<ptsize;i++)
         rgbs.push_back(data[pos++]);
+    for (int i=0;i<ptsize/3;i++)
+        ids.push_back(pc->genId());
     if (data[pos++]!=0)
     {
         pcNodes=new CPcNode* [8];
         for (size_t i=0;i<8;i++)
         {
             pcNodes[i]=new CPcNode();
-            pcNodes[i]->deserialize(data,pos);
+            pcNodes[i]->deserialize(pc,data,pos);
         }
     }
 }
@@ -182,7 +188,7 @@ void CPcNode::serializeOld(std::vector<unsigned char>& data) const
         data.push_back(0);
 }
 
-void CPcNode::deserializeOld(const unsigned char* data,int& pos)
+void CPcNode::deserializeOld(CPcStruct* pc,const unsigned char* data,int& pos)
 {
     int ptsize=(reinterpret_cast<const int*>(data+pos))[0];pos+=sizeof(int);
     pts.resize(ptsize);
@@ -194,13 +200,16 @@ void CPcNode::deserializeOld(const unsigned char* data,int& pos)
     }
     for (int i=0;i<ptsize;i++)
         rgbs.push_back(data[pos++]);
+    for (int i=0;i<ptsize/3;i++)
+        ids.push_back(pc->genId());
+
     if (data[pos++]!=0)
     {
         pcNodes=new CPcNode* [8];
         for (size_t i=0;i<8;i++)
         {
             pcNodes[i]=new CPcNode();
-            pcNodes[i]->deserializeOld(data,pos);
+            pcNodes[i]->deserializeOld(pc,data,pos);
         }
     }
 }
@@ -219,6 +228,43 @@ size_t CPcNode::countCellsWithContent() const
             retVal+=pcNodes[i]->countCellsWithContent();
     }
     return(retVal);
+}
+
+void CPcNode::resetAllIds(CPcStruct* pc)
+{
+    if (pcNodes!=nullptr)
+    {
+        for (size_t i=0;i<8;i++)
+            pcNodes[i]->resetAllIds(pc);
+    }
+    for (size_t i=0;i<ids.size();i++)
+        ids[i] = pc->genId();
+}
+
+void CPcNode::getDisplayPointsColorsAndIds(CPcStruct* pc,double boxS,const C3Vector& boxCenter,std::vector<float>& thePts,std::vector<unsigned char>& theRgbs,std::vector<unsigned int>& theIds) const
+{
+    if (pcNodes!=nullptr)
+    {
+        for (size_t i=0;i<8;i++)
+            pcNodes[i]->getDisplayPointsColorsAndIds(pc,boxS*0.5,boxCenter+ocNodeTranslations[i]*boxS,thePts, theRgbs, theIds);
+    }
+    for (size_t i=0;i<ids.size();i++)
+    {
+        unsigned int id = ids[i];
+        if (pc->allIds[id])
+        { // fetch only new points
+            C3Vector pt(&pts[3*i]);
+            pt+=boxCenter;
+            thePts.push_back((float)pt(0));
+            thePts.push_back((float)pt(1));
+            thePts.push_back((float)pt(2));
+            theRgbs.push_back(rgbs[3*i+0]);
+            theRgbs.push_back(rgbs[3*i+1]);
+            theRgbs.push_back(rgbs[3*i+2]);
+            theIds.push_back(ids[i]);
+            pc->allIds[id] = false;
+        }
+    }
 }
 
 void CPcNode::getPointsPosAndRgb_all(double boxS,const C3Vector& boxCenter,std::vector<double>& data) const
@@ -304,7 +350,7 @@ const double* CPcNode::getPoints(double boxS,const C3Vector& boxCenter,unsigned 
     return(retVal);
 }
 
-void CPcNode::add_pts(double boxS,const C3Vector& boxCenter,double cellS,int cellPts,const std::vector<double>& points,std::vector<size_t>& ptsOriginalIndices,std::vector<bool>& ptsInvalidityIndicators,const std::vector<unsigned char>& rgbData,bool rgbForEachPt)
+void CPcNode::add_pts(CPcStruct* pc,double boxS,const C3Vector& boxCenter,double cellS,int cellPts,const std::vector<double>& points,std::vector<size_t>& ptsOriginalIndices,std::vector<bool>& ptsInvalidityIndicators,const std::vector<unsigned char>& rgbData,bool rgbForEachPt)
 {
     double boxHsp=boxS*double(0.5001);
     // Compute points relative to this box:
@@ -351,6 +397,7 @@ void CPcNode::add_pts(double boxS,const C3Vector& boxCenter,double cellS,int cel
                             pts.push_back(points2[3*i+0]);
                             pts.push_back(points2[3*i+1]);
                             pts.push_back(points2[3*i+2]);
+                            ids.push_back(pc->genId());
                             if (rgbForEachPt)
                             {
                                 rgbs.push_back(rgbData2[3*i+0]);
@@ -370,13 +417,13 @@ void CPcNode::add_pts(double boxS,const C3Vector& boxCenter,double cellS,int cel
                 { // we create new children..
                     pcNodes=new CPcNode* [8];
                     for (size_t i=0;i<8;i++)
-                        pcNodes[i]=new CPcNode(boxS*0.5,ocNodeTranslations[i]*boxS,cellS,cellPts,points2,ptsOriginalIndices2,ptsInvalidityIndicators,rgbData2,rgbForEachPt);
+                        pcNodes[i]=new CPcNode(pc,boxS*0.5,ocNodeTranslations[i]*boxS,cellS,cellPts,points2,ptsOriginalIndices2,ptsInvalidityIndicators,rgbData2,rgbForEachPt);
                 }
             }
             else
             { // continue exploring...
                 for (size_t i=0;i<8;i++)
-                    pcNodes[i]->add_pts(boxS*0.5,ocNodeTranslations[i]*boxS,cellS,cellPts,points2,ptsOriginalIndices2,ptsInvalidityIndicators,rgbData2,rgbForEachPt);
+                    pcNodes[i]->add_pts(pc,boxS*0.5,ocNodeTranslations[i]*boxS,cellS,cellPts,points2,ptsOriginalIndices2,ptsInvalidityIndicators,rgbData2,rgbForEachPt);
             }
         }
         else
@@ -391,6 +438,7 @@ void CPcNode::add_pts(double boxS,const C3Vector& boxCenter,double cellS,int cel
                         pts.push_back(points2[3*i+0]);
                         pts.push_back(points2[3*i+1]);
                         pts.push_back(points2[3*i+2]);
+                        ids.push_back(pc->genId());
                         if (rgbForEachPt)
                         {
                             rgbs.push_back(rgbData2[3*i+0]);
@@ -428,15 +476,17 @@ void CPcNode::add_pts(double boxS,const C3Vector& boxCenter,double cellS,int cel
                     ptsInvalidityIndicators.push_back(false);
                 }
                 pts.clear();
+                pc->remIds(ids);
+                ids.clear();
                 pcNodes=new CPcNode* [8];
                 for (size_t i=0;i<8;i++)
-                    pcNodes[i]=new CPcNode(boxS*0.5,ocNodeTranslations[i]*boxS,cellS,cellPts,points2,ptsOriginalIndices2,ptsInvalidityIndicators,rgbData2,true);
+                    pcNodes[i]=new CPcNode(pc,boxS*0.5,ocNodeTranslations[i]*boxS,cellS,cellPts,points2,ptsOriginalIndices2,ptsInvalidityIndicators,rgbData2,true);
             }
         }
     }
 }
 
-bool CPcNode::delete_pts(double boxS,const C3Vector& boxCenter,const std::vector<double>& points,double proximityTol,int* count)
+bool CPcNode::delete_pts(CPcStruct* pc,double boxS,const C3Vector& boxCenter,const std::vector<double>& points,double proximityTol,int* count)
 {
     if ( (pcNodes==nullptr)&&(pts.size()==0) )
         return(true); // nothing to remove, node is empty. Remove this node (maybe)
@@ -465,7 +515,7 @@ bool CPcNode::delete_pts(double boxS,const C3Vector& boxCenter,const std::vector
                 bool removeChildNodes=true;
                 for (size_t i=0;i<8;i++)
                 {
-                    bool bb=pcNodes[i]->delete_pts(boxS*0.5,ocNodeTranslations[i]*boxS,points2,proximityTol,count);
+                    bool bb=pcNodes[i]->delete_pts(pc,boxS*0.5,ocNodeTranslations[i]*boxS,points2,proximityTol,count);
                     removeChildNodes=removeChildNodes&&bb;
                 }
                 if (removeChildNodes)
@@ -494,6 +544,8 @@ bool CPcNode::delete_pts(double boxS,const C3Vector& boxCenter,const std::vector
                     if (d<dTol)
                     {
                         pts.erase(pts.begin()+3*j,pts.begin()+3*j+3);
+                        pc->remId(ids[j]);
+                        ids.erase(ids.begin()+j, ids.begin()+1);
                         rgbs.erase(rgbs.begin()+3*j,rgbs.begin()+3*j+3);
                         if (count!=nullptr)
                             count[0]++;
@@ -509,7 +561,7 @@ bool CPcNode::delete_pts(double boxS,const C3Vector& boxCenter,const std::vector
     return(false); // keep this node
 }
 
-bool CPcNode::delete_octree(double pcBoxS,const C3Vector& pcBoxCenter,const C4X4Matrix& pcM,double ocBoxS,const C3Vector& ocBoxCenter,const COcNode* ocNode,const C4X4Matrix& ocM,int* count)
+bool CPcNode::delete_octree(CPcStruct* pc,double pcBoxS,const C3Vector& pcBoxCenter,const C4X4Matrix& pcM,double ocBoxS,const C3Vector& ocBoxCenter,const COcNode* ocNode,const C4X4Matrix& ocM,int* count)
 {
     if ( (pcNodes==nullptr)&&(pts.size()==0) )
         return(true); // nothing to remove, node is empty. Remove this node (maybe)
@@ -534,7 +586,7 @@ bool CPcNode::delete_octree(double pcBoxS,const C3Vector& pcBoxCenter,const C4X4
                         bool removeChildNodes=true;
                         for (size_t i=0;i<8;i++)
                         {
-                            bool bb=pcNodes[i]->delete_octree(pcBoxS*0.5,pcBoxCenter+ocNodeTranslations[i]*pcBoxS,pcM,ocBoxS,ocBoxCenter,ocNode,ocM,count);
+                            bool bb=pcNodes[i]->delete_octree(pc,pcBoxS*0.5,pcBoxCenter+ocNodeTranslations[i]*pcBoxS,pcM,ocBoxS,ocBoxCenter,ocNode,ocM,count);
                             removeChildNodes=removeChildNodes&&bb;
                         }
                         if (removeChildNodes)
@@ -550,7 +602,7 @@ bool CPcNode::delete_octree(double pcBoxS,const C3Vector& pcBoxCenter,const C4X4
                     { // explore the OC tree..
                         for (size_t i=0;i<8;i++)
                         {
-                            if (delete_octree(pcBoxS,pcBoxCenter,pcM,ocBoxS*0.5,ocBoxCenter+ocNodeTranslations[i]*ocBoxS,ocNode->ocNodes[i],ocM,count))
+                            if (delete_octree(pc,pcBoxS,pcBoxCenter,pcM,ocBoxS*0.5,ocBoxCenter+ocNodeTranslations[i]*ocBoxS,ocNode->ocNodes[i],ocM,count))
                                 return(true); // this node could be removed
                         }
                     }
@@ -577,6 +629,8 @@ bool CPcNode::delete_octree(double pcBoxS,const C3Vector& pcBoxCenter,const C4X4
                         {
                             pts.erase(pts.begin()+3*i,pts.begin()+3*i+3);
                             rgbs.erase(rgbs.begin()+3*i,rgbs.begin()+3*i+3);
+                            pc->remId(ids[i]);
+                            ids.erase(ids.begin()+i, ids.begin()+i+1);
                             if (count!=nullptr)
                                 count[0]++;
                             i--; // reprocess this pos
@@ -589,7 +643,7 @@ bool CPcNode::delete_octree(double pcBoxS,const C3Vector& pcBoxCenter,const C4X4
                 { // continue exploring the oc tree...
                     for (size_t i=0;i<8;i++)
                     {
-                        if (delete_octree(pcBoxS,pcBoxCenter,pcM,ocBoxS*0.5,ocBoxCenter+ocNodeTranslations[i]*ocBoxS,ocNode->ocNodes[i],ocM,count))
+                        if (delete_octree(pc,pcBoxS,pcBoxCenter,pcM,ocBoxS*0.5,ocBoxCenter+ocNodeTranslations[i]*ocBoxS,ocNode->ocNodes[i],ocM,count))
                             return(true); // this node could be removed
                     }
                 }
@@ -599,7 +653,7 @@ bool CPcNode::delete_octree(double pcBoxS,const C3Vector& pcBoxCenter,const C4X4
     return(false); // keep this node
 }
 
-bool CPcNode::intersect_pts(double boxS,const C3Vector& boxCenter,const std::vector<double>& points,double proximityTol)
+bool CPcNode::intersect_pts(CPcStruct* pc,double boxS,const C3Vector& boxCenter,const std::vector<double>& points,double proximityTol)
 {
     if ( (pcNodes==nullptr)&&(pts.size()==0) )
         return(true); // nothing to intersect, node is empty. Remove this node (maybe)
@@ -626,7 +680,7 @@ bool CPcNode::intersect_pts(double boxS,const C3Vector& boxCenter,const std::vec
                 bool removeChildNodes=true;
                 for (size_t i=0;i<8;i++)
                 {
-                    bool bb=pcNodes[i]->intersect_pts(boxS*0.5,ocNodeTranslations[i]*boxS,points2,proximityTol);
+                    bool bb=pcNodes[i]->intersect_pts(pc,boxS*0.5,ocNodeTranslations[i]*boxS,points2,proximityTol);
                     removeChildNodes=removeChildNodes&&bb;
                 }
                 if (removeChildNodes)
@@ -670,12 +724,16 @@ bool CPcNode::intersect_pts(double boxS,const C3Vector& boxCenter,const std::vec
             {
                 pts.clear();
                 rgbs.clear();
+                pc->remIds(ids);
+                ids.clear();
                 return(true); // this node could be removed
             }
             std::vector<double> pts2(pts);
             std::vector<unsigned char> rgbs2(rgbs);
             pts.clear();
             rgbs.clear();
+            pc->remIds(ids);
+            ids.clear();
             for (size_t i=0;i<removableFlags.size();i++)
             {
                 if (!removableFlags[i])
@@ -683,6 +741,7 @@ bool CPcNode::intersect_pts(double boxS,const C3Vector& boxCenter,const std::vec
                     pts.push_back(pts2[3*i+0]);
                     pts.push_back(pts2[3*i+1]);
                     pts.push_back(pts2[3*i+2]);
+                    ids.push_back(pc->genId());
                     rgbs.push_back(rgbs2[3*i+0]);
                     rgbs.push_back(rgbs2[3*i+1]);
                     rgbs.push_back(rgbs2[3*i+2]);

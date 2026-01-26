@@ -48,6 +48,7 @@ CPcStruct* geom_getPtcloudFromSerializationData_float(const unsigned char* seria
 void geom_getPtcloudSerializationData_float(const CPcStruct* pcStruct,std::vector<unsigned char>& serializationData);
 void geom_scalePtcloud(CPcStruct* pcStruct,double scalingFactor);
 void geom_destroyPtcloud(CPcStruct* pcStruct);
+bool geom_getDisplayPtcloudData(CPcStruct* pcStruct, bool forceFresh, std::vector<float>& points, std::vector<unsigned char>& cols, std::vector<unsigned int>& ids);
 void geom_getPtcloudPoints(const CPcStruct* pcStruct,std::vector<double>& pointData,double prop=1.0);
 void geom_getPtcloudOctreeCorners(const CPcStruct* pcStruct,std::vector<double>& points);
 int geom_getPtcloudNonEmptyCellCount(const CPcStruct* pcStruct);

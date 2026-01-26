@@ -7,6 +7,8 @@
 #include "obbStruct.h"
 #include "pcNode.h"
 
+#define MAX_ID 10000000
+
 class COcStruct;
 
 class CPcStruct
@@ -26,6 +28,8 @@ public:
     bool deserializeOld(const unsigned char* data);
 
     size_t countCellsWithContent() const;
+
+    bool getDisplayPointsColorsAndIds(bool forceFresh, std::vector<float>& thePts,std::vector<unsigned char>& theRgbs,std::vector<unsigned int>& theIds);
     void getPointsPosAndRgb_all(std::vector<double>& pointsPosAndRgb) const;
     void getPointsPosAndRgb_subset(std::vector<double>& pointsPosAndRgb,double prop) const;
     void getOctreeCorners(std::vector<double>& points) const;
@@ -46,6 +50,13 @@ public:
     bool getDistance_ptcloud(const CPcStruct* pc2Struct,const C4X4Matrix& pc1M,const C4X4Matrix& pc2M,double& dist,C3Vector* pc1MinDistSegAbsPt,C3Vector* pc2MinDistSegAbsPt,unsigned long long int* pc1Caching,unsigned long long int* pc2Caching) const;
 
     bool getSensorDistance(const C4X4Matrix& pcM,const CVolumePlanes& planesIn,const CVolumePlanes& planesOut,bool fast,double& dist,C3Vector* detectPt) const;
+
+    unsigned int nextId;
+    std::vector<bool> allIds;
+    std::vector<unsigned int> removedIds;
+    unsigned int genId();
+    void remId(unsigned int id);
+    void remIds(const std::vector<unsigned int>& ids);
 
 private:
     void _create(double cellS,int cellPts,const double* points,size_t pointCnt,const unsigned char* rgbData,bool rgbForEachPt,double distanceTolerance);

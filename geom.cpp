@@ -1378,6 +1378,11 @@ void geom_destroyPtcloud(CPcStruct* pcStruct)
     delete pcStruct;
 }
 
+bool geom_getDisplayPtcloudData(CPcStruct* pcStruct, bool forceFresh, std::vector<float>& points, std::vector<unsigned char>& cols, std::vector<unsigned int>& ids)
+{
+    return pcStruct->getDisplayPointsColorsAndIds(forceFresh, points, cols, ids);
+}
+
 void geom_getPtcloudPoints(const CPcStruct* pcStruct,std::vector<double>& pointData,double prop/*=1.0*/)
 {
     if (prop==1.0)
