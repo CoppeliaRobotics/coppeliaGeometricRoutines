@@ -4,12 +4,16 @@
 
 COcStruct::COcStruct()
 {
+    nextId = OCT_MAX_ID; // triggers a full data retrieval next time data is fetched
+    allIds.resize(OCT_MAX_ID, false);
     ocNode=new COcNode();
 }
 
 COcStruct::COcStruct(double cellS,const double* points,size_t pointCnt,const unsigned char* rgbData,const unsigned int* usrData,bool dataForEachPt)
 {
     // Create an OC tree from points
+    nextId = OCT_MAX_ID; // triggers a full data retrieval next time data is fetched
+    allIds.resize(OCT_MAX_ID, false);
     ocNode=new COcNode();
     _create(cellS,points,pointCnt,rgbData,usrData,dataForEachPt);
 }
@@ -17,6 +21,8 @@ COcStruct::COcStruct(double cellS,const double* points,size_t pointCnt,const uns
 COcStruct::COcStruct(const C4X4Matrix& ocM,double cellS,const CObbStruct* obbStruct,const C4X4Matrix& shapeM,const unsigned char* rgbData,unsigned int usrData)
 {
     // Create an OC tree from a shape
+    nextId = OCT_MAX_ID; // triggers a full data retrieval next time data is fetched
+    allIds.resize(OCT_MAX_ID, false);
     ocNode=new COcNode();
     C4X4Matrix tr(ocM.getInverse()*shapeM);
     std::vector<double> points;
@@ -35,6 +41,8 @@ COcStruct::COcStruct(const C4X4Matrix& ocM,double cellS,const CObbStruct* obbStr
 COcStruct::COcStruct(const C4X4Matrix& oc1M,double cell1S,const COcStruct* oc2Struct,const C4X4Matrix& oc2M,const unsigned char* rgbData,unsigned int usrData)
 {
     // Create an OC tree from another OC tree
+    nextId = OCT_MAX_ID; // triggers a full data retrieval next time data is fetched
+    allIds.resize(OCT_MAX_ID, false);
     ocNode=new COcNode();
     C4X4Matrix tr(oc1M.getInverse()*oc2M);
     std::vector<double> points;
@@ -96,7 +104,7 @@ void COcStruct::_create(double cellS,const double* points,size_t pointCnt,const 
     }
     ocNode->ocNodes=new COcNode* [8];
     for (size_t i=0;i<8;i++)
-         ocNode->ocNodes[i]=new COcNode(boxSize*0.5,ocNodeTranslations[i]*boxSize,cellS,pts,rgbs,usrs,dataForEachPt);
+         ocNode->ocNodes[i]=new COcNode(this, boxSize*0.5,ocNodeTranslations[i]*boxSize,cellS,pts,rgbs,usrs,dataForEachPt);
 }
 
 COcStruct::~COcStruct()
@@ -154,7 +162,7 @@ bool COcStruct::deserialize(const unsigned char* data)
         for (size_t i=0;i<8;i++)
         {
             ocNode->ocNodes[i]=new COcNode();
-            ocNode->ocNodes[i]->deserialize(data,pos);
+            ocNode->ocNodes[i]->deserialize(this, data,pos);
         }
         return(true);
     }
@@ -200,11 +208,34 @@ bool COcStruct::deserializeOld(const unsigned char* data)
         for (size_t i=0;i<8;i++)
         {
             ocNode->ocNodes[i]=new COcNode();
-            ocNode->ocNodes[i]->deserialize(data,pos);
+            ocNode->ocNodes[i]->deserialize(this, data,pos);
         }
         return(true);
     }
     return(false);
+}
+
+void COcStruct::refreshDisplayData()
+{
+    nextId = OCT_MAX_ID;
+}
+
+bool COcStruct::getDisplayVoxelsColorsAndIds(std::vector<float>& thePts,std::vector<unsigned char>& theRgbs,std::vector<unsigned int>& theIds)
+{
+    bool retVal = false;
+    if (nextId >= OCT_MAX_ID)
+    {
+        retVal = true;
+        nextId = 1;
+        allIds.clear();
+        allIds.resize(OCT_MAX_ID, false);
+        for (size_t i=0;i<8;i++)
+            ocNode->ocNodes[i]->resetAllIds(this);
+        removedIds.clear();
+    }
+    for (size_t i=0;i<8;i++)
+        ocNode->ocNodes[i]->getDisplayVoxelsColorsAndIds(this, boxSize, boxPos + ocNodeTranslations[i] * boxSize, thePts, theRgbs, theIds);
+    return retVal;
 }
 
 void COcStruct::getVoxelsPosAndRgb(std::vector<double>& voxelsPosAndRgb,std::vector<unsigned int>* userData/*=nullptr*/) const
@@ -243,7 +274,7 @@ bool COcStruct::deleteVoxels_pts(const double* points,size_t pointCnt)
     }
     for (size_t i=0;i<8;i++)
     {
-        bool bb=ocNode->ocNodes[i]->deleteVoxels_pts(boxSize*0.5,ocNodeTranslations[i]*boxSize,pts);
+        bool bb=ocNode->ocNodes[i]->deleteVoxels_pts(this, boxSize*0.5,ocNodeTranslations[i]*boxSize,pts);
         retVal=retVal&&bb;
     }
     return(retVal); // true: this OC tree is empty
@@ -257,7 +288,7 @@ bool COcStruct::deleteVoxels_shape(const C4X4Matrix& ocM,const CObbStruct* obbSt
     {
         C4X4Matrix _ocM(ocM);
         _ocM.X+=ocM.M*boxPos;
-        bool bb=ocNode->ocNodes[i]->deleteVoxels_shape(_ocM,boxSize*0.5,ocNodeTranslations[i]*boxSize,obbStruct,obbStruct->obb,shapeM);
+        bool bb=ocNode->ocNodes[i]->deleteVoxels_shape(this, _ocM,boxSize*0.5,ocNodeTranslations[i]*boxSize,obbStruct,obbStruct->obb,shapeM);
         retVal=retVal&&bb;
     }
     return(retVal); // true: this OC tree is empty
@@ -273,7 +304,7 @@ bool COcStruct::deleteVoxels_octree(const C4X4Matrix& oc1M,const COcStruct* oc2S
     _oc2M.X+=oc2M.M*oc2Struct->boxPos;
     for (size_t i=0;i<8;i++)
     {
-        bool bb=ocNode->ocNodes[i]->deleteVoxels_octree(_oc1M,boxSize*0.5,ocNodeTranslations[i]*boxSize,oc2Struct->ocNode,_oc2M,oc2Struct->boxSize,C3Vector::zeroVector);
+        bool bb=ocNode->ocNodes[i]->deleteVoxels_octree(this, _oc1M,boxSize*0.5,ocNodeTranslations[i]*boxSize,oc2Struct->ocNode,_oc2M,oc2Struct->boxSize,C3Vector::zeroVector);
         retVal=retVal&&bb;
     }
     return(retVal); // true: this OC tree is empty
@@ -309,7 +340,7 @@ void COcStruct::add_pts(const double* points,size_t pointCnt,const unsigned char
         usrs.push_back(usrData[0]);
     }
     for (size_t i=0;i<8;i++)
-        ocNode->ocNodes[i]->add_pts(cellSize,boxSize*0.5,ocNodeTranslations[i]*boxSize,pts,rgbs,usrs,dataForEachPt);
+        ocNode->ocNodes[i]->add_pts(this, cellSize,boxSize*0.5,ocNodeTranslations[i]*boxSize,pts,rgbs,usrs,dataForEachPt);
 }
 
 void COcStruct::add_shape(const C4X4Matrix& ocM,const CObbStruct* obbStruct,const C4X4Matrix& shapeM,const unsigned char* rgbData,unsigned int usrData)
@@ -331,7 +362,7 @@ void COcStruct::add_shape(const C4X4Matrix& ocM,const CObbStruct* obbStruct,cons
     {
         C4X4Matrix m(ocM);
         m.X+=ocM.M*boxPos;
-        ocNode->ocNodes[i]->add_shape(m,cellSize,boxSize*0.5,ocNodeTranslations[i]*boxSize,obbStruct,obbStruct->obb,shapeM,rgbData,usrData);
+        ocNode->ocNodes[i]->add_shape(this, m,cellSize,boxSize*0.5,ocNodeTranslations[i]*boxSize,obbStruct,obbStruct->obb,shapeM,rgbData,usrData);
     }
 }
 
@@ -358,7 +389,7 @@ void COcStruct::add_octree(const C4X4Matrix& oc1M,const COcStruct* oc2Struct,con
     for (size_t i=0;i<8;i++)
     {
         for (size_t j=0;j<8;j++)
-            ocNode->ocNodes[i]->add_octree(m1,cellSize,boxSize*0.5,ocNodeTranslations[i]*boxSize,oc2Struct->ocNode->ocNodes[j],m2,oc2Struct->boxSize*0.5,ocNodeTranslations[j]*oc2Struct->boxSize,rgbData,usrData);
+            ocNode->ocNodes[i]->add_octree(this, m1,cellSize,boxSize*0.5,ocNodeTranslations[i]*boxSize,oc2Struct->ocNode->ocNodes[j],m2,oc2Struct->boxSize*0.5,ocNodeTranslations[j]*oc2Struct->boxSize,rgbData,usrData);
     }
 }
 
@@ -772,5 +803,21 @@ bool COcStruct::getRaySensorDistance(const C4X4Matrix& ocM,const C3Vector& raySe
     return(retVal);
 }
 
+void COcStruct::genId(unsigned int& id)
+{
+    id = nextId;
+    if (nextId < OCT_MAX_ID)
+        nextId++;
+    allIds[id] = true;
+}
 
+void COcStruct::remId(unsigned int& id)
+{
+    if (id != 0)
+    {
+        allIds[id] = false;
+        removedIds.push_back(id);
+        id = 0;
+    }
+}
 

@@ -1112,6 +1112,16 @@ double geom_getPtcloudPointDistance(const CPcStruct* pcStruct,const C7Vector& pc
     return(dist);
 }
 
+void geom_refreshDisplayOctreeData(COcStruct* ocStruct)
+{
+    ocStruct->refreshDisplayData();
+}
+
+bool geom_getDisplayOctreeData(COcStruct* ocStruct, std::vector<float>& points, std::vector<unsigned char>& cols, std::vector<unsigned int>& ids)
+{
+    return ocStruct->getDisplayVoxelsColorsAndIds(points, cols, ids);
+}
+
 void geom_getOctreeVoxelData(const COcStruct* ocStruct,std::vector<double>& voxelData,std::vector<unsigned int>* userData/*=nullptr*/)
 { // returns voxel positions and color
     ocStruct->getVoxelsPosAndRgb(voxelData,userData);
@@ -1378,9 +1388,14 @@ void geom_destroyPtcloud(CPcStruct* pcStruct)
     delete pcStruct;
 }
 
-bool geom_getDisplayPtcloudData(CPcStruct* pcStruct, bool forceFresh, std::vector<float>& points, std::vector<unsigned char>& cols, std::vector<unsigned int>& ids)
+void geom_refreshDisplayPtcloudData(CPcStruct* pcStruct)
 {
-    return pcStruct->getDisplayPointsColorsAndIds(forceFresh, points, cols, ids);
+    pcStruct->refreshDisplayData();
+}
+
+bool geom_getDisplayPtcloudData(CPcStruct* pcStruct, std::vector<float>& points, std::vector<unsigned char>& cols, std::vector<unsigned int>& ids)
+{
+    return pcStruct->getDisplayPointsColorsAndIds(points, cols, ids);
 }
 
 void geom_getPtcloudPoints(const CPcStruct* pcStruct,std::vector<double>& pointData,double prop/*=1.0*/)

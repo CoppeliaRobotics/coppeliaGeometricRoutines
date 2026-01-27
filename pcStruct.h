@@ -7,7 +7,7 @@
 #include "obbStruct.h"
 #include "pcNode.h"
 
-#define MAX_ID 10000000
+#define PTS_MAX_ID 10000000
 
 class COcStruct;
 
@@ -29,7 +29,8 @@ public:
 
     size_t countCellsWithContent() const;
 
-    bool getDisplayPointsColorsAndIds(bool forceFresh, std::vector<float>& thePts,std::vector<unsigned char>& theRgbs,std::vector<unsigned int>& theIds);
+    void refreshDisplayData();
+    bool getDisplayPointsColorsAndIds(std::vector<float>& thePts,std::vector<unsigned char>& theRgbs,std::vector<unsigned int>& theIds);
     void getPointsPosAndRgb_all(std::vector<double>& pointsPosAndRgb) const;
     void getPointsPosAndRgb_subset(std::vector<double>& pointsPosAndRgb,double prop) const;
     void getOctreeCorners(std::vector<double>& points) const;

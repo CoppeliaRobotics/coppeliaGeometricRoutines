@@ -27,6 +27,8 @@ COcStruct* geom_getOctreeFromSerializationData_float(const unsigned char* serial
 void geom_getOctreeSerializationData_float(const COcStruct* ocStruct,std::vector<unsigned char>& serializationData);
 void geom_scaleOctree(COcStruct* ocStruct,double scalingFactor);
 void geom_destroyOctree(COcStruct* ocStruct);
+void geom_refreshDisplayOctreeData(COcStruct* ocStruct);
+bool geom_getDisplayOctreeData(COcStruct* ocStruct, std::vector<float>& points, std::vector<unsigned char>& cols, std::vector<unsigned int>& ids);
 void geom_getOctreeVoxelData(const COcStruct* ocStruct,std::vector<double>& voxelData,std::vector<unsigned int>* userData=nullptr);
 void geom_getOctreeCornersFromOctree(const COcStruct* ocStruct,std::vector<double>& points);
 
@@ -48,7 +50,8 @@ CPcStruct* geom_getPtcloudFromSerializationData_float(const unsigned char* seria
 void geom_getPtcloudSerializationData_float(const CPcStruct* pcStruct,std::vector<unsigned char>& serializationData);
 void geom_scalePtcloud(CPcStruct* pcStruct,double scalingFactor);
 void geom_destroyPtcloud(CPcStruct* pcStruct);
-bool geom_getDisplayPtcloudData(CPcStruct* pcStruct, bool forceFresh, std::vector<float>& points, std::vector<unsigned char>& cols, std::vector<unsigned int>& ids);
+void geom_refreshDisplayPtcloudData(CPcStruct* pcStruct);
+bool geom_getDisplayPtcloudData(CPcStruct* pcStruct, std::vector<float>& points, std::vector<unsigned char>& cols, std::vector<unsigned int>& ids);
 void geom_getPtcloudPoints(const CPcStruct* pcStruct,std::vector<double>& pointData,double prop=1.0);
 void geom_getPtcloudOctreeCorners(const CPcStruct* pcStruct,std::vector<double>& points);
 int geom_getPtcloudNonEmptyCellCount(const CPcStruct* pcStruct);

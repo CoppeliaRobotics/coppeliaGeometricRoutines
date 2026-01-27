@@ -1,14 +1,17 @@
 #include "calcUtils.h"
 #include "ocNode.h"
+#include "ocStruct.h"
 
 COcNode::COcNode()
 {
+    id = 0;
     empty=true;
     ocNodes=nullptr;
 }
 
-COcNode::COcNode(double boxS,const C3Vector& boxCenter,double cellS,const std::vector<double>& points,const std::vector<unsigned char>& rgbData,const std::vector<unsigned int>& usrData,bool dataForEachPt)
+COcNode::COcNode(COcStruct* oct, double boxS,const C3Vector& boxCenter,double cellS,const std::vector<double>& points,const std::vector<unsigned char>& rgbData,const std::vector<unsigned int>& usrData,bool dataForEachPt)
 {
+    id = 0;
     empty=true;
     ocNodes=nullptr;
     double boxHsp=boxS*double(0.5001);
@@ -46,7 +49,7 @@ COcNode::COcNode(double boxS,const C3Vector& boxCenter,double cellS,const std::v
             }
             ocNodes=new COcNode* [8];
             for (size_t i=0;i<8;i++)
-                ocNodes[i]=new COcNode(boxS*0.5,ocNodeTranslations[i]*boxS,cellS,pts,rgbs,usrs,dataForEachPt);
+                ocNodes[i]=new COcNode(oct, boxS*0.5,ocNodeTranslations[i]*boxS,cellS,pts,rgbs,usrs,dataForEachPt);
         }
     }
     else
@@ -58,6 +61,7 @@ COcNode::COcNode(double boxS,const C3Vector& boxCenter,double cellS,const std::v
             if ( (fabs(pt(0))<boxHsp)&&(fabs(pt(1))<boxHsp)&&(fabs(pt(2))<boxHsp) )
             {
                 empty=false;
+                oct->genId(id);
                 if (dataForEachPt)
                 {
                     rgb[0]=rgbData[3*i+0];
@@ -126,24 +130,27 @@ void COcNode::serialize(std::vector<unsigned char>& data) const
         data.push_back(0);
 }
 
-void COcNode::deserialize(const unsigned char* data,int& pos)
+void COcNode::deserialize(COcStruct* oct, const unsigned char* data,int& pos)
 {
     empty=(data[pos++]==0);
     if (!empty)
     {
+        oct->genId(id);
         rgb[0]=data[pos++];
         rgb[1]=data[pos++];
         rgb[2]=data[pos++];
         userData=(reinterpret_cast<const unsigned int*>(data+pos))[0];
         pos+=sizeof(userData);
     }
+    else
+        id = 0;
     if (data[pos++]!=0)
     {
         ocNodes=new COcNode* [8];
         for (size_t i=0;i<8;i++)
         {
             ocNodes[i]=new COcNode();
-            ocNodes[i]->deserialize(data,pos);
+            ocNodes[i]->deserialize(oct, data,pos);
         }
     }
 }
@@ -173,6 +180,36 @@ bool COcNode::getCell(const C3Vector& boxCenter,double boxSize,unsigned long lon
         }
     }
     return(retVal);
+}
+
+void COcNode::resetAllIds(COcStruct* oct)
+{
+    if (ocNodes!=nullptr)
+    {
+        for (size_t i=0;i<8;i++)
+            ocNodes[i]->resetAllIds(oct);
+    }
+    oct->genId(id);
+}
+
+void COcNode::getDisplayVoxelsColorsAndIds(COcStruct* oct, double pBoxSize,const C3Vector& boxCenter, std::vector<float>& thePts, std::vector<unsigned char>& theRgbs, std::vector<unsigned int>& theIds) const
+{
+    if (ocNodes!=nullptr)
+    {
+        for (size_t i=0;i<8;i++)
+            ocNodes[i]->getDisplayVoxelsColorsAndIds(oct, pBoxSize, boxCenter, thePts, theRgbs, theIds);
+    }
+    if (!empty)
+    {
+        thePts.push_back(float(boxCenter(0)));
+        thePts.push_back(float(boxCenter(0)));
+        thePts.push_back(float(boxCenter(0)));
+        theRgbs.push_back(rgb[0]);
+        theRgbs.push_back(rgb[1]);
+        theRgbs.push_back(rgb[2]);
+        theIds.push_back(id);
+        oct->allIds[id] = false;
+    }
 }
 
 void COcNode::getVoxelsPosAndRgb(std::vector<double>& voxelsPosAndRgb,double pBoxSize,const C3Vector& boxCenter,std::vector<unsigned int>* usrData/*=nullptr*/) const
@@ -230,7 +267,7 @@ void COcNode::getOctreeCorners(std::vector<double>& points,double pBoxSize,const
     }
 }
 
-bool COcNode::deleteVoxels_pts(double boxS,const C3Vector& boxCenter,const std::vector<double>& points)
+bool COcNode::deleteVoxels_pts(COcStruct* oct, double boxS,const C3Vector& boxCenter,const std::vector<double>& points)
 {
     bool retVal=true;
     double boxHsp=boxS*double(0.5001);
@@ -252,7 +289,7 @@ bool COcNode::deleteVoxels_pts(double boxS,const C3Vector& boxCenter,const std::
         {
             for (size_t i=0;i<8;i++)
             {
-                bool bb=ocNodes[i]->deleteVoxels_pts(boxS*0.5,ocNodeTranslations[i]*boxS,pts);
+                bool bb=ocNodes[i]->deleteVoxels_pts(oct, boxS*0.5,ocNodeTranslations[i]*boxS,pts);
                 retVal=retVal&&bb;
             }
         }
@@ -270,6 +307,7 @@ bool COcNode::deleteVoxels_pts(double boxS,const C3Vector& boxCenter,const std::
                 if ( (fabs(pt(0))<boxHsp)&&(fabs(pt(1))<boxHsp)&&(fabs(pt(2))<boxHsp) )
                 {
                     empty=true;
+                    oct->remId(id);
                     break;
                 }
             }
@@ -278,7 +316,11 @@ bool COcNode::deleteVoxels_pts(double boxS,const C3Vector& boxCenter,const std::
     }
     if (retVal)
     {
-        empty=true;
+        if (!empty)
+        {
+            empty=true;
+            oct->remId(id);
+        }
         if (ocNodes!=nullptr)
         {
             for (size_t i=0;i<8;i++)
@@ -290,7 +332,7 @@ bool COcNode::deleteVoxels_pts(double boxS,const C3Vector& boxCenter,const std::
     return(retVal); // true: this OC node is empty
 }
 
-bool COcNode::deleteVoxels_shape(const C4X4Matrix& ocM,double boxS,const C3Vector& boxCenter,const CObbStruct* obbStruct,const CObbNode* obb,const C4X4Matrix& shapeM)
+bool COcNode::deleteVoxels_shape(COcStruct* oct, const C4X4Matrix& ocM,double boxS,const C3Vector& boxCenter,const CObbStruct* obbStruct,const CObbNode* obb,const C4X4Matrix& shapeM)
 {
     bool retVal=true;
     double boxHsp=boxS*double(0.5001);
@@ -308,13 +350,13 @@ bool COcNode::deleteVoxels_shape(const C4X4Matrix& ocM,double boxS,const C3Vecto
             {
                 retVal=false;
                 for (size_t i=0;i<2;i++)
-                    retVal=retVal||deleteVoxels_shape(ocM,boxS,boxCenter,obbStruct,obb->obbNodes[i],shapeM);
+                    retVal=retVal||deleteVoxels_shape(oct, ocM,boxS,boxCenter,obbStruct,obb->obbNodes[i],shapeM);
             }
             else
             {
                 for (size_t i=0;i<8;i++)
                 {
-                    bool bb=ocNodes[i]->deleteVoxels_shape(ocM,boxS*0.5,boxCenter+ocNodeTranslations[i]*boxS,obbStruct,obb,shapeM);
+                    bool bb=ocNodes[i]->deleteVoxels_shape(oct, ocM,boxS*0.5,boxCenter+ocNodeTranslations[i]*boxS,obbStruct,obb,shapeM);
                     retVal=retVal&&bb;
                 }
             }
@@ -330,8 +372,8 @@ bool COcNode::deleteVoxels_shape(const C4X4Matrix& ocM,double boxS,const C3Vecto
             {
                 if (obb->leafTris==nullptr)
                 {
-                    retVal=deleteVoxels_shape(ocM,boxS,boxCenter,obbStruct,obb->obbNodes[0],shapeM);
-                    retVal=retVal||deleteVoxels_shape(ocM,boxS,boxCenter,obbStruct,obb->obbNodes[1],shapeM);
+                    retVal=deleteVoxels_shape(oct, ocM,boxS,boxCenter,obbStruct,obb->obbNodes[0],shapeM);
+                    retVal=retVal||deleteVoxels_shape(oct, ocM,boxS,boxCenter,obbStruct,obb->obbNodes[1],shapeM);
                 }
                 else
                 {
@@ -361,7 +403,12 @@ bool COcNode::deleteVoxels_shape(const C4X4Matrix& ocM,double boxS,const C3Vecto
     }
     if (retVal)
     {
-        empty=true;
+        if (!empty)
+        {
+            empty=true;
+            oct->remId(id);
+        }
+
         if (ocNodes!=nullptr)
         {
             for (size_t i=0;i<8;i++)
@@ -373,7 +420,7 @@ bool COcNode::deleteVoxels_shape(const C4X4Matrix& ocM,double boxS,const C3Vecto
     return(retVal); // true: this OC node is empty
 }
 
-bool COcNode::deleteVoxels_octree(const C4X4Matrix& oc1M,double box1S,const C3Vector& box1Center,const COcNode* oc2Node,const C4X4Matrix& oc2M,double box2S,const C3Vector& box2Center)
+bool COcNode::deleteVoxels_octree(COcStruct* oct, const C4X4Matrix& oc1M,double box1S,const C3Vector& box1Center,const COcNode* oc2Node,const C4X4Matrix& oc2M,double box2S,const C3Vector& box2Center)
 {
     bool retVal=true;
     double box1Hsp=box1S*double(0.5001);
@@ -391,13 +438,13 @@ bool COcNode::deleteVoxels_octree(const C4X4Matrix& oc1M,double box1S,const C3Ve
             {
                 retVal=false;
                 for (size_t i=0;i<8;i++)
-                    retVal=retVal||deleteVoxels_octree(oc1M,box1S,box1Center,oc2Node->ocNodes[i],oc2M,box2S*0.5,box2Center+ocNodeTranslations[i]*box2S);
+                    retVal=retVal||deleteVoxels_octree(oct, oc1M,box1S,box1Center,oc2Node->ocNodes[i],oc2M,box2S*0.5,box2Center+ocNodeTranslations[i]*box2S);
             }
             else
             {
                 for (size_t i=0;i<8;i++)
                 {
-                    bool bb=ocNodes[i]->deleteVoxels_octree(oc1M,box1S*0.5,box1Center+ocNodeTranslations[i]*box1S,oc2Node,oc2M,box2S,box2Center);
+                    bool bb=ocNodes[i]->deleteVoxels_octree(oct, oc1M,box1S*0.5,box1Center+ocNodeTranslations[i]*box1S,oc2Node,oc2M,box2S,box2Center);
                     retVal=retVal&&bb;
                 }
             }
@@ -415,7 +462,7 @@ bool COcNode::deleteVoxels_octree(const C4X4Matrix& oc1M,double box1S,const C3Ve
                 {
                     bool retVal=false;
                     for (size_t i=0;i<8;i++)
-                        retVal=retVal||deleteVoxels_octree(oc1M,box1S,box1Center,oc2Node->ocNodes[i],oc2M,box2S*0.5,box2Center+ocNodeTranslations[i]*box2S);
+                        retVal=retVal||deleteVoxels_octree(oct, oc1M,box1S,box1Center,oc2Node->ocNodes[i],oc2M,box2S*0.5,box2Center+ocNodeTranslations[i]*box2S);
                 }
             }
             else
@@ -424,7 +471,11 @@ bool COcNode::deleteVoxels_octree(const C4X4Matrix& oc1M,double box1S,const C3Ve
     }
     if (retVal)
     {
-        empty=true;
+        if (!empty)
+        {
+            empty=true;
+            oct->remId(id);
+        }
         if (ocNodes!=nullptr)
         {
             for (size_t i=0;i<8;i++)
@@ -436,7 +487,7 @@ bool COcNode::deleteVoxels_octree(const C4X4Matrix& oc1M,double box1S,const C3Ve
     return(retVal); // true: this OC node is empty
 }
 
-void COcNode::add_pts(double cellS,double boxS,const C3Vector& boxCenter,const std::vector<double>& points,const std::vector<unsigned char>& rgbData,const std::vector<unsigned int>& usrData,bool dataForEachPt)
+void COcNode::add_pts(COcStruct* oct, double cellS,double boxS,const C3Vector& boxCenter,const std::vector<double>& points,const std::vector<unsigned char>& rgbData,const std::vector<unsigned int>& usrData,bool dataForEachPt)
 {
     double boxHsp=boxS*double(0.5001);
     if (boxS>cellS*double(1.5))
@@ -475,12 +526,12 @@ void COcNode::add_pts(double cellS,double boxS,const C3Vector& boxCenter,const s
             {
                 ocNodes=new COcNode* [8];
                 for (size_t i=0;i<8;i++)
-                    ocNodes[i]=new COcNode(boxS*0.5,ocNodeTranslations[i]*boxS,cellS,pts,rgbs,usrs,dataForEachPt);
+                    ocNodes[i]=new COcNode(oct, boxS*0.5,ocNodeTranslations[i]*boxS,cellS,pts,rgbs,usrs,dataForEachPt);
             }
             else
             {
                 for (size_t i=0;i<8;i++)
-                    ocNodes[i]->add_pts(cellS,boxS*0.5,ocNodeTranslations[i]*boxS,pts,rgbs,usrs,dataForEachPt);
+                    ocNodes[i]->add_pts(oct, cellS,boxS*0.5,ocNodeTranslations[i]*boxS,pts,rgbs,usrs,dataForEachPt);
             }
         }
     }
@@ -495,6 +546,7 @@ void COcNode::add_pts(double cellS,double boxS,const C3Vector& boxCenter,const s
                 if ( (fabs(pt(0))<boxHsp)&&(fabs(pt(1))<boxHsp)&&(fabs(pt(2))<boxHsp) )
                 { // create that voxel
                     empty=false;
+                    oct->genId(id);
                     if (dataForEachPt)
                     {
                         rgb[0]=rgbData[3*i+0];
@@ -515,7 +567,7 @@ void COcNode::add_pts(double cellS,double boxS,const C3Vector& boxCenter,const s
     }
 }
 
-bool COcNode::add_shape(const C4X4Matrix& ocM,double cellS,double boxS,const C3Vector& boxCenter,const CObbStruct* obbStruct,const CObbNode* obb,const C4X4Matrix& shapeM,const unsigned char* rgbData,unsigned int usrData)
+bool COcNode::add_shape(COcStruct* oct, const C4X4Matrix& ocM,double cellS,double boxS,const C3Vector& boxCenter,const CObbStruct* obbStruct,const CObbNode* obb,const C4X4Matrix& shapeM,const unsigned char* rgbData,unsigned int usrData)
 {
     bool retVal=false;
     double boxHsp=boxS*double(0.5001);
@@ -529,8 +581,8 @@ bool COcNode::add_shape(const C4X4Matrix& ocM,double cellS,double boxS,const C3V
         { // the OBB box and the ocnode box collide. Continue exploration by exploring the largest volume first:
             if ( (obb->boxHs(0)*obb->boxHs(1)*obb->boxHs(2)>boxHsp*boxHsp*boxHsp)&&(obb->leafTris==nullptr) )
             { // Explore the OBB node
-                bool bb1=add_shape(ocM,cellS,boxS,boxCenter,obbStruct,obb->obbNodes[0],shapeM,rgbData,usrData);
-                bool bb2=add_shape(ocM,cellS,boxS,boxCenter,obbStruct,obb->obbNodes[1],shapeM,rgbData,usrData);
+                bool bb1=add_shape(oct, ocM,cellS,boxS,boxCenter,obbStruct,obb->obbNodes[0],shapeM,rgbData,usrData);
+                bool bb2=add_shape(oct, ocM,cellS,boxS,boxCenter,obbStruct,obb->obbNodes[1],shapeM,rgbData,usrData);
                 retVal=bb1||bb2;
             }
             else
@@ -543,7 +595,7 @@ bool COcNode::add_shape(const C4X4Matrix& ocM,double cellS,double boxS,const C3V
                 }
                 for (size_t i=0;i<8;i++)
                 {
-                    bool bb=ocNodes[i]->add_shape(ocM,cellS,boxS*0.5,boxCenter+ocNodeTranslations[i]*boxS,obbStruct,obb,shapeM,rgbData,usrData);
+                    bool bb=ocNodes[i]->add_shape(oct, ocM,cellS,boxS*0.5,boxCenter+ocNodeTranslations[i]*boxS,obbStruct,obb,shapeM,rgbData,usrData);
                     retVal=retVal||bb;
                 }
             }
@@ -558,8 +610,8 @@ bool COcNode::add_shape(const C4X4Matrix& ocM,double cellS,double boxS,const C3V
             { // the OBB box and the voxel collide
                 if (obb->leafTris==nullptr)
                 { // explore the OBB node
-                    retVal=add_shape(ocM,cellS,boxS,boxCenter,obbStruct,obb->obbNodes[0],shapeM,rgbData,usrData);
-                    retVal=retVal||add_shape(ocM,cellS,boxS,boxCenter,obbStruct,obb->obbNodes[1],shapeM,rgbData,usrData);
+                    retVal=add_shape(oct, ocM,cellS,boxS,boxCenter,obbStruct,obb->obbNodes[0],shapeM,rgbData,usrData);
+                    retVal=retVal||add_shape(oct, ocM,cellS,boxS,boxCenter,obbStruct,obb->obbNodes[1],shapeM,rgbData,usrData);
                 }
                 else
                 { // Check the triangles of the OBB leaf and the voxel
@@ -577,6 +629,7 @@ bool COcNode::add_shape(const C4X4Matrix& ocM,double cellS,double boxS,const C3V
                         if (CCalcUtils::doCollide_cell_tri(boxHsp,true,p,v,w))
                         { // Create the voxel
                             empty=false;
+                            oct->genId(id);
                             retVal=true;
                             rgb[0]=rgbData[0];
                             rgb[1]=rgbData[1];
@@ -592,7 +645,7 @@ bool COcNode::add_shape(const C4X4Matrix& ocM,double cellS,double boxS,const C3V
     return(retVal); // true: at least one new voxel was added
 }
 
-bool COcNode::add_octree(const C4X4Matrix& oc1M,double cell1S,double box1S,const C3Vector& box1Center,const COcNode* oc2Node,const C4X4Matrix& oc2M,double box2S,const C3Vector& box2Center,const unsigned char* rgbData,unsigned int usrData)
+bool COcNode::add_octree(COcStruct* oct, const C4X4Matrix& oc1M,double cell1S,double box1S,const C3Vector& box1Center,const COcNode* oc2Node,const C4X4Matrix& oc2M,double box2S,const C3Vector& box2Center,const unsigned char* rgbData,unsigned int usrData)
 {
     bool retVal=false;
     double box1Hsp=box1S*double(0.5001);
@@ -610,7 +663,7 @@ bool COcNode::add_octree(const C4X4Matrix& oc1M,double cell1S,double box1S,const
             { // Explore the OC node 2
                 for (size_t i=0;i<8;i++)
                 {
-                    bool bb=add_octree(oc1M,cell1S,box1S,box1Center,oc2Node->ocNodes[i],oc2M,box2S*0.5,box2Center+ocNodeTranslations[i]*box2S,rgbData,usrData);
+                    bool bb=add_octree(oct, oc1M,cell1S,box1S,box1Center,oc2Node->ocNodes[i],oc2M,box2S*0.5,box2Center+ocNodeTranslations[i]*box2S,rgbData,usrData);
                     retVal=retVal||bb;
                 }
             }
@@ -624,7 +677,7 @@ bool COcNode::add_octree(const C4X4Matrix& oc1M,double cell1S,double box1S,const
                 }
                 for (size_t i=0;i<8;i++)
                 {
-                    bool bb=ocNodes[i]->add_octree(oc1M,cell1S,box1S*0.5,box1Center+ocNodeTranslations[i]*box1S,oc2Node,oc2M,box2S,box2Center,rgbData,usrData);
+                    bool bb=ocNodes[i]->add_octree(oct, oc1M,cell1S,box1S*0.5,box1Center+ocNodeTranslations[i]*box1S,oc2Node,oc2M,box2S,box2Center,rgbData,usrData);
                     retVal=retVal||bb;
                 }
             }
@@ -640,7 +693,7 @@ bool COcNode::add_octree(const C4X4Matrix& oc1M,double cell1S,double box1S,const
                 {  // explore the node 2 since we are not yet at its leafs
                     for (size_t i=0;i<8;i++)
                     {
-                        retVal=add_octree(oc1M,cell1S,box1S,box1Center,oc2Node->ocNodes[i],oc2M,box2S*0.5,box2Center+ocNodeTranslations[i]*box2S,rgbData,usrData);
+                        retVal=add_octree(oct, oc1M,cell1S,box1S,box1Center,oc2Node->ocNodes[i],oc2M,box2S*0.5,box2Center+ocNodeTranslations[i]*box2S,rgbData,usrData);
                         if (retVal)
                             break; // the voxel was added, leave
                     }
@@ -651,6 +704,7 @@ bool COcNode::add_octree(const C4X4Matrix& oc1M,double cell1S,double box1S,const
                     if (retVal)
                     {
                         empty=false;
+                        oct->genId(id);
                         rgb[0]=rgbData[0];
                         rgb[1]=rgbData[1];
                         rgb[2]=rgbData[2];

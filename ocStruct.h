@@ -6,6 +6,8 @@
 #include "obbStruct.h"
 #include "ocNode.h"
 
+#define OCT_MAX_ID 1000000
+
 class CPcStruct;
 
 class COcStruct
@@ -25,6 +27,8 @@ public:
     unsigned char* serializeOld(int& dataSize) const;
     bool deserializeOld(const unsigned char* data);
 
+    void refreshDisplayData();
+    bool getDisplayVoxelsColorsAndIds(std::vector<float>& thePts,std::vector<unsigned char>& theRgbs,std::vector<unsigned int>& theIds);
     void getVoxelsPosAndRgb(std::vector<double>& voxelsPosAndRgb,std::vector<unsigned int>* userData=nullptr) const;
     void getVoxelsCorners(std::vector<double>& points) const;
     void getOctreeCorners(std::vector<double>& points) const;
@@ -57,6 +61,12 @@ public:
 
     bool getSensorDistance(const C4X4Matrix& ocM,const CVolumePlanes& planesIn,const CVolumePlanes& planesOut,double cosAngle,bool frontDetection,bool backDetection,bool fast,double& dist,C3Vector* detectPt,C3Vector* triN) const;
     bool getRaySensorDistance(const C4X4Matrix& ocM,const C3Vector& raySegP,const C3Vector& raySegL,double forbiddenDist,double cosAngle,bool frontDetection,bool backDetection,bool fast,double& dist,C3Vector* detectPt,C3Vector* triN,bool* forbiddenDistTouched) const;
+
+    unsigned int nextId;
+    std::vector<bool> allIds;
+    std::vector<unsigned int> removedIds;
+    void genId(unsigned int& id);
+    void remId(unsigned int& id);
 
 private:
     void _create(double cellS,const double* points,size_t pointCnt,const unsigned char* rgbData,const unsigned int* usrData,bool dataForEachPt);

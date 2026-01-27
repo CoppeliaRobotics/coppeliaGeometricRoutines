@@ -5,16 +5,16 @@
 
 CPcStruct::CPcStruct()
 {
-    nextId = MAX_ID; // triggers a full data retrieval next time data is fetched
-    allIds.resize(MAX_ID, false);
+    nextId = PTS_MAX_ID; // triggers a full data retrieval next time data is fetched
+    allIds.resize(PTS_MAX_ID, false);
     pcNode=new CPcNode();
 }
 
 CPcStruct::CPcStruct(double cellS,int cellPts,const double* points,size_t pointCnt,const unsigned char* rgbData,bool rgbForEachPt,double proximityTol)
 {
     // Create an PC tree from points
-    nextId = MAX_ID; // triggers a full data retrieval next time data is fetched
-    allIds.resize(MAX_ID, false);
+    nextId = PTS_MAX_ID; // triggers a full data retrieval next time data is fetched
+    allIds.resize(PTS_MAX_ID, false);
     pcNode=new CPcNode();
     _create(cellS,cellPts,points,pointCnt,rgbData,rgbForEachPt,proximityTol);
 }
@@ -202,15 +202,20 @@ size_t CPcStruct::countCellsWithContent() const
     return(retVal);
 }
 
-bool CPcStruct::getDisplayPointsColorsAndIds(bool forceFresh, std::vector<float>& thePts,std::vector<unsigned char>& theRgbs,std::vector<unsigned int>& theIds)
+void CPcStruct::refreshDisplayData()
+{
+    nextId = PTS_MAX_ID;
+}
+
+bool CPcStruct::getDisplayPointsColorsAndIds(std::vector<float>& thePts,std::vector<unsigned char>& theRgbs,std::vector<unsigned int>& theIds)
 {
     bool retVal = false;
-    if ((nextId >= MAX_ID) || forceFresh)
+    if (nextId >= PTS_MAX_ID)
     {
         retVal = true;
         nextId = 0;
         allIds.clear();
-        allIds.resize(MAX_ID, false);
+        allIds.resize(PTS_MAX_ID, false);
         for (size_t i=0;i<8;i++)
             pcNode->pcNodes[i]->resetAllIds(this);
         removedIds.clear();
@@ -664,7 +669,7 @@ const double* CPcStruct::getPoints(const C4X4Matrix& pcM,unsigned long long int 
 unsigned int CPcStruct::genId()
 {
     unsigned int retVal = nextId;
-    if (nextId < MAX_ID)
+    if (nextId < PTS_MAX_ID)
         nextId++;
     allIds[retVal] = true;
     return retVal;
