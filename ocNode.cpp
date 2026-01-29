@@ -197,7 +197,7 @@ void COcNode::getDisplayVoxelsColorsAndIds(COcStruct* oct, double pBoxSize,const
     if (ocNodes!=nullptr)
     {
         for (size_t i=0;i<8;i++)
-            ocNodes[i]->getDisplayVoxelsColorsAndIds(oct, pBoxSize, boxCenter, thePts, theRgbs, theIds);
+            ocNodes[i]->getDisplayVoxelsColorsAndIds(oct, pBoxSize * 0.5, boxCenter + ocNodeTranslations[i] * pBoxSize * 0.5, thePts, theRgbs, theIds);
     }
     if (!empty)
     {
