@@ -202,8 +202,8 @@ void COcNode::getDisplayVoxelsColorsAndIds(COcStruct* oct, double pBoxSize,const
     if (!empty)
     {
         thePts.push_back(float(boxCenter(0)));
-        thePts.push_back(float(boxCenter(0)));
-        thePts.push_back(float(boxCenter(0)));
+        thePts.push_back(float(boxCenter(1)));
+        thePts.push_back(float(boxCenter(2)));
         theRgbs.push_back(rgb[0]);
         theRgbs.push_back(rgb[1]);
         theRgbs.push_back(rgb[2]);
