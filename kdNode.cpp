@@ -1,6 +1,6 @@
-#include "kdNode.h"
+#include <kdNode.h>
 
-CKdNode* CKdNode::buildKdTree(const double* pts,size_t ptCnt,const unsigned char* rgbData,bool rgbForEachPt,double proximityTol)
+CKdNode* CKdNode::buildKdTree(const double* pts,size_t ptCnt,const unsigned char* rgbaData,bool rgbForEachPt,double proximityTol)
 {
     std::vector<SKdPt> allPts;
     std::vector<int> selectedPts;
@@ -11,15 +11,17 @@ CKdNode* CKdNode::buildKdTree(const double* pts,size_t ptCnt,const unsigned char
         kdpt.ignorePt=false;
         if (rgbForEachPt)
         {
-            kdpt.rgb[0]=rgbData[3*i+0];
-            kdpt.rgb[1]=rgbData[3*i+1];
-            kdpt.rgb[2]=rgbData[3*i+2];
+            kdpt.rgba[0]=rgbaData[4*i+0];
+            kdpt.rgba[1]=rgbaData[4*i+1];
+            kdpt.rgba[2]=rgbaData[4*i+2];
+            kdpt.rgba[3]=rgbaData[4*i+3];
         }
         else
         {
-            kdpt.rgb[0]=rgbData[0];
-            kdpt.rgb[1]=rgbData[1];
-            kdpt.rgb[2]=rgbData[2];
+            kdpt.rgba[0]=rgbaData[0];
+            kdpt.rgba[1]=rgbaData[1];
+            kdpt.rgba[2]=rgbaData[2];
+            kdpt.rgba[3]=rgbaData[3];
         }
         allPts.push_back(kdpt);
         selectedPts.push_back(int(i));
@@ -58,9 +60,10 @@ void CKdNode::_populateNode(std::vector<SKdPt>& pts,const std::vector<int>& sele
         if (!pts[selectedPts[i]].ignorePt)
         {
             pt=pts[selectedPts[i]].pt;
-            rgb[0]=pts[selectedPts[i]].rgb[0];
-            rgb[1]=pts[selectedPts[i]].rgb[1];
-            rgb[2]=pts[selectedPts[i]].rgb[2];
+            rgba[0]=pts[selectedPts[i]].rgba[0];
+            rgba[1]=pts[selectedPts[i]].rgba[1];
+            rgba[2]=pts[selectedPts[i]].rgba[2];
+            rgba[3]=pts[selectedPts[i]].rgba[3];
             ptIsValid=true;
             pts[selectedPts[i]].ignorePt=true;
             break;
@@ -144,19 +147,20 @@ void CKdNode::_disableClosePts(std::vector<SKdPt>& pts,const std::vector<int>& s
     }
 }
 
-void CKdNode::getPts(std::vector<double>& pts,std::vector<unsigned char>& rgbs)
+void CKdNode::getPts(std::vector<double>& pts,std::vector<unsigned char>& rgbas)
 {
     if (ptIsValid)
     {
         pts.push_back(pt(0));
         pts.push_back(pt(1));
         pts.push_back(pt(2));
-        rgbs.push_back(rgb[0]);
-        rgbs.push_back(rgb[1]);
-        rgbs.push_back(rgb[2]);
+        rgbas.push_back(rgba[0]);
+        rgbas.push_back(rgba[1]);
+        rgbas.push_back(rgba[2]);
+        rgbas.push_back(rgba[3]);
         if (kdNodes[0]!=nullptr)
-            kdNodes[0]->getPts(pts,rgbs);
+            kdNodes[0]->getPts(pts,rgbas);
         if (kdNodes[1]!=nullptr)
-            kdNodes[1]->getPts(pts,rgbs);
+            kdNodes[1]->getPts(pts,rgbas);
     }
 }

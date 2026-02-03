@@ -1,10 +1,10 @@
 #pragma once
 
-#include "conf.h"
+#include <conf.h>
 #include <vector>
 #include <simMath/3Vector.h>
-#include "obbStruct.h"
-#include "ocNode.h"
+#include <obbStruct.h>
+#include <ocNode.h>
 
 #define OCT_MAX_ID 1000000
 
@@ -24,12 +24,12 @@ public:
     void scaleYourself(double f);
     unsigned char* serialize(int& dataSize) const;
     bool deserialize(const unsigned char* data);
-    unsigned char* serializeOld(int& dataSize) const;
-    bool deserializeOld(const unsigned char* data);
+    bool deserialize_float(const unsigned char* data);
+    unsigned char* serialize_ver2(int& dataSize) const;
 
     void refreshDisplayData();
-    bool getDisplayVoxelsColorsAndIds(std::vector<float>& thePts,std::vector<unsigned char>& theRgbs,std::vector<unsigned int>& theIds);
-    void getVoxelsPosAndRgb(std::vector<double>& voxelsPosAndRgb,std::vector<unsigned int>* userData=nullptr) const;
+    bool getDisplayVoxelsColorsAndIds(std::vector<float>& thePts,std::vector<unsigned char>& theRgbas,std::vector<unsigned int>& theIds);
+    void getVoxelsPosAndRgba(std::vector<double>& voxelsPosAndRgba,std::vector<unsigned int>* userData=nullptr) const;
     void getVoxelsCorners(std::vector<double>& points) const;
     void getOctreeCorners(std::vector<double>& points) const;
 

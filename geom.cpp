@@ -1,7 +1,7 @@
-#include "geom.h"
+#include <geom.h>
 #include <iostream>
 #include <cstdio>
-#include "calcUtils.h"
+#include <calcUtils.h>
 
 bool geom_getMeshMeshCollision(const CObbStruct* mesh1ObbStruct,const C7Vector& mesh1Transformation,const CObbStruct* mesh2ObbStruct,const C7Vector& mesh2Transformation,std::vector<double>* intersections/*=nullptr*/,int* mesh1Caching/*=nullptr*/,int* mesh2Caching/*=nullptr*/)
 {
@@ -1124,10 +1124,10 @@ bool geom_getDisplayOctreeData(COcStruct* ocStruct, std::vector<float>& points, 
 
 void geom_getOctreeVoxelData(const COcStruct* ocStruct,std::vector<double>& voxelData,std::vector<unsigned int>* userData/*=nullptr*/)
 { // returns voxel positions and color
-    ocStruct->getVoxelsPosAndRgb(voxelData,userData);
+    ocStruct->getVoxelsPosAndRgba(voxelData,userData);
 }
 
-COcStruct* geom_createOctreeFromPoints(const double* points,int pointCnt,const C7Vector* octreeOrigin/*=nullptr*/,double cellS/*=double(0.05)*/,const unsigned char rgbData[3]/*=nullptr*/,unsigned int usrData/*=0*/)
+COcStruct* geom_createOctreeFromPoints(const double* points,int pointCnt,const C7Vector* octreeOrigin/*=nullptr*/,double cellS/*=double(0.05)*/,const unsigned char rgbaData[4]/*=nullptr*/,unsigned int usrData/*=0*/)
 {
     std::vector<double> relPts;
     relPts.resize(size_t(pointCnt)*3);
@@ -1143,18 +1143,19 @@ COcStruct* geom_createOctreeFromPoints(const double* points,int pointCnt,const C
         relPts[3*i+1]=v(1);
         relPts[3*i+2]=v(2);
     }
-    unsigned char _rgbData[3];
-    if (rgbData!=nullptr)
+    unsigned char _rgbaData[4];
+    if (rgbaData!=nullptr)
     {
-        _rgbData[0]=rgbData[0];
-        _rgbData[1]=rgbData[1];
-        _rgbData[2]=rgbData[2];
+        _rgbaData[0]=rgbaData[0];
+        _rgbaData[1]=rgbaData[1];
+        _rgbaData[2]=rgbaData[2];
+        _rgbaData[3]=rgbaData[3];
     }
-    COcStruct* ocStruct=new COcStruct(cellS,&relPts[0],(size_t)pointCnt,_rgbData,&usrData,false);
+    COcStruct* ocStruct=new COcStruct(cellS,&relPts[0],(size_t)pointCnt,_rgbaData,&usrData,false);
     return(ocStruct);
 }
 
-COcStruct* geom_createOctreeFromColorPoints(const double* points,int pointCnt,const C7Vector* octreeOrigin/*=nullptr*/,double cellS/*=double(0.05)*/,const unsigned char* rgbData/*=nullptr*/,const unsigned int* usrData/*=nullptr*/)
+COcStruct* geom_createOctreeFromColorPoints(const double* points,int pointCnt,const C7Vector* octreeOrigin/*=nullptr*/,double cellS/*=double(0.05)*/,const unsigned char* rgbaData/*=nullptr*/,const unsigned int* usrData/*=nullptr*/)
 {
     std::vector<double> relPts;
     relPts.resize(size_t(pointCnt)*3);
@@ -1170,12 +1171,12 @@ COcStruct* geom_createOctreeFromColorPoints(const double* points,int pointCnt,co
         relPts[3*i+1]=v(1);
         relPts[3*i+2]=v(2);
     }
-    std::vector<unsigned char> _rgbData;
-    _rgbData.resize(pointCnt*3,0);
-    if (rgbData!=nullptr)
+    std::vector<unsigned char> _rgbaData;
+    _rgbaData.resize(pointCnt*4,0);
+    if (rgbaData!=nullptr)
     {
-        for (int i=0;i<pointCnt*3;i++)
-            _rgbData[i]=rgbData[i];
+        for (int i=0;i<pointCnt*4;i++)
+            _rgbaData[i]=rgbaData[i];
     }
     std::vector<unsigned int> _usrData;
     _usrData.resize(pointCnt,0);
@@ -1184,41 +1185,43 @@ COcStruct* geom_createOctreeFromColorPoints(const double* points,int pointCnt,co
         for (int i=0;i<pointCnt;i++)
             _usrData[i]=usrData[i];
     }
-    COcStruct* ocStruct=new COcStruct(cellS,&relPts[0],(size_t)pointCnt,&_rgbData[0],&_usrData[0],true);
+    COcStruct* ocStruct=new COcStruct(cellS,&relPts[0],(size_t)pointCnt,&_rgbaData[0],&_usrData[0],true);
     return(ocStruct);
 }
 
-COcStruct* geom_createOctreeFromMesh(const CObbStruct* meshObbStruct,const C7Vector& meshTransformation,const C7Vector* octreeOrigin/*=nullptr*/,double cellS/*=double(0.05)*/,const unsigned char rgbData[3]/*=nullptr*/,unsigned int usrData/*=0*/)
+COcStruct* geom_createOctreeFromMesh(const CObbStruct* meshObbStruct,const C7Vector& meshTransformation,const C7Vector* octreeOrigin/*=nullptr*/,double cellS/*=double(0.05)*/,const unsigned char rgbaData[4]/*=nullptr*/,unsigned int usrData/*=0*/)
 {
     C7Vector _octreeOrigin;
     _octreeOrigin.setIdentity();
     if (octreeOrigin!=nullptr)
         _octreeOrigin=octreeOrigin[0];
-    unsigned char _rgbData[3];
-    if (rgbData!=nullptr)
+    unsigned char _rgbaData[4];
+    if (rgbaData!=nullptr)
     {
-        _rgbData[0]=rgbData[0];
-        _rgbData[1]=rgbData[1];
-        _rgbData[2]=rgbData[2];
+        _rgbaData[0]=rgbaData[0];
+        _rgbaData[1]=rgbaData[1];
+        _rgbaData[2]=rgbaData[2];
+        _rgbaData[3]=rgbaData[3];
     }
-    COcStruct* ocStruct=new COcStruct(_octreeOrigin.getMatrix(),cellS,meshObbStruct,meshTransformation.getMatrix(),_rgbData,usrData);
+    COcStruct* ocStruct=new COcStruct(_octreeOrigin.getMatrix(),cellS,meshObbStruct,meshTransformation.getMatrix(),_rgbaData,usrData);
     return(ocStruct);
 }
 
-COcStruct* geom_createOctreeFromOctree(const COcStruct* otherOctreeStruct,const C7Vector& otherOctreeTransformation,const C7Vector* newOctreeOrigin/*=nullptr*/,double newOctreeCellS/*=double(0.05)*/,const unsigned char rgbData[3]/*=nullptr*/,unsigned int usrData/*=0*/)
+COcStruct* geom_createOctreeFromOctree(const COcStruct* otherOctreeStruct,const C7Vector& otherOctreeTransformation,const C7Vector* newOctreeOrigin/*=nullptr*/,double newOctreeCellS/*=double(0.05)*/,const unsigned char rgbaData[4]/*=nullptr*/,unsigned int usrData/*=0*/)
 {
     C7Vector _newOctreeOrigin;
     _newOctreeOrigin.setIdentity();
     if (newOctreeOrigin!=nullptr)
         _newOctreeOrigin=newOctreeOrigin[0];
-    unsigned char _rgbData[3];
-    if (rgbData!=nullptr)
+    unsigned char _rgbaData[4];
+    if (rgbaData!=nullptr)
     {
-        _rgbData[0]=rgbData[0];
-        _rgbData[1]=rgbData[1];
-        _rgbData[2]=rgbData[2];
+        _rgbaData[0]=rgbaData[0];
+        _rgbaData[1]=rgbaData[1];
+        _rgbaData[2]=rgbaData[2];
+        _rgbaData[3]=rgbaData[3];
     }
-    COcStruct* ocStruct=new COcStruct(_newOctreeOrigin.getMatrix(),newOctreeCellS,otherOctreeStruct,otherOctreeTransformation.getMatrix(),_rgbData,usrData);
+    COcStruct* ocStruct=new COcStruct(_newOctreeOrigin.getMatrix(),newOctreeCellS,otherOctreeStruct,otherOctreeTransformation.getMatrix(),_rgbaData,usrData);
     return(ocStruct);
 }
 
@@ -1246,10 +1249,18 @@ void geom_getOctreeSerializationData(const COcStruct* ocStruct,std::vector<unsig
     delete[] data;
 }
 
-COcStruct* geom_getOctreeFromSerializationData(const unsigned char* serializationData)
+void geom_getOctreeSerializationData_ver2(const COcStruct* ocStruct,std::vector<unsigned char>& serializationData)
+{
+    int s;
+    unsigned char* data=ocStruct->serialize_ver2(s);
+    serializationData.assign(data,data+s);
+    delete[] data;
+}
+
+COcStruct* geom_getOctreeFromSerializationData_float(const unsigned char* serializationData)
 {
     COcStruct* newOctreeStruct=new COcStruct();
-    if (newOctreeStruct->deserialize(serializationData))
+    if (newOctreeStruct->deserialize_float(serializationData))
         return(newOctreeStruct);
     else
     {
@@ -1258,18 +1269,10 @@ COcStruct* geom_getOctreeFromSerializationData(const unsigned char* serializatio
     }
 }
 
-void geom_getOctreeSerializationData_float(const COcStruct* ocStruct,std::vector<unsigned char>& serializationData)
-{
-    int s;
-    unsigned char* data=ocStruct->serializeOld(s);
-    serializationData.assign(data,data+s);
-    delete[] data;
-}
-
-COcStruct* geom_getOctreeFromSerializationData_float(const unsigned char* serializationData)
+COcStruct* geom_getOctreeFromSerializationData(const unsigned char* serializationData)
 {
     COcStruct* newOctreeStruct=new COcStruct();
-    if (newOctreeStruct->deserializeOld(serializationData))
+    if (newOctreeStruct->deserialize(serializationData))
         return(newOctreeStruct);
     else
     {
@@ -1363,18 +1366,30 @@ CPcStruct* geom_getPtcloudFromSerializationData(const unsigned char* serializati
     }
 }
 
-void geom_getPtcloudSerializationData_float(const CPcStruct* pcStruct,std::vector<unsigned char>& serializationData)
+void geom_getPtcloudSerializationData_ver2(const CPcStruct* pcStruct,std::vector<unsigned char>& serializationData)
 {
     int s;
-    unsigned char* data=pcStruct->serializeOld(s);
+    unsigned char* data=pcStruct->serialize_ver2(s);
     serializationData.assign(data,data+s);
     delete[] data;
+}
+
+CPcStruct* geom_getPtcloudFromSerializationData_ver2(const unsigned char* serializationData)
+{
+    CPcStruct* newPcStruct=new CPcStruct();
+    if (newPcStruct->deserialize_ver2(serializationData))
+        return(newPcStruct);
+    else
+    {
+        delete newPcStruct;
+        return(nullptr);
+    }
 }
 
 CPcStruct* geom_getPtcloudFromSerializationData_float(const unsigned char* serializationData)
 {
     CPcStruct* newPcStruct=new CPcStruct();
-    if (newPcStruct->deserializeOld(serializationData))
+    if (newPcStruct->deserialize_float(serializationData))
         return(newPcStruct);
     else
     {
@@ -1401,9 +1416,9 @@ bool geom_getDisplayPtcloudData(CPcStruct* pcStruct, std::vector<float>& points,
 void geom_getPtcloudPoints(const CPcStruct* pcStruct,std::vector<double>& pointData,double prop/*=1.0*/)
 {
     if (prop==1.0)
-        pcStruct->getPointsPosAndRgb_all(pointData);
+        pcStruct->getPointsPosAndRgba_all(pointData);
     else
-        pcStruct->getPointsPosAndRgb_subset(pointData,prop);
+        pcStruct->getPointsPosAndRgba_subset(pointData,prop);
 }
 
 bool geom_isPointInVolume(const double* planesIn,int planesInSize,const C3Vector& point)
@@ -1592,7 +1607,7 @@ bool geom_raySensorDetectOctreeIfSmaller(const C7Vector& sensorTransformation,do
     return(retVal);
 }
 
-void geom_insertPointsIntoPtcloud(CPcStruct* pcStruct,const C7Vector& ptcloudTransformation,const double* points,int pointCnt,const unsigned char rgbData[3]/*=nullptr*/,double proximityTol/*=double(0.001)*/)
+void geom_insertPointsIntoPtcloud(CPcStruct* pcStruct,const C7Vector& ptcloudTransformation,const double* points,int pointCnt,const unsigned char rgbaData[4]/*=nullptr*/,double proximityTol/*=double(0.001)*/)
 {
     std::vector<double> relPts;
     relPts.resize(size_t(pointCnt)*3);
@@ -1605,17 +1620,18 @@ void geom_insertPointsIntoPtcloud(CPcStruct* pcStruct,const C7Vector& ptcloudTra
         relPts[3*i+1]=v(1);
         relPts[3*i+2]=v(2);
     }
-    unsigned char _rgbData[3];
-    if (rgbData!=nullptr)
+    unsigned char _rgbaData[4];
+    if (rgbaData!=nullptr)
     {
-        _rgbData[0]=rgbData[0];
-        _rgbData[1]=rgbData[1];
-        _rgbData[2]=rgbData[2];
+        _rgbaData[0]=rgbaData[0];
+        _rgbaData[1]=rgbaData[1];
+        _rgbaData[2]=rgbaData[2];
+        _rgbaData[3]=rgbaData[3];
     }
-    pcStruct->add_pts(&relPts[0],pointCnt,_rgbData,false,proximityTol);
+    pcStruct->add_pts(&relPts[0],pointCnt,_rgbaData,false,proximityTol);
 }
 
-void geom_insertColorPointsIntoPtcloud(CPcStruct* pcStruct,const C7Vector& ptcloudTransformation,const double* points,int pointCnt,const unsigned char* rgbData/*=nullptr*/,double proximityTol/*=double(0.001)*/)
+void geom_insertColorPointsIntoPtcloud(CPcStruct* pcStruct,const C7Vector& ptcloudTransformation,const double* points,int pointCnt,const unsigned char* rgbaData/*=nullptr*/,double proximityTol/*=double(0.001)*/)
 {
     std::vector<double> relPts;
     relPts.resize(size_t(pointCnt)*3);
@@ -1628,14 +1644,14 @@ void geom_insertColorPointsIntoPtcloud(CPcStruct* pcStruct,const C7Vector& ptclo
         relPts[3*i+1]=v(1);
         relPts[3*i+2]=v(2);
     }
-    std::vector<unsigned char> _rgbData;
-    _rgbData.resize(pointCnt*3,0);
-    if (rgbData!=nullptr)
+    std::vector<unsigned char> _rgbaData;
+    _rgbaData.resize(pointCnt*4,0);
+    if (rgbaData!=nullptr)
     {
-        for (int i=0;i<pointCnt*3;i++)
-            _rgbData[i]=rgbData[i];
+        for (int i=0;i<pointCnt*4;i++)
+            _rgbaData[i]=rgbaData[i];
     }
-    pcStruct->add_pts(&relPts[0],pointCnt,&_rgbData[0],true,proximityTol);
+    pcStruct->add_pts(&relPts[0],pointCnt,&_rgbaData[0],true,proximityTol);
 }
 
 bool geom_removePointsFromPtcloud(CPcStruct* pcStruct,const C7Vector& ptcloudTransformation,const double* points,int pointCnt,double proximityTol/*=double(0.001)*/,int* countRemoved/*=nullptr*/)
@@ -1688,7 +1704,7 @@ int geom_getPtcloudNonEmptyCellCount(const CPcStruct* pcStruct)
     return(int(pcStruct->countCellsWithContent()));
 }
 
-void geom_insertPointsIntoOctree(COcStruct* ocStruct,const C7Vector& octreeTransformation,const double* points,int pointCnt,const unsigned char rgbData[3]/*=nullptr*/,unsigned int usrData/*=0*/)
+void geom_insertPointsIntoOctree(COcStruct* ocStruct,const C7Vector& octreeTransformation,const double* points,int pointCnt,const unsigned char rgbaData[4]/*=nullptr*/,unsigned int usrData/*=0*/)
 {
     std::vector<double> relPts;
     relPts.resize(size_t(pointCnt)*3);
@@ -1701,17 +1717,18 @@ void geom_insertPointsIntoOctree(COcStruct* ocStruct,const C7Vector& octreeTrans
         relPts[3*i+1]=v(1);
         relPts[3*i+2]=v(2);
     }
-    unsigned char _rgbData[3];
-    if (rgbData!=nullptr)
+    unsigned char _rgbaData[4];
+    if (rgbaData!=nullptr)
     {
-        _rgbData[0]=rgbData[0];
-        _rgbData[1]=rgbData[1];
-        _rgbData[2]=rgbData[2];
+        _rgbaData[0]=rgbaData[0];
+        _rgbaData[1]=rgbaData[1];
+        _rgbaData[2]=rgbaData[2];
+        _rgbaData[3]=rgbaData[3];
     }
-    ocStruct->add_pts(&relPts[0],(size_t)pointCnt,_rgbData,&usrData,false);
+    ocStruct->add_pts(&relPts[0],(size_t)pointCnt,_rgbaData,&usrData,false);
 }
 
-void geom_insertColorPointsIntoOctree(COcStruct* ocStruct,const C7Vector& octreeTransformation,const double* points,int pointCnt,const unsigned char* rgbData/*=nullptr*/,const unsigned int* usrData/*=nullptr*/)
+void geom_insertColorPointsIntoOctree(COcStruct* ocStruct,const C7Vector& octreeTransformation,const double* points,int pointCnt,const unsigned char* rgbaData/*=nullptr*/,const unsigned int* usrData/*=nullptr*/)
 {
     std::vector<double> relPts;
     relPts.resize(size_t(pointCnt)*3);
@@ -1724,12 +1741,12 @@ void geom_insertColorPointsIntoOctree(COcStruct* ocStruct,const C7Vector& octree
         relPts[3*i+1]=v(1);
         relPts[3*i+2]=v(2);
     }
-    std::vector<unsigned char> _rgbData;
-    _rgbData.resize(pointCnt*3,0);
-    if (rgbData!=nullptr)
+    std::vector<unsigned char> _rgbaData;
+    _rgbaData.resize(pointCnt*4,255);
+    if (rgbaData!=nullptr)
     {
-        for (int i=0;i<pointCnt*3;i++)
-            _rgbData[i]=rgbData[i];
+        for (int i=0;i<pointCnt*4;i++)
+            _rgbaData[i]=rgbaData[i];
     }
     std::vector<unsigned int> _usrData;
     _usrData.resize(pointCnt,0);
@@ -1738,31 +1755,33 @@ void geom_insertColorPointsIntoOctree(COcStruct* ocStruct,const C7Vector& octree
         for (int i=0;i<pointCnt;i++)
             _usrData[i]=usrData[i];
     }
-    ocStruct->add_pts(&relPts[0],(size_t)pointCnt,&_rgbData[0],&_usrData[0],true);
+    ocStruct->add_pts(&relPts[0],(size_t)pointCnt,&_rgbaData[0],&_usrData[0],true);
 }
 
-void geom_insertMeshIntoOctree(COcStruct* ocStruct,const C7Vector& octreeTransformation,const CObbStruct* obbStruct,const C7Vector& meshTransformation,const unsigned char rgbData[3]/*=nullptr*/,unsigned int usrData/*=0*/)
+void geom_insertMeshIntoOctree(COcStruct* ocStruct,const C7Vector& octreeTransformation,const CObbStruct* obbStruct,const C7Vector& meshTransformation,const unsigned char rgbaData[4]/*=nullptr*/,unsigned int usrData/*=0*/)
 {
-    unsigned char _rgbData[3];
-    if (rgbData!=nullptr)
+    unsigned char _rgbaData[4];
+    if (rgbaData!=nullptr)
     {
-        _rgbData[0]=rgbData[0];
-        _rgbData[1]=rgbData[1];
-        _rgbData[2]=rgbData[2];
+        _rgbaData[0]=rgbaData[0];
+        _rgbaData[1]=rgbaData[1];
+        _rgbaData[2]=rgbaData[2];
+        _rgbaData[3]=rgbaData[3];
     }
-    ocStruct->add_shape(octreeTransformation.getMatrix(),obbStruct,meshTransformation.getMatrix(),_rgbData,usrData);
+    ocStruct->add_shape(octreeTransformation.getMatrix(),obbStruct,meshTransformation.getMatrix(),_rgbaData,usrData);
 }
 
-void geom_insertOctreeIntoOctree(COcStruct* oc1Struct,const C7Vector& octree1Transformation,const COcStruct* oc2Struct,const C7Vector& octree2Transformation,const unsigned char rgbData[3]/*=nullptr*/,unsigned int usrData/*=0*/)
+void geom_insertOctreeIntoOctree(COcStruct* oc1Struct,const C7Vector& octree1Transformation,const COcStruct* oc2Struct,const C7Vector& octree2Transformation,const unsigned char rgbaData[4]/*=nullptr*/,unsigned int usrData/*=0*/)
 {
-    unsigned char _rgbData[3];
-    if (rgbData!=nullptr)
+    unsigned char _rgbaData[4];
+    if (rgbaData!=nullptr)
     {
-        _rgbData[0]=rgbData[0];
-        _rgbData[1]=rgbData[1];
-        _rgbData[2]=rgbData[2];
+        _rgbaData[0]=rgbaData[0];
+        _rgbaData[1]=rgbaData[1];
+        _rgbaData[2]=rgbaData[2];
+        _rgbaData[3]=rgbaData[3];
     }
-    oc1Struct->add_octree(octree1Transformation.getMatrix(),oc2Struct,octree2Transformation.getMatrix(),_rgbData,usrData);
+    oc1Struct->add_octree(octree1Transformation.getMatrix(),oc2Struct,octree2Transformation.getMatrix(),_rgbaData,usrData);
 }
 
 bool geom_removePointsFromOctree(COcStruct* ocStruct,const C7Vector& octreeTransformation,const double* points,int pointCnt)

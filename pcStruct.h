@@ -1,11 +1,11 @@
 #pragma once
 
-#include "conf.h"
+#include <conf.h>
 #include <vector>
 #include <simMath/3Vector.h>
 #include <simMath/4X4Matrix.h>
-#include "obbStruct.h"
-#include "pcNode.h"
+#include <obbStruct.h>
+#include <pcNode.h>
 
 #define PTS_MAX_ID 10000000
 
@@ -24,20 +24,21 @@ public:
     void scaleYourself(double f);
     unsigned char* serialize(int& dataSize) const;
     bool deserialize(const unsigned char* data);
-    unsigned char* serializeOld(int& dataSize) const;
-    bool deserializeOld(const unsigned char* data);
+    unsigned char* serialize_ver2(int& dataSize) const;
+    bool deserialize_ver2(const unsigned char* data);
+    bool deserialize_float(const unsigned char* data);
 
     size_t countCellsWithContent() const;
 
     void refreshDisplayData();
-    bool getDisplayPointsColorsAndIds(std::vector<float>& thePts,std::vector<unsigned char>& theRgbs,std::vector<unsigned int>& theIds);
-    void getPointsPosAndRgb_all(std::vector<double>& pointsPosAndRgb) const;
-    void getPointsPosAndRgb_subset(std::vector<double>& pointsPosAndRgb,double prop) const;
+    bool getDisplayPointsColorsAndIds(std::vector<float>& thePts,std::vector<unsigned char>& theRgbas,std::vector<unsigned int>& theIds);
+    void getPointsPosAndRgba_all(std::vector<double>& pointsPosAndRgba) const;
+    void getPointsPosAndRgba_subset(std::vector<double>& pointsPosAndRgba,double prop) const;
     void getOctreeCorners(std::vector<double>& points) const;
 
     const double* getPoints(const C4X4Matrix& pcM,unsigned long long int pcCaching,size_t* ptCnt,C4X4Matrix& transf) const;
 
-    void add_pts(const double* points,size_t pointCnt,const unsigned char* rgbData,bool dataForEachPt,double proximityTol);
+    void add_pts(const double* points,size_t pointCnt,const unsigned char* rgbaData,bool dataForEachPt,double proximityTol);
 
     bool delete_pts(const double* points,size_t pointCnt,double proximityTol,int* count);
     bool delete_octree(const C4X4Matrix& pcM,const COcStruct* ocStruct,const C4X4Matrix& ocM,int* count);

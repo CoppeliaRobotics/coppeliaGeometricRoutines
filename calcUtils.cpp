@@ -1,4 +1,4 @@
-#include "calcUtils.h"
+#include <calcUtils.h>
 
 unsigned long CCalcUtils::getDjb2Hash(const char* inputStr,size_t size)
 { // taken from http://www.cse.yorku.ca/~oz/hash.html

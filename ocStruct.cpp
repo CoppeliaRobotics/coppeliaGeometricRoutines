@@ -1,6 +1,6 @@
-#include "calcUtils.h"
-#include "ocStruct.h"
-#include "pcStruct.h"
+#include <calcUtils.h>
+#include <ocStruct.h>
+#include <pcStruct.h>
 
 COcStruct::COcStruct()
 {
@@ -9,16 +9,16 @@ COcStruct::COcStruct()
     ocNode=new COcNode();
 }
 
-COcStruct::COcStruct(double cellS,const double* points,size_t pointCnt,const unsigned char* rgbData,const unsigned int* usrData,bool dataForEachPt)
+COcStruct::COcStruct(double cellS,const double* points,size_t pointCnt,const unsigned char* rgbaData,const unsigned int* usrData,bool dataForEachPt)
 {
     // Create an OC tree from points
     nextId = OCT_MAX_ID; // triggers a full data retrieval next time data is fetched
     allIds.resize(OCT_MAX_ID, false);
     ocNode=new COcNode();
-    _create(cellS,points,pointCnt,rgbData,usrData,dataForEachPt);
+    _create(cellS,points,pointCnt,rgbaData,usrData,dataForEachPt);
 }
 
-COcStruct::COcStruct(const C4X4Matrix& ocM,double cellS,const CObbStruct* obbStruct,const C4X4Matrix& shapeM,const unsigned char* rgbData,unsigned int usrData)
+COcStruct::COcStruct(const C4X4Matrix& ocM,double cellS,const CObbStruct* obbStruct,const C4X4Matrix& shapeM,const unsigned char* rgbaData,unsigned int usrData)
 {
     // Create an OC tree from a shape
     nextId = OCT_MAX_ID; // triggers a full data retrieval next time data is fetched
@@ -34,11 +34,11 @@ COcStruct::COcStruct(const C4X4Matrix& ocM,double cellS,const CObbStruct* obbStr
         points.push_back(v(1));
         points.push_back(v(2));
     }
-    _create(cellS,&points[0],points.size()/3,rgbData,&usrData,false);
-    add_shape(ocM,obbStruct,shapeM,rgbData,usrData);
+    _create(cellS,&points[0],points.size()/3,rgbaData,&usrData,false);
+    add_shape(ocM,obbStruct,shapeM,rgbaData,usrData);
 }
 
-COcStruct::COcStruct(const C4X4Matrix& oc1M,double cell1S,const COcStruct* oc2Struct,const C4X4Matrix& oc2M,const unsigned char* rgbData,unsigned int usrData)
+COcStruct::COcStruct(const C4X4Matrix& oc1M,double cell1S,const COcStruct* oc2Struct,const C4X4Matrix& oc2M,const unsigned char* rgbaData,unsigned int usrData)
 {
     // Create an OC tree from another OC tree
     nextId = OCT_MAX_ID; // triggers a full data retrieval next time data is fetched
@@ -55,11 +55,11 @@ COcStruct::COcStruct(const C4X4Matrix& oc1M,double cell1S,const COcStruct* oc2St
         points[3*i+1]=v(1);
         points[3*i+2]=v(2);
     }
-    _create(cell1S,&points[0],points.size()/3,rgbData,&usrData,false);
-    add_octree(oc1M,oc2Struct,oc2M,rgbData,usrData);
+    _create(cell1S,&points[0],points.size()/3,rgbaData,&usrData,false);
+    add_octree(oc1M,oc2Struct,oc2M,rgbaData,usrData);
 }
 
-void COcStruct::_create(double cellS,const double* points,size_t pointCnt,const unsigned char* rgbData,const unsigned int* usrData,bool dataForEachPt)
+void COcStruct::_create(double cellS,const double* points,size_t pointCnt,const unsigned char* rgbaData,const unsigned int* usrData,bool dataForEachPt)
 {
     // Create an OC tree from points
     cellSize=cellS;
@@ -80,13 +80,14 @@ void COcStruct::_create(double cellS,const double* points,size_t pointCnt,const 
     boxSize=c;
     boxPos.clear();
     std::vector<double> pts;
-    std::vector<unsigned char> rgbs;
+    std::vector<unsigned char> rgbas;
     std::vector<unsigned int> usrs;
     if (!dataForEachPt)
     {
-        rgbs.push_back(rgbData[0]);
-        rgbs.push_back(rgbData[1]);
-        rgbs.push_back(rgbData[2]);
+        rgbas.push_back(rgbaData[0]);
+        rgbas.push_back(rgbaData[1]);
+        rgbas.push_back(rgbaData[2]);
+        rgbas.push_back(rgbaData[3]);
         usrs.push_back(usrData[0]);
     }
     for (size_t i=0;i<pointCnt;i++)
@@ -96,15 +97,16 @@ void COcStruct::_create(double cellS,const double* points,size_t pointCnt,const 
         pts.push_back(points[3*i+2]-boxPos(2));
         if (dataForEachPt)
         {
-            rgbs.push_back(rgbData[3*i+0]);
-            rgbs.push_back(rgbData[3*i+1]);
-            rgbs.push_back(rgbData[3*i+2]);
+            rgbas.push_back(rgbaData[4*i+0]);
+            rgbas.push_back(rgbaData[4*i+1]);
+            rgbas.push_back(rgbaData[4*i+2]);
+            rgbas.push_back(rgbaData[4*i+3]);
             usrs.push_back(usrData[i]);
         }
     }
     ocNode->ocNodes=new COcNode* [8];
     for (size_t i=0;i<8;i++)
-         ocNode->ocNodes[i]=new COcNode(this, boxSize*0.5,ocNodeTranslations[i]*boxSize,cellS,pts,rgbs,usrs,dataForEachPt);
+         ocNode->ocNodes[i]=new COcNode(this, boxSize*0.5,ocNodeTranslations[i]*boxSize,cellS,pts,rgbas,usrs,dataForEachPt);
 }
 
 COcStruct::~COcStruct()
@@ -130,9 +132,9 @@ void COcStruct::scaleYourself(double f)
 }
 
 unsigned char* COcStruct::serialize(int& dataSize) const
-{
+{ // ver 3
     std::vector<unsigned char> data;
-    data.push_back(2); // ser ver
+    data.push_back(3); // ser ver
     pushData(data,&boxSize,sizeof(double));
     pushData(data,&cellSize,sizeof(double));
     pushData(data,&boxPos(0),sizeof(double));
@@ -148,10 +150,10 @@ unsigned char* COcStruct::serialize(int& dataSize) const
 }
 
 bool COcStruct::deserialize(const unsigned char* data)
-{
+{ // ver 2 & 3
     int pos=0;
     unsigned char ver=data[pos++];
-    if (ver<=2)
+    if (ver<=3)
     {
         boxSize=(reinterpret_cast<const double*>(data+pos))[0];pos+=sizeof(double);
         cellSize=(reinterpret_cast<const double*>(data+pos))[0];pos+=sizeof(double);
@@ -169,32 +171,8 @@ bool COcStruct::deserialize(const unsigned char* data)
     return(false);
 }
 
-unsigned char* COcStruct::serializeOld(int& dataSize) const
-{
-    std::vector<unsigned char> data;
-    data.push_back(2); // ser ver
-    float a;
-    a=(float)boxSize;
-    pushData(data,&a,sizeof(float));
-    a=(float)cellSize;
-    pushData(data,&a,sizeof(float));
-    a=(float)boxPos(0);
-    pushData(data,&a,sizeof(float));
-    a=(float)boxPos(1);
-    pushData(data,&a,sizeof(float));
-    a=(float)boxPos(2);
-    pushData(data,&a,sizeof(float));
-    for (size_t i=0;i<8;i++)
-        ocNode->ocNodes[i]->serialize(data);
-    unsigned char* retVal=new unsigned char[data.size()];
-    for (size_t i=0;i<data.size();i++)
-        retVal[i]=data[i];
-    dataSize=int(data.size());
-    return(retVal);
-}
-
-bool COcStruct::deserializeOld(const unsigned char* data)
-{
+bool COcStruct::deserialize_float(const unsigned char* data)
+{ // old, float version (version 1)
     int pos=0;
     unsigned char ver=data[pos++];
     if (ver<=2)
@@ -215,12 +193,30 @@ bool COcStruct::deserializeOld(const unsigned char* data)
     return(false);
 }
 
+unsigned char* COcStruct::serialize_ver2(int& dataSize) const
+{ // ver 2
+    std::vector<unsigned char> data;
+    data.push_back(2); // ser ver
+    pushData(data,&boxSize,sizeof(double));
+    pushData(data,&cellSize,sizeof(double));
+    pushData(data,&boxPos(0),sizeof(double));
+    pushData(data,&boxPos(1),sizeof(double));
+    pushData(data,&boxPos(2),sizeof(double));
+    for (size_t i=0;i<8;i++)
+        ocNode->ocNodes[i]->serialize_ver2(data);
+    unsigned char* retVal=new unsigned char[data.size()];
+    for (size_t i=0;i<data.size();i++)
+        retVal[i]=data[i];
+    dataSize=int(data.size());
+    return(retVal);
+}
+
 void COcStruct::refreshDisplayData()
 {
     nextId = OCT_MAX_ID;
 }
 
-bool COcStruct::getDisplayVoxelsColorsAndIds(std::vector<float>& thePts,std::vector<unsigned char>& theRgbs,std::vector<unsigned int>& theIds)
+bool COcStruct::getDisplayVoxelsColorsAndIds(std::vector<float>& thePts,std::vector<unsigned char>& theRgbas,std::vector<unsigned int>& theIds)
 {
     bool retVal = false;
     if (nextId >= OCT_MAX_ID)
@@ -234,14 +230,14 @@ bool COcStruct::getDisplayVoxelsColorsAndIds(std::vector<float>& thePts,std::vec
         removedIds.clear();
     }
     for (size_t i=0;i<8;i++)
-        ocNode->ocNodes[i]->getDisplayVoxelsColorsAndIds(this, boxSize, boxPos + ocNodeTranslations[i] * boxSize, thePts, theRgbs, theIds);
+        ocNode->ocNodes[i]->getDisplayVoxelsColorsAndIds(this, boxSize, boxPos + ocNodeTranslations[i] * boxSize, thePts, theRgbas, theIds);
     return retVal;
 }
 
-void COcStruct::getVoxelsPosAndRgb(std::vector<double>& voxelsPosAndRgb,std::vector<unsigned int>* userData/*=nullptr*/) const
+void COcStruct::getVoxelsPosAndRgba(std::vector<double>& voxelsPosAndRgba,std::vector<unsigned int>* userData/*=nullptr*/) const
 {
     for (size_t i=0;i<8;i++)
-        ocNode->ocNodes[i]->getVoxelsPosAndRgb(voxelsPosAndRgb,boxSize,boxPos+ocNodeTranslations[i]*boxSize,userData);
+        ocNode->ocNodes[i]->getVoxelsPosAndRgba(voxelsPosAndRgba,boxSize,boxPos+ocNodeTranslations[i]*boxSize,userData);
 }
 
 void COcStruct::getVoxelsCorners(std::vector<double>& points) const
@@ -311,13 +307,13 @@ bool COcStruct::deleteVoxels_octree(const C4X4Matrix& oc1M,const COcStruct* oc2S
 }
 
 
-void COcStruct::add_pts(const double* points,size_t pointCnt,const unsigned char* rgbData,const unsigned int* usrData,bool dataForEachPt)
+void COcStruct::add_pts(const double* points,size_t pointCnt,const unsigned char* rgbaData,const unsigned int* usrData,bool dataForEachPt)
 {
     // Adds points to an OC tree (extends it if needed)
     _extendOctreeIfNeeded(points,pointCnt);
     // Now add the points:
     std::vector<double> pts;
-    std::vector<unsigned char> rgbs;
+    std::vector<unsigned char> rgbas;
     std::vector<unsigned int> usrs;
     for (size_t i=0;i<pointCnt;i++)
     {
@@ -326,24 +322,26 @@ void COcStruct::add_pts(const double* points,size_t pointCnt,const unsigned char
         pts.push_back(points[3*i+2]-boxPos(2));
         if (dataForEachPt)
         {
-            rgbs.push_back(rgbData[3*i+0]);
-            rgbs.push_back(rgbData[3*i+1]);
-            rgbs.push_back(rgbData[3*i+2]);
+            rgbas.push_back(rgbaData[4*i+0]);
+            rgbas.push_back(rgbaData[4*i+1]);
+            rgbas.push_back(rgbaData[4*i+2]);
+            rgbas.push_back(rgbaData[4*i+3]);
             usrs.push_back(usrData[i]);
         }
     }
     if (!dataForEachPt)
     {
-        rgbs.push_back(rgbData[0]);
-        rgbs.push_back(rgbData[1]);
-        rgbs.push_back(rgbData[2]);
+        rgbas.push_back(rgbaData[0]);
+        rgbas.push_back(rgbaData[1]);
+        rgbas.push_back(rgbaData[2]);
+        rgbas.push_back(rgbaData[3]);
         usrs.push_back(usrData[0]);
     }
     for (size_t i=0;i<8;i++)
-        ocNode->ocNodes[i]->add_pts(this, cellSize,boxSize*0.5,ocNodeTranslations[i]*boxSize,pts,rgbs,usrs,dataForEachPt);
+        ocNode->ocNodes[i]->add_pts(this, cellSize,boxSize*0.5,ocNodeTranslations[i]*boxSize,pts,rgbas,usrs,dataForEachPt);
 }
 
-void COcStruct::add_shape(const C4X4Matrix& ocM,const CObbStruct* obbStruct,const C4X4Matrix& shapeM,const unsigned char* rgbData,unsigned int usrData)
+void COcStruct::add_shape(const C4X4Matrix& ocM,const CObbStruct* obbStruct,const C4X4Matrix& shapeM,const unsigned char* rgbaData,unsigned int usrData)
 {
     // First use the shape vertices to possibly extend the octree:
     C4X4Matrix tr(ocM.getInverse()*shapeM);
@@ -362,11 +360,11 @@ void COcStruct::add_shape(const C4X4Matrix& ocM,const CObbStruct* obbStruct,cons
     {
         C4X4Matrix m(ocM);
         m.X+=ocM.M*boxPos;
-        ocNode->ocNodes[i]->add_shape(this, m,cellSize,boxSize*0.5,ocNodeTranslations[i]*boxSize,obbStruct,obbStruct->obb,shapeM,rgbData,usrData);
+        ocNode->ocNodes[i]->add_shape(this, m,cellSize,boxSize*0.5,ocNodeTranslations[i]*boxSize,obbStruct,obbStruct->obb,shapeM,rgbaData,usrData);
     }
 }
 
-void COcStruct::add_octree(const C4X4Matrix& oc1M,const COcStruct* oc2Struct,const C4X4Matrix& oc2M,const unsigned char* rgbData,unsigned int usrData)
+void COcStruct::add_octree(const C4X4Matrix& oc1M,const COcStruct* oc2Struct,const C4X4Matrix& oc2M,const unsigned char* rgbaData,unsigned int usrData)
 {
     // First use the octree's corner vertices to possibly extend the octree:
     C4X4Matrix tr(oc1M.getInverse()*oc2M);
@@ -389,7 +387,7 @@ void COcStruct::add_octree(const C4X4Matrix& oc1M,const COcStruct* oc2Struct,con
     for (size_t i=0;i<8;i++)
     {
         for (size_t j=0;j<8;j++)
-            ocNode->ocNodes[i]->add_octree(this, m1,cellSize,boxSize*0.5,ocNodeTranslations[i]*boxSize,oc2Struct->ocNode->ocNodes[j],m2,oc2Struct->boxSize*0.5,ocNodeTranslations[j]*oc2Struct->boxSize,rgbData,usrData);
+            ocNode->ocNodes[i]->add_octree(this, m1,cellSize,boxSize*0.5,ocNodeTranslations[i]*boxSize,oc2Struct->ocNode->ocNodes[j],m2,oc2Struct->boxSize*0.5,ocNodeTranslations[j]*oc2Struct->boxSize,rgbaData,usrData);
     }
 }
 

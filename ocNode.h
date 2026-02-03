@@ -1,9 +1,9 @@
 #pragma once
 
-#include "conf.h"
+#include <conf.h>
 #include <vector>
 #include <simMath/3Vector.h>
-#include "pcNode.h"
+#include <pcNode.h>
 
 class COcStruct;
 
@@ -11,18 +11,19 @@ class COcNode
 {
 public:
     COcNode();
-    COcNode(COcStruct* oct, double boxS,const C3Vector& boxCenter,double cellS,const std::vector<double>& points,const std::vector<unsigned char>& rgbData,const std::vector<unsigned int>& usrData,bool dataForEachPt);
+    COcNode(COcStruct* oct, double boxS,const C3Vector& boxCenter,double cellS,const std::vector<double>& points,const std::vector<unsigned char>& rgbaData,const std::vector<unsigned int>& usrData,bool dataForEachPt);
     virtual ~COcNode();
 
     COcNode* copyYourself() const;
     void serialize(std::vector<unsigned char>& data) const;
     void deserialize(COcStruct* oct, const unsigned char* data,int& pos);
+    void serialize_ver2(std::vector<unsigned char>& data) const;
 
     bool getCell(const C3Vector& boxCenter,double boxSize,unsigned long long int ocCaching,C3Vector& totalTranslation,unsigned int* usrData) const;
 
     void resetAllIds(COcStruct* oct);
-    void getDisplayVoxelsColorsAndIds(COcStruct* oct, double pBoxSize,const C3Vector& boxCenter, std::vector<float>& thePts, std::vector<unsigned char>& theRgbs, std::vector<unsigned int>& theIds) const;
-    void getVoxelsPosAndRgb(std::vector<double>& voxelsPosAndRgb,double pBoxSize,const C3Vector& boxCenter,std::vector<unsigned int>* usrData=nullptr) const;
+    void getDisplayVoxelsColorsAndIds(COcStruct* oct, double pBoxSize,const C3Vector& boxCenter, std::vector<float>& thePts, std::vector<unsigned char>& theRgbas, std::vector<unsigned int>& theIds) const;
+    void getVoxelsPosAndRgba(std::vector<double>& voxelsPosAndRgb,double pBoxSize,const C3Vector& boxCenter,std::vector<unsigned int>* usrData=nullptr) const;
     void getVoxelsCorners(std::vector<double>& points,double pBoxSize,const C3Vector& boxCenter) const;
     void getOctreeCorners(std::vector<double>& points,double pBoxSize,const C3Vector& boxCenter) const;
 
@@ -30,7 +31,7 @@ public:
     bool deleteVoxels_shape(COcStruct* oct, const C4X4Matrix& ocM,double boxS,const C3Vector& boxCenter,const CObbStruct* obbStruct,const CObbNode* obb,const C4X4Matrix& shapeM);
     bool deleteVoxels_octree(COcStruct* oct, const C4X4Matrix& oc1M,double box1S,const C3Vector& box1Center,const COcNode* oc2Node,const C4X4Matrix& oc2M,double box2S,const C3Vector& box2Center);
 
-    void add_pts(COcStruct* oct, double cellS,double boxS,const C3Vector& boxCenter,const std::vector<double>& points,const std::vector<unsigned char>& rgbData,const std::vector<unsigned int>& usrData,bool dataForEachPt);
+    void add_pts(COcStruct* oct, double cellS,double boxS,const C3Vector& boxCenter,const std::vector<double>& points,const std::vector<unsigned char>& rgbaData,const std::vector<unsigned int>& usrData,bool dataForEachPt);
     bool add_shape(COcStruct* oct, const C4X4Matrix& ocM,double cellS,double boxS,const C3Vector& boxCenter,const CObbStruct* obbStruct,const CObbNode* obb,const C4X4Matrix& shapeM,const unsigned char* rgbData,unsigned int usrData);
     bool add_octree(COcStruct* oct, const C4X4Matrix& oc1M,double cell1S,double box1S,const C3Vector& box1Center,const COcNode* oc2Node,const C4X4Matrix& oc2M,double box2S,const C3Vector& box2Center,const unsigned char* rgbData,unsigned int usrData);
 
@@ -54,7 +55,7 @@ public:
 
     COcNode** ocNodes;
     bool empty;
-    unsigned char rgb[3];
+    unsigned char rgba[4];
     unsigned int userData;
     unsigned int id;
 };

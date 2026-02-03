@@ -1,6 +1,6 @@
 #pragma once
 
-#include "conf.h"
+#include <conf.h>
 #include <vector>
 #include <simMath/3Vector.h>
 #include <simMath/4X4Matrix.h>

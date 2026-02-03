@@ -1,6 +1,6 @@
-#include "calcUtils.h"
-#include "ocNode.h"
-#include "ocStruct.h"
+#include <calcUtils.h>
+#include <ocNode.h>
+#include <ocStruct.h>
 
 COcNode::COcNode()
 {
@@ -9,7 +9,7 @@ COcNode::COcNode()
     ocNodes=nullptr;
 }
 
-COcNode::COcNode(COcStruct* oct, double boxS,const C3Vector& boxCenter,double cellS,const std::vector<double>& points,const std::vector<unsigned char>& rgbData,const std::vector<unsigned int>& usrData,bool dataForEachPt)
+COcNode::COcNode(COcStruct* oct, double boxS,const C3Vector& boxCenter,double cellS,const std::vector<double>& points,const std::vector<unsigned char>& rgbaData,const std::vector<unsigned int>& usrData,bool dataForEachPt)
 {
     id = 0;
     empty=true;
@@ -18,7 +18,7 @@ COcNode::COcNode(COcStruct* oct, double boxS,const C3Vector& boxCenter,double ce
     if (boxS>cellS*double(1.5))
     {
         std::vector<double> pts;
-        std::vector<unsigned char> rgbs;
+        std::vector<unsigned char> rgbas;
         std::vector<unsigned int> usrs;
         for (size_t i=0;i<points.size()/3;i++)
         {
@@ -31,9 +31,10 @@ COcNode::COcNode(COcStruct* oct, double boxS,const C3Vector& boxCenter,double ce
                 pts.push_back(pt(2));
                 if (dataForEachPt)
                 {
-                    rgbs.push_back(rgbData[3*i+0]);
-                    rgbs.push_back(rgbData[3*i+1]);
-                    rgbs.push_back(rgbData[3*i+2]);
+                    rgbas.push_back(rgbaData[4*i+0]);
+                    rgbas.push_back(rgbaData[4*i+1]);
+                    rgbas.push_back(rgbaData[4*i+2]);
+                    rgbas.push_back(rgbaData[4*i+3]);
                     usrs.push_back(usrData[i]);
                 }
             }
@@ -42,14 +43,15 @@ COcNode::COcNode(COcStruct* oct, double boxS,const C3Vector& boxCenter,double ce
         {
             if (!dataForEachPt)
             {
-                rgbs.push_back(rgbData[0]);
-                rgbs.push_back(rgbData[1]);
-                rgbs.push_back(rgbData[2]);
+                rgbas.push_back(rgbaData[0]);
+                rgbas.push_back(rgbaData[1]);
+                rgbas.push_back(rgbaData[2]);
+                rgbas.push_back(rgbaData[3]);
                 usrs.push_back(usrData[0]);
             }
             ocNodes=new COcNode* [8];
             for (size_t i=0;i<8;i++)
-                ocNodes[i]=new COcNode(oct, boxS*0.5,ocNodeTranslations[i]*boxS,cellS,pts,rgbs,usrs,dataForEachPt);
+                ocNodes[i]=new COcNode(oct, boxS*0.5,ocNodeTranslations[i]*boxS,cellS,pts,rgbas,usrs,dataForEachPt);
         }
     }
     else
@@ -64,16 +66,18 @@ COcNode::COcNode(COcStruct* oct, double boxS,const C3Vector& boxCenter,double ce
                 oct->genId(id);
                 if (dataForEachPt)
                 {
-                    rgb[0]=rgbData[3*i+0];
-                    rgb[1]=rgbData[3*i+1];
-                    rgb[2]=rgbData[3*i+2];
+                    rgba[0]=rgbaData[4*i+0];
+                    rgba[1]=rgbaData[4*i+1];
+                    rgba[2]=rgbaData[4*i+2];
+                    rgba[3]=rgbaData[4*i+3];
                     userData=usrData[i];
                 }
                 else
                 {
-                    rgb[0]=rgbData[0];
-                    rgb[1]=rgbData[1];
-                    rgb[2]=rgbData[2];
+                    rgba[0]=rgbaData[0];
+                    rgba[1]=rgbaData[1];
+                    rgba[2]=rgbaData[2];
+                    rgba[3]=rgbaData[3];
                     userData=usrData[0];
                 }
             }
@@ -95,9 +99,10 @@ COcNode* COcNode::copyYourself() const
 {
     COcNode* newOcNode=new COcNode();
     newOcNode->empty=empty;
-    newOcNode->rgb[0]=rgb[0];
-    newOcNode->rgb[1]=rgb[1];
-    newOcNode->rgb[2]=rgb[2];
+    newOcNode->rgba[0]=rgba[0];
+    newOcNode->rgba[1]=rgba[1];
+    newOcNode->rgba[2]=rgba[2];
+    newOcNode->rgba[3]=rgba[3];
     newOcNode->userData=userData;
     if (ocNodes!=nullptr)
     {
@@ -110,12 +115,36 @@ COcNode* COcNode::copyYourself() const
 
 void COcNode::serialize(std::vector<unsigned char>& data) const
 {
+    const unsigned char ver = 3;
+    if (!empty)
+    {
+        data.push_back(ver);
+        data.push_back(rgba[0]);
+        data.push_back(rgba[1]);
+        data.push_back(rgba[2]);
+        data.push_back(rgba[3]);
+        pushData(data,&userData,sizeof(unsigned int));
+    }
+    else
+        data.push_back(0);
+    if (ocNodes!=nullptr)
+    {
+        data.push_back(ver);
+        for (size_t i=0;i<8;i++)
+            ocNodes[i]->serialize(data);
+    }
+    else
+        data.push_back(0);
+}
+
+void COcNode::serialize_ver2(std::vector<unsigned char>& data) const
+{ // for backw. compatibility. In ver 2 no rgbA, just rgb!
     if (!empty)
     {
         data.push_back(1);
-        data.push_back(rgb[0]);
-        data.push_back(rgb[1]);
-        data.push_back(rgb[2]);
+        data.push_back(rgba[0]);
+        data.push_back(rgba[1]);
+        data.push_back(rgba[2]);
         pushData(data,&userData,sizeof(unsigned int));
     }
     else
@@ -124,7 +153,7 @@ void COcNode::serialize(std::vector<unsigned char>& data) const
     {
         data.push_back(1);
         for (size_t i=0;i<8;i++)
-            ocNodes[i]->serialize(data);
+            ocNodes[i]->serialize_ver2(data);
     }
     else
         data.push_back(0);
@@ -132,13 +161,18 @@ void COcNode::serialize(std::vector<unsigned char>& data) const
 
 void COcNode::deserialize(COcStruct* oct, const unsigned char* data,int& pos)
 {
-    empty=(data[pos++]==0);
+    unsigned char ver = data[pos++];
+    empty=(ver==0);
     if (!empty)
     {
         oct->genId(id);
-        rgb[0]=data[pos++];
-        rgb[1]=data[pos++];
-        rgb[2]=data[pos++];
+        rgba[0]=data[pos++];
+        rgba[1]=data[pos++];
+        rgba[2]=data[pos++];
+        if (ver >= 3)
+            rgba[3]=data[pos++];
+        else
+            rgba[3]=255;
         userData=(reinterpret_cast<const unsigned int*>(data+pos))[0];
         pos+=sizeof(userData);
     }
@@ -192,43 +226,45 @@ void COcNode::resetAllIds(COcStruct* oct)
     oct->genId(id);
 }
 
-void COcNode::getDisplayVoxelsColorsAndIds(COcStruct* oct, double pBoxSize,const C3Vector& boxCenter, std::vector<float>& thePts, std::vector<unsigned char>& theRgbs, std::vector<unsigned int>& theIds) const
+void COcNode::getDisplayVoxelsColorsAndIds(COcStruct* oct, double pBoxSize,const C3Vector& boxCenter, std::vector<float>& thePts, std::vector<unsigned char>& theRgbas, std::vector<unsigned int>& theIds) const
 {
     if (ocNodes!=nullptr)
     {
         for (size_t i=0;i<8;i++)
-            ocNodes[i]->getDisplayVoxelsColorsAndIds(oct, pBoxSize * 0.5, boxCenter + ocNodeTranslations[i] * pBoxSize * 0.5, thePts, theRgbs, theIds);
+            ocNodes[i]->getDisplayVoxelsColorsAndIds(oct, pBoxSize * 0.5, boxCenter + ocNodeTranslations[i] * pBoxSize * 0.5, thePts, theRgbas, theIds);
     }
     if (!empty)
     {
         thePts.push_back(float(boxCenter(0)));
         thePts.push_back(float(boxCenter(1)));
         thePts.push_back(float(boxCenter(2)));
-        theRgbs.push_back(rgb[0]);
-        theRgbs.push_back(rgb[1]);
-        theRgbs.push_back(rgb[2]);
+        theRgbas.push_back(rgba[0]);
+        theRgbas.push_back(rgba[1]);
+        theRgbas.push_back(rgba[2]);
+        theRgbas.push_back(rgba[3]);
         theIds.push_back(id);
         oct->allIds[id] = false;
     }
 }
 
-void COcNode::getVoxelsPosAndRgb(std::vector<double>& voxelsPosAndRgb,double pBoxSize,const C3Vector& boxCenter,std::vector<unsigned int>* usrData/*=nullptr*/) const
+void COcNode::getVoxelsPosAndRgba(std::vector<double>& voxelsPosAndRgba,double pBoxSize,const C3Vector& boxCenter,std::vector<unsigned int>* usrData/*=nullptr*/) const
 {
     if (!empty)
     {
-        voxelsPosAndRgb.push_back(boxCenter(0));
-        voxelsPosAndRgb.push_back(boxCenter(1));
-        voxelsPosAndRgb.push_back(boxCenter(2));
-        voxelsPosAndRgb.push_back(double(rgb[0])/double(254.99));
-        voxelsPosAndRgb.push_back(double(rgb[1])/double(254.99));
-        voxelsPosAndRgb.push_back(double(rgb[2])/double(254.99));
+        voxelsPosAndRgba.push_back(boxCenter(0));
+        voxelsPosAndRgba.push_back(boxCenter(1));
+        voxelsPosAndRgba.push_back(boxCenter(2));
+        voxelsPosAndRgba.push_back(double(rgba[0])/double(254.99));
+        voxelsPosAndRgba.push_back(double(rgba[1])/double(254.99));
+        voxelsPosAndRgba.push_back(double(rgba[2])/double(254.99));
+        voxelsPosAndRgba.push_back(double(rgba[3])/double(254.99));
         if (usrData!=nullptr)
             usrData->push_back(userData);
     }
     if (ocNodes!=nullptr)
     {
         for (size_t i=0;i<8;i++)
-            ocNodes[i]->getVoxelsPosAndRgb(voxelsPosAndRgb,pBoxSize*0.5,boxCenter+ocNodeTranslations[i]*pBoxSize*0.5,usrData);
+            ocNodes[i]->getVoxelsPosAndRgba(voxelsPosAndRgba,pBoxSize*0.5,boxCenter+ocNodeTranslations[i]*pBoxSize*0.5,usrData);
     }
 }
 
@@ -487,13 +523,13 @@ bool COcNode::deleteVoxels_octree(COcStruct* oct, const C4X4Matrix& oc1M,double 
     return(retVal); // true: this OC node is empty
 }
 
-void COcNode::add_pts(COcStruct* oct, double cellS,double boxS,const C3Vector& boxCenter,const std::vector<double>& points,const std::vector<unsigned char>& rgbData,const std::vector<unsigned int>& usrData,bool dataForEachPt)
+void COcNode::add_pts(COcStruct* oct, double cellS,double boxS,const C3Vector& boxCenter,const std::vector<double>& points,const std::vector<unsigned char>& rgbaData,const std::vector<unsigned int>& usrData,bool dataForEachPt)
 {
     double boxHsp=boxS*double(0.5001);
     if (boxS>cellS*double(1.5))
     { // not a leaf node yet..
         std::vector<double> pts;
-        std::vector<unsigned char> rgbs;
+        std::vector<unsigned char> rgbas;
         std::vector<unsigned int> usrs;
         for (size_t i=0;i<points.size()/3;i++)
         {
@@ -506,9 +542,10 @@ void COcNode::add_pts(COcStruct* oct, double cellS,double boxS,const C3Vector& b
                 pts.push_back(pt(2));
                 if (dataForEachPt)
                 {
-                    rgbs.push_back(rgbData[3*i+0]);
-                    rgbs.push_back(rgbData[3*i+1]);
-                    rgbs.push_back(rgbData[3*i+2]);
+                    rgbas.push_back(rgbaData[4*i+0]);
+                    rgbas.push_back(rgbaData[4*i+1]);
+                    rgbas.push_back(rgbaData[4*i+2]);
+                    rgbas.push_back(rgbaData[4*i+3]);
                     usrs.push_back(usrData[i]);
                 }
             }
@@ -517,21 +554,22 @@ void COcNode::add_pts(COcStruct* oct, double cellS,double boxS,const C3Vector& b
         {
             if (!dataForEachPt)
             {
-                rgbs.push_back(rgbData[0]);
-                rgbs.push_back(rgbData[1]);
-                rgbs.push_back(rgbData[2]);
+                rgbas.push_back(rgbaData[0]);
+                rgbas.push_back(rgbaData[1]);
+                rgbas.push_back(rgbaData[2]);
+                rgbas.push_back(rgbaData[3]);
                 usrs.push_back(usrData[0]);
             }
             if (ocNodes==nullptr)
             {
                 ocNodes=new COcNode* [8];
                 for (size_t i=0;i<8;i++)
-                    ocNodes[i]=new COcNode(oct, boxS*0.5,ocNodeTranslations[i]*boxS,cellS,pts,rgbs,usrs,dataForEachPt);
+                    ocNodes[i]=new COcNode(oct, boxS*0.5,ocNodeTranslations[i]*boxS,cellS,pts,rgbas,usrs,dataForEachPt);
             }
             else
             {
                 for (size_t i=0;i<8;i++)
-                    ocNodes[i]->add_pts(oct, cellS,boxS*0.5,ocNodeTranslations[i]*boxS,pts,rgbs,usrs,dataForEachPt);
+                    ocNodes[i]->add_pts(oct, cellS,boxS*0.5,ocNodeTranslations[i]*boxS,pts,rgbas,usrs,dataForEachPt);
             }
         }
     }
@@ -549,16 +587,18 @@ void COcNode::add_pts(COcStruct* oct, double cellS,double boxS,const C3Vector& b
                     oct->genId(id);
                     if (dataForEachPt)
                     {
-                        rgb[0]=rgbData[3*i+0];
-                        rgb[1]=rgbData[3*i+1];
-                        rgb[2]=rgbData[3*i+2];
+                        rgba[0]=rgbaData[4*i+0];
+                        rgba[1]=rgbaData[4*i+1];
+                        rgba[2]=rgbaData[4*i+2];
+                        rgba[3]=rgbaData[4*i+3];
                         userData=usrData[i];
                     }
                     else
                     {
-                        rgb[0]=rgbData[0];
-                        rgb[1]=rgbData[1];
-                        rgb[2]=rgbData[2];
+                        rgba[0]=rgbaData[0];
+                        rgba[1]=rgbaData[1];
+                        rgba[2]=rgbaData[2];
+                        rgba[3]=rgbaData[3];
                         userData=usrData[0];
                     }
                 }
@@ -567,7 +607,7 @@ void COcNode::add_pts(COcStruct* oct, double cellS,double boxS,const C3Vector& b
     }
 }
 
-bool COcNode::add_shape(COcStruct* oct, const C4X4Matrix& ocM,double cellS,double boxS,const C3Vector& boxCenter,const CObbStruct* obbStruct,const CObbNode* obb,const C4X4Matrix& shapeM,const unsigned char* rgbData,unsigned int usrData)
+bool COcNode::add_shape(COcStruct* oct, const C4X4Matrix& ocM,double cellS,double boxS,const C3Vector& boxCenter,const CObbStruct* obbStruct,const CObbNode* obb,const C4X4Matrix& shapeM,const unsigned char* rgbaData,unsigned int usrData)
 {
     bool retVal=false;
     double boxHsp=boxS*double(0.5001);
@@ -581,8 +621,8 @@ bool COcNode::add_shape(COcStruct* oct, const C4X4Matrix& ocM,double cellS,doubl
         { // the OBB box and the ocnode box collide. Continue exploration by exploring the largest volume first:
             if ( (obb->boxHs(0)*obb->boxHs(1)*obb->boxHs(2)>boxHsp*boxHsp*boxHsp)&&(obb->leafTris==nullptr) )
             { // Explore the OBB node
-                bool bb1=add_shape(oct, ocM,cellS,boxS,boxCenter,obbStruct,obb->obbNodes[0],shapeM,rgbData,usrData);
-                bool bb2=add_shape(oct, ocM,cellS,boxS,boxCenter,obbStruct,obb->obbNodes[1],shapeM,rgbData,usrData);
+                bool bb1=add_shape(oct, ocM,cellS,boxS,boxCenter,obbStruct,obb->obbNodes[0],shapeM,rgbaData,usrData);
+                bool bb2=add_shape(oct, ocM,cellS,boxS,boxCenter,obbStruct,obb->obbNodes[1],shapeM,rgbaData,usrData);
                 retVal=bb1||bb2;
             }
             else
@@ -595,7 +635,7 @@ bool COcNode::add_shape(COcStruct* oct, const C4X4Matrix& ocM,double cellS,doubl
                 }
                 for (size_t i=0;i<8;i++)
                 {
-                    bool bb=ocNodes[i]->add_shape(oct, ocM,cellS,boxS*0.5,boxCenter+ocNodeTranslations[i]*boxS,obbStruct,obb,shapeM,rgbData,usrData);
+                    bool bb=ocNodes[i]->add_shape(oct, ocM,cellS,boxS*0.5,boxCenter+ocNodeTranslations[i]*boxS,obbStruct,obb,shapeM,rgbaData,usrData);
                     retVal=retVal||bb;
                 }
             }
@@ -610,8 +650,8 @@ bool COcNode::add_shape(COcStruct* oct, const C4X4Matrix& ocM,double cellS,doubl
             { // the OBB box and the voxel collide
                 if (obb->leafTris==nullptr)
                 { // explore the OBB node
-                    retVal=add_shape(oct, ocM,cellS,boxS,boxCenter,obbStruct,obb->obbNodes[0],shapeM,rgbData,usrData);
-                    retVal=retVal||add_shape(oct, ocM,cellS,boxS,boxCenter,obbStruct,obb->obbNodes[1],shapeM,rgbData,usrData);
+                    retVal=add_shape(oct, ocM,cellS,boxS,boxCenter,obbStruct,obb->obbNodes[0],shapeM,rgbaData,usrData);
+                    retVal=retVal||add_shape(oct, ocM,cellS,boxS,boxCenter,obbStruct,obb->obbNodes[1],shapeM,rgbaData,usrData);
                 }
                 else
                 { // Check the triangles of the OBB leaf and the voxel
@@ -631,9 +671,10 @@ bool COcNode::add_shape(COcStruct* oct, const C4X4Matrix& ocM,double cellS,doubl
                             empty=false;
                             oct->genId(id);
                             retVal=true;
-                            rgb[0]=rgbData[0];
-                            rgb[1]=rgbData[1];
-                            rgb[2]=rgbData[2];
+                            rgba[0]=rgbaData[0];
+                            rgba[1]=rgbaData[1];
+                            rgba[2]=rgbaData[2];
+                            rgba[3]=rgbaData[3];
                             userData=usrData;
                             break;
                         }
@@ -645,7 +686,7 @@ bool COcNode::add_shape(COcStruct* oct, const C4X4Matrix& ocM,double cellS,doubl
     return(retVal); // true: at least one new voxel was added
 }
 
-bool COcNode::add_octree(COcStruct* oct, const C4X4Matrix& oc1M,double cell1S,double box1S,const C3Vector& box1Center,const COcNode* oc2Node,const C4X4Matrix& oc2M,double box2S,const C3Vector& box2Center,const unsigned char* rgbData,unsigned int usrData)
+bool COcNode::add_octree(COcStruct* oct, const C4X4Matrix& oc1M,double cell1S,double box1S,const C3Vector& box1Center,const COcNode* oc2Node,const C4X4Matrix& oc2M,double box2S,const C3Vector& box2Center,const unsigned char* rgbaData,unsigned int usrData)
 {
     bool retVal=false;
     double box1Hsp=box1S*double(0.5001);
@@ -663,7 +704,7 @@ bool COcNode::add_octree(COcStruct* oct, const C4X4Matrix& oc1M,double cell1S,do
             { // Explore the OC node 2
                 for (size_t i=0;i<8;i++)
                 {
-                    bool bb=add_octree(oct, oc1M,cell1S,box1S,box1Center,oc2Node->ocNodes[i],oc2M,box2S*0.5,box2Center+ocNodeTranslations[i]*box2S,rgbData,usrData);
+                    bool bb=add_octree(oct, oc1M,cell1S,box1S,box1Center,oc2Node->ocNodes[i],oc2M,box2S*0.5,box2Center+ocNodeTranslations[i]*box2S,rgbaData,usrData);
                     retVal=retVal||bb;
                 }
             }
@@ -677,7 +718,7 @@ bool COcNode::add_octree(COcStruct* oct, const C4X4Matrix& oc1M,double cell1S,do
                 }
                 for (size_t i=0;i<8;i++)
                 {
-                    bool bb=ocNodes[i]->add_octree(oct, oc1M,cell1S,box1S*0.5,box1Center+ocNodeTranslations[i]*box1S,oc2Node,oc2M,box2S,box2Center,rgbData,usrData);
+                    bool bb=ocNodes[i]->add_octree(oct, oc1M,cell1S,box1S*0.5,box1Center+ocNodeTranslations[i]*box1S,oc2Node,oc2M,box2S,box2Center,rgbaData,usrData);
                     retVal=retVal||bb;
                 }
             }
@@ -693,7 +734,7 @@ bool COcNode::add_octree(COcStruct* oct, const C4X4Matrix& oc1M,double cell1S,do
                 {  // explore the node 2 since we are not yet at its leafs
                     for (size_t i=0;i<8;i++)
                     {
-                        retVal=add_octree(oct, oc1M,cell1S,box1S,box1Center,oc2Node->ocNodes[i],oc2M,box2S*0.5,box2Center+ocNodeTranslations[i]*box2S,rgbData,usrData);
+                        retVal=add_octree(oct, oc1M,cell1S,box1S,box1Center,oc2Node->ocNodes[i],oc2M,box2S*0.5,box2Center+ocNodeTranslations[i]*box2S,rgbaData,usrData);
                         if (retVal)
                             break; // the voxel was added, leave
                     }
@@ -705,9 +746,10 @@ bool COcNode::add_octree(COcStruct* oct, const C4X4Matrix& oc1M,double cell1S,do
                     {
                         empty=false;
                         oct->genId(id);
-                        rgb[0]=rgbData[0];
-                        rgb[1]=rgbData[1];
-                        rgb[2]=rgbData[2];
+                        rgba[0]=rgbaData[0];
+                        rgba[1]=rgbaData[1];
+                        rgba[2]=rgbaData[2];
+                        rgba[3]=rgbaData[3];
                         userData=usrData;
                     }
                 }

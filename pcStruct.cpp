@@ -1,7 +1,7 @@
-#include "calcUtils.h"
-#include "kdNode.h"
-#include "pcStruct.h"
-#include "ocStruct.h"
+#include <calcUtils.h>
+#include <kdNode.h>
+#include <pcStruct.h>
+#include <ocStruct.h>
 
 CPcStruct::CPcStruct()
 {
@@ -10,42 +10,43 @@ CPcStruct::CPcStruct()
     pcNode=new CPcNode();
 }
 
-CPcStruct::CPcStruct(double cellS,int cellPts,const double* points,size_t pointCnt,const unsigned char* rgbData,bool rgbForEachPt,double proximityTol)
+CPcStruct::CPcStruct(double cellS,int cellPts,const double* points,size_t pointCnt,const unsigned char* rgbaData,bool rgbForEachPt,double proximityTol)
 {
     // Create an PC tree from points
     nextId = PTS_MAX_ID; // triggers a full data retrieval next time data is fetched
     allIds.resize(PTS_MAX_ID, false);
     pcNode=new CPcNode();
-    _create(cellS,cellPts,points,pointCnt,rgbData,rgbForEachPt,proximityTol);
+    _create(cellS,cellPts,points,pointCnt,rgbaData,rgbForEachPt,proximityTol);
 }
 
-void CPcStruct::_create(double cellS,int cellPts,const double* points,size_t pointCnt,const unsigned char* rgbData,bool rgbForEachPt,double proximityTol)
+void CPcStruct::_create(double cellS,int cellPts,const double* points,size_t pointCnt,const unsigned char* rgbaData,bool rgbForEachPt,double proximityTol)
 {
     // Create an OC tree from points
     cellSize=cellS;
     maxPtCnt=cellPts;
     // handle distance tolerance:
     std::vector<double> _points;
-    std::vector<unsigned char> _rgbData;
+    std::vector<unsigned char> _rgbaData;
     if (proximityTol==0.0)
     {
         _points.assign(points,points+pointCnt*3);
         if (rgbForEachPt)
-            _rgbData.assign(rgbData,rgbData+pointCnt*3);
+            _rgbaData.assign(rgbaData,rgbaData+pointCnt*4);
         else
         {
             for (size_t i=0;i<pointCnt;i++)
             {
-                _rgbData.push_back(rgbData[0]);
-                _rgbData.push_back(rgbData[1]);
-                _rgbData.push_back(rgbData[2]);
+                _rgbaData.push_back(rgbaData[0]);
+                _rgbaData.push_back(rgbaData[1]);
+                _rgbaData.push_back(rgbaData[2]);
+                _rgbaData.push_back(rgbaData[3]);
             }
         }
     }
     else
     {
-        CKdNode* allKdTreePts=CKdNode::buildKdTree(points,pointCnt,rgbData,rgbForEachPt,proximityTol);
-        allKdTreePts->getPts(_points,_rgbData);
+        CKdNode* allKdTreePts=CKdNode::buildKdTree(points,pointCnt,rgbaData,rgbForEachPt,proximityTol);
+        allKdTreePts->getPts(_points,_rgbaData);
         delete allKdTreePts;
     }
     // Set box size and pos:
@@ -77,7 +78,7 @@ void CPcStruct::_create(double cellS,int cellPts,const double* points,size_t poi
     std::vector<bool> ptsInvalidityIndicators(pts.size()/3,false);
     pcNode->pcNodes=new CPcNode* [8];
     for (size_t i=0;i<8;i++)
-        pcNode->pcNodes[i]=new CPcNode(this,boxSize*0.5,ocNodeTranslations[i]*boxSize,cellSize,maxPtCnt,pts,ptsOriginalIndices,ptsInvalidityIndicators,_rgbData,true);
+        pcNode->pcNodes[i]=new CPcNode(this,boxSize*0.5,ocNodeTranslations[i]*boxSize,cellSize,maxPtCnt,pts,ptsOriginalIndices,ptsInvalidityIndicators,_rgbaData,true);
 }
 
 CPcStruct::~CPcStruct()
@@ -107,7 +108,7 @@ void CPcStruct::scaleYourself(double f)
 unsigned char* CPcStruct::serialize(int& dataSize) const
 {
     std::vector<unsigned char> data;
-    data.push_back(2); // ser ver
+    data.push_back(3); // ser ver
     pushData(data,&boxSize,sizeof(double));
     pushData(data,&cellSize,sizeof(double));
     pushData(data,&boxPos(0),sizeof(double));
@@ -127,7 +128,7 @@ bool CPcStruct::deserialize(const unsigned char* data)
 {
     int pos=0;
     unsigned char ver=data[pos++];
-    if (ver<=2)
+    if (ver==3)
     {
         boxSize=(reinterpret_cast<const double*>(data+pos))[0];pos+=sizeof(double);
         cellSize=(reinterpret_cast<const double*>(data+pos))[0];pos+=sizeof(double);
@@ -146,24 +147,18 @@ bool CPcStruct::deserialize(const unsigned char* data)
     return(false);
 }
 
-unsigned char* CPcStruct::serializeOld(int& dataSize) const
+unsigned char* CPcStruct::serialize_ver2(int& dataSize) const
 {
     std::vector<unsigned char> data;
     data.push_back(2); // ser ver
-    float a;
-    a=(float)boxSize;
-    pushData(data,&a,sizeof(float));
-    a=(float)cellSize;
-    pushData(data,&a,sizeof(float));
-    a=(float)boxPos(0);
-    pushData(data,&a,sizeof(float));
-    a=(float)boxPos(1);
-    pushData(data,&a,sizeof(float));
-    a=(float)boxPos(2);
-    pushData(data,&a,sizeof(float));
+    pushData(data,&boxSize,sizeof(double));
+    pushData(data,&cellSize,sizeof(double));
+    pushData(data,&boxPos(0),sizeof(double));
+    pushData(data,&boxPos(1),sizeof(double));
+    pushData(data,&boxPos(2),sizeof(double));
     pushData(data,&maxPtCnt,sizeof(int));
     for (size_t i=0;i<8;i++)
-        pcNode->pcNodes[i]->serializeOld(data);
+        pcNode->pcNodes[i]->serialize_ver2(data);
     unsigned char* retVal=new unsigned char[data.size()];
     for (size_t i=0;i<data.size();i++)
         retVal[i]=data[i];
@@ -171,7 +166,30 @@ unsigned char* CPcStruct::serializeOld(int& dataSize) const
     return(retVal);
 }
 
-bool CPcStruct::deserializeOld(const unsigned char* data)
+bool CPcStruct::deserialize_ver2(const unsigned char* data)
+{
+    int pos=0;
+    unsigned char ver=data[pos++];
+    if (ver<=2)
+    {
+        boxSize=(reinterpret_cast<const double*>(data+pos))[0];pos+=sizeof(double);
+        cellSize=(reinterpret_cast<const double*>(data+pos))[0];pos+=sizeof(double);
+        boxPos(0)=(reinterpret_cast<const double*>(data+pos))[0];pos+=sizeof(double);
+        boxPos(1)=(reinterpret_cast<const double*>(data+pos))[0];pos+=sizeof(double);
+        boxPos(2)=(reinterpret_cast<const double*>(data+pos))[0];pos+=sizeof(double);
+        maxPtCnt=(reinterpret_cast<const int*>(data+pos))[0];pos+=sizeof(int);
+        pcNode->pcNodes=new CPcNode* [8];
+        for (size_t i=0;i<8;i++)
+        {
+            pcNode->pcNodes[i]=new CPcNode();
+            pcNode->pcNodes[i]->deserialize_ver2(this,data,pos);
+        }
+        return(true);
+    }
+    return(false);
+}
+
+bool CPcStruct::deserialize_float(const unsigned char* data)
 {
     int pos=0;
     unsigned char ver=data[pos++];
@@ -187,7 +205,7 @@ bool CPcStruct::deserializeOld(const unsigned char* data)
         for (size_t i=0;i<8;i++)
         {
             pcNode->pcNodes[i]=new CPcNode();
-            pcNode->pcNodes[i]->deserializeOld(this,data,pos);
+            pcNode->pcNodes[i]->deserialize_float(this,data,pos);
         }
         return(true);
     }
@@ -207,7 +225,7 @@ void CPcStruct::refreshDisplayData()
     nextId = PTS_MAX_ID;
 }
 
-bool CPcStruct::getDisplayPointsColorsAndIds(std::vector<float>& thePts,std::vector<unsigned char>& theRgbs,std::vector<unsigned int>& theIds)
+bool CPcStruct::getDisplayPointsColorsAndIds(std::vector<float>& thePts,std::vector<unsigned char>& theRgbas,std::vector<unsigned int>& theIds)
 {
     bool retVal = false;
     if (nextId >= PTS_MAX_ID)
@@ -221,20 +239,20 @@ bool CPcStruct::getDisplayPointsColorsAndIds(std::vector<float>& thePts,std::vec
         removedIds.clear();
     }
     for (size_t i=0;i<8;i++)
-        pcNode->pcNodes[i]->getDisplayPointsColorsAndIds(this,boxSize*0.5,boxPos+ocNodeTranslations[i]*boxSize,thePts, theRgbs, theIds);
+        pcNode->pcNodes[i]->getDisplayPointsColorsAndIds(this,boxSize*0.5,boxPos+ocNodeTranslations[i]*boxSize,thePts, theRgbas, theIds);
     return retVal;
 }
 
-void CPcStruct::getPointsPosAndRgb_all(std::vector<double>& pointsPosAndRgb) const
+void CPcStruct::getPointsPosAndRgba_all(std::vector<double>& pointsPosAndRgba) const
 {
     for (size_t i=0;i<8;i++)
-        pcNode->pcNodes[i]->getPointsPosAndRgb_all(boxSize*0.5,boxPos+ocNodeTranslations[i]*boxSize,pointsPosAndRgb);
+        pcNode->pcNodes[i]->getPointsPosAndRgba_all(boxSize*0.5,boxPos+ocNodeTranslations[i]*boxSize,pointsPosAndRgba);
 }
 
-void CPcStruct::getPointsPosAndRgb_subset(std::vector<double>& pointsPosAndRgb,double prop) const
+void CPcStruct::getPointsPosAndRgba_subset(std::vector<double>& pointsPosAndRgba,double prop) const
 {
     for (size_t i=0;i<8;i++)
-        pcNode->pcNodes[i]->getPointsPosAndRgb_subset(boxSize*0.5,boxPos+ocNodeTranslations[i]*boxSize,prop,pointsPosAndRgb);
+        pcNode->pcNodes[i]->getPointsPosAndRgba_subset(boxSize*0.5,boxPos+ocNodeTranslations[i]*boxSize,prop,pointsPosAndRgba);
 }
 
 void CPcStruct::getOctreeCorners(std::vector<double>& points) const
@@ -310,7 +328,7 @@ void CPcStruct::_extendPointCloudOctreeIfNeeded(const double* points,size_t poin
 }
 
 
-void CPcStruct::add_pts(const double* points,size_t pointCnt,const unsigned char* rgbData,bool dataForEachPt,double proximityTol)
+void CPcStruct::add_pts(const double* points,size_t pointCnt,const unsigned char* rgbaData,bool dataForEachPt,double proximityTol)
 {
     if (proximityTol>0.0)
     {
@@ -329,7 +347,7 @@ void CPcStruct::add_pts(const double* points,size_t pointCnt,const unsigned char
             pcNode->pcNodes[i]->flagDuplicates(boxSize*0.5,ocNodeTranslations[i]*boxSize,pts,ptsOriginalIndices,duplicateIndicators,proximityTol);
 
         std::vector<double> points2;
-        std::vector<unsigned char> rgbData2;
+        std::vector<unsigned char> rgbaData2;
         for (size_t i=0;i<pointCnt;i++)
         {
             if (!duplicateIndicators[i])
@@ -339,29 +357,31 @@ void CPcStruct::add_pts(const double* points,size_t pointCnt,const unsigned char
                 points2.push_back(points[3*i+2]);
                 if (dataForEachPt)
                 {
-                    rgbData2.push_back(rgbData[3*i+0]);
-                    rgbData2.push_back(rgbData[3*i+1]);
-                    rgbData2.push_back(rgbData[3*i+2]);
+                    rgbaData2.push_back(rgbaData[4*i+0]);
+                    rgbaData2.push_back(rgbaData[4*i+1]);
+                    rgbaData2.push_back(rgbaData[4*i+2]);
+                    rgbaData2.push_back(rgbaData[4*i+3]);
                 }
             }
         }
         if (!dataForEachPt)
         {
-            rgbData2.push_back(rgbData[0]);
-            rgbData2.push_back(rgbData[1]);
-            rgbData2.push_back(rgbData[2]);
+            rgbaData2.push_back(rgbaData[0]);
+            rgbaData2.push_back(rgbaData[1]);
+            rgbaData2.push_back(rgbaData[2]);
+            rgbaData2.push_back(rgbaData[3]);
         }
 
         if (points2.size()>0)
         {   // now discard duplicates among the new points:
             std::vector<double> points3;
-            std::vector<unsigned char> rgbs3;
-            CKdNode* allKdTreePts=CKdNode::buildKdTree(&points2[0],points2.size()/3,&rgbData2[0],dataForEachPt,proximityTol);
-            allKdTreePts->getPts(points3,rgbs3);
+            std::vector<unsigned char> rgbas3;
+            CKdNode* allKdTreePts=CKdNode::buildKdTree(&points2[0],points2.size()/3,&rgbaData2[0],dataForEachPt,proximityTol);
+            allKdTreePts->getPts(points3,rgbas3);
             delete allKdTreePts;
             // Finally add the pts:
             if (points3.size()>0)
-                add_pts(&points3[0],points3.size()/3,&rgbs3[0],dataForEachPt,0.0);
+                add_pts(&points3[0],points3.size()/3,&rgbas3[0],dataForEachPt,0.0);
         }
     }
     else
@@ -370,7 +390,7 @@ void CPcStruct::add_pts(const double* points,size_t pointCnt,const unsigned char
         _extendPointCloudOctreeIfNeeded(points,pointCnt);
         // Now add the points:
         std::vector<double> pts;
-        std::vector<unsigned char> rgbs;
+        std::vector<unsigned char> rgbas;
         std::vector<size_t> ptsOriginalIndices;
         std::vector<bool> ptsInvalidityIndicators(pointCnt,false);
         for (size_t i=0;i<pointCnt;i++)
@@ -381,19 +401,21 @@ void CPcStruct::add_pts(const double* points,size_t pointCnt,const unsigned char
             pts.push_back(points[3*i+2]-boxPos(2));
             if (dataForEachPt)
             {
-                rgbs.push_back(rgbData[3*i+0]);
-                rgbs.push_back(rgbData[3*i+1]);
-                rgbs.push_back(rgbData[3*i+2]);
+                rgbas.push_back(rgbaData[4*i+0]);
+                rgbas.push_back(rgbaData[4*i+1]);
+                rgbas.push_back(rgbaData[4*i+2]);
+                rgbas.push_back(rgbaData[4*i+3]);
             }
         }
         if (!dataForEachPt)
         {
-            rgbs.push_back(rgbData[0]);
-            rgbs.push_back(rgbData[1]);
-            rgbs.push_back(rgbData[2]);
+            rgbas.push_back(rgbaData[0]);
+            rgbas.push_back(rgbaData[1]);
+            rgbas.push_back(rgbaData[2]);
+            rgbas.push_back(rgbaData[3]);
         }
         for (size_t i=0;i<8;i++)
-            pcNode->pcNodes[i]->add_pts(this,boxSize*0.5,ocNodeTranslations[i]*boxSize,cellSize,maxPtCnt,pts,ptsOriginalIndices,ptsInvalidityIndicators,rgbs,dataForEachPt);
+            pcNode->pcNodes[i]->add_pts(this,boxSize*0.5,ocNodeTranslations[i]*boxSize,cellSize,maxPtCnt,pts,ptsOriginalIndices,ptsInvalidityIndicators,rgbas,dataForEachPt);
     }
 }
 

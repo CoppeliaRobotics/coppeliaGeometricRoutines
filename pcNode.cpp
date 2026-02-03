@@ -1,20 +1,20 @@
-#include "calcUtils.h"
-#include "pcNode.h"
-#include "ocNode.h"
-#include "pcStruct.h"
+#include <calcUtils.h>
+#include <pcNode.h>
+#include <ocNode.h>
+#include <pcStruct.h>
 
 CPcNode::CPcNode()
 {
     pcNodes=nullptr;
 }
 
-CPcNode::CPcNode(CPcStruct* pc,double boxS,const C3Vector& boxCenter,double cellS,int cellPts,const std::vector<double>& points,std::vector<size_t>& ptsOriginalIndices,std::vector<bool>& ptsInvalidityIndicators,const std::vector<unsigned char>& rgbData,bool rgbForEachPt)
+CPcNode::CPcNode(CPcStruct* pc,double boxS,const C3Vector& boxCenter,double cellS,int cellPts,const std::vector<double>& points,std::vector<size_t>& ptsOriginalIndices,std::vector<bool>& ptsInvalidityIndicators,const std::vector<unsigned char>& rgbaData,bool rgbForEachPt)
 {
     double boxHsp=boxS*double(0.5001);
     pcNodes=nullptr;
     // Compute points relative to this box:
     std::vector<double> points2;
-    std::vector<unsigned char> rgbData2;
+    std::vector<unsigned char> rgbaData2;
     std::vector<size_t> ptsOriginalIndices2;
     for (size_t i=0;i<points.size()/3;i++)
     {
@@ -28,17 +28,19 @@ CPcNode::CPcNode(CPcStruct* pc,double boxS,const C3Vector& boxCenter,double cell
             ptsOriginalIndices2.push_back(ptsOriginalIndices[i]);
             if (rgbForEachPt)
             {
-                rgbData2.push_back(rgbData[3*i+0]);
-                rgbData2.push_back(rgbData[3*i+1]);
-                rgbData2.push_back(rgbData[3*i+2]);
+                rgbaData2.push_back(rgbaData[4*i+0]);
+                rgbaData2.push_back(rgbaData[4*i+1]);
+                rgbaData2.push_back(rgbaData[4*i+2]);
+                rgbaData2.push_back(rgbaData[4*i+3]);
             }
         }
     }
     if (!rgbForEachPt)
     {
-        rgbData2.push_back(rgbData[0]);
-        rgbData2.push_back(rgbData[1]);
-        rgbData2.push_back(rgbData[2]);
+        rgbaData2.push_back(rgbaData[0]);
+        rgbaData2.push_back(rgbaData[1]);
+        rgbaData2.push_back(rgbaData[2]);
+        rgbaData2.push_back(rgbaData[3]);
     }
     if (points2.size()>0)
     {
@@ -46,7 +48,7 @@ CPcNode::CPcNode(CPcStruct* pc,double boxS,const C3Vector& boxCenter,double cell
         { // subdivide
             pcNodes=new CPcNode* [8];
             for (size_t i=0;i<8;i++)
-                pcNodes[i]=new CPcNode(pc,boxS*0.5,ocNodeTranslations[i]*boxS,cellS,cellPts,points2,ptsOriginalIndices2,ptsInvalidityIndicators,rgbData2,rgbForEachPt);
+                pcNodes[i]=new CPcNode(pc,boxS*0.5,ocNodeTranslations[i]*boxS,cellS,cellPts,points2,ptsOriginalIndices2,ptsInvalidityIndicators,rgbaData2,rgbForEachPt);
         }
         else
         { // we are at a leaf. Populate it
@@ -61,15 +63,17 @@ CPcNode::CPcNode(CPcStruct* pc,double boxS,const C3Vector& boxCenter,double cell
                     pts.push_back(points2[3*i+2]);
                     if (!rgbForEachPt)
                     {
-                        rgbs.push_back(rgbData2[0]);
-                        rgbs.push_back(rgbData2[1]);
-                        rgbs.push_back(rgbData2[2]);
+                        rgbas.push_back(rgbaData2[0]);
+                        rgbas.push_back(rgbaData2[1]);
+                        rgbas.push_back(rgbaData2[2]);
+                        rgbas.push_back(rgbaData2[3]);
                     }
                     else
                     {
-                        rgbs.push_back(rgbData2[3*i+0]);
-                        rgbs.push_back(rgbData2[3*i+1]);
-                        rgbs.push_back(rgbData2[3*i+2]);
+                        rgbas.push_back(rgbaData2[4*i+0]);
+                        rgbas.push_back(rgbaData2[4*i+1]);
+                        rgbas.push_back(rgbaData2[4*i+2]);
+                        rgbas.push_back(rgbaData2[4*i+3]);
                     }
                 }
             }
@@ -93,7 +97,7 @@ CPcNode* CPcNode::copyYourself() const
     if (pts.size()>0)
     {
         newPcNode->pts.assign(pts.begin(),pts.end());
-        newPcNode->rgbs.assign(rgbs.begin(),rgbs.end());
+        newPcNode->rgbas.assign(rgbas.begin(),rgbas.end());
         for (size_t i = 0; i < pts.size() / 3; i++)
             newPcNode->ids.push_back(0); // will be generated again when next fetched
     }
@@ -132,8 +136,8 @@ void CPcNode::serialize(std::vector<unsigned char>& data) const
     pushData(data,&s,sizeof(int));
     for (size_t i=0;i<pts.size();i++)
         pushData(data,&pts[i],sizeof(double));
-    for (size_t i=0;i<rgbs.size();i++)
-        data.push_back(rgbs[i]);
+    for (size_t i=0;i<rgbas.size();i++)
+        data.push_back(rgbas[i]);
     if (pcNodes!=nullptr)
     {
         data.push_back(1);
@@ -152,10 +156,14 @@ void CPcNode::deserialize(CPcStruct* pc,const unsigned char* data,int& pos)
         pts.push_back((reinterpret_cast<const double*>(data+pos))[0]);
         pos+=sizeof(double);
     }
-    for (int i=0;i<ptsize;i++)
-        rgbs.push_back(data[pos++]);
     for (int i=0;i<ptsize/3;i++)
+    {
+        rgbas.push_back(data[pos++]);
+        rgbas.push_back(data[pos++]);
+        rgbas.push_back(data[pos++]);
+        rgbas.push_back(data[pos++]);
         ids.push_back(pc->genId());
+    }
     if (data[pos++]!=0)
     {
         pcNodes=new CPcNode* [8];
@@ -167,28 +175,56 @@ void CPcNode::deserialize(CPcStruct* pc,const unsigned char* data,int& pos)
     }
 }
 
-void CPcNode::serializeOld(std::vector<unsigned char>& data) const
+void CPcNode::serialize_ver2(std::vector<unsigned char>& data) const
 {
     int s=int(pts.size());
     pushData(data,&s,sizeof(int));
     for (size_t i=0;i<pts.size();i++)
+        pushData(data,&pts[i],sizeof(double));
+    for (size_t i=0;i<rgbas.size()/4;i++)
     {
-        float a=(float)pts[i];
-        pushData(data,&a,sizeof(float));
+        data.push_back(rgbas[4*i+0]);
+        data.push_back(rgbas[4*i+1]);
+        data.push_back(rgbas[4*i+2]);
     }
-    for (size_t i=0;i<rgbs.size();i++)
-        data.push_back(rgbs[i]);
     if (pcNodes!=nullptr)
     {
         data.push_back(1);
         for (size_t i=0;i<8;i++)
-            pcNodes[i]->serializeOld(data);
+            pcNodes[i]->serialize_ver2(data);
     }
     else
         data.push_back(0);
 }
 
-void CPcNode::deserializeOld(CPcStruct* pc,const unsigned char* data,int& pos)
+void CPcNode::deserialize_ver2(CPcStruct* pc,const unsigned char* data,int& pos)
+{
+    int ptsize=(reinterpret_cast<const int*>(data+pos))[0];pos+=sizeof(int);
+    for (int i=0;i<ptsize;i++)
+    {
+        pts.push_back((reinterpret_cast<const double*>(data+pos))[0]);
+        pos+=sizeof(double);
+    }
+    for (int i=0;i<ptsize/3;i++)
+    {
+        rgbas.push_back(data[pos++]);
+        rgbas.push_back(data[pos++]);
+        rgbas.push_back(data[pos++]);
+        rgbas.push_back(255);
+        ids.push_back(pc->genId());
+    }
+    if (data[pos++]!=0)
+    {
+        pcNodes=new CPcNode* [8];
+        for (size_t i=0;i<8;i++)
+        {
+            pcNodes[i]=new CPcNode();
+            pcNodes[i]->deserialize_ver2(pc,data,pos);
+        }
+    }
+}
+
+void CPcNode::deserialize_float(CPcStruct* pc,const unsigned char* data,int& pos)
 {
     int ptsize=(reinterpret_cast<const int*>(data+pos))[0];pos+=sizeof(int);
     pts.resize(ptsize);
@@ -198,18 +234,21 @@ void CPcNode::deserializeOld(CPcStruct* pc,const unsigned char* data,int& pos)
         pts[i]=(double)a;
         pos+=sizeof(float);
     }
-    for (int i=0;i<ptsize;i++)
-        rgbs.push_back(data[pos++]);
     for (int i=0;i<ptsize/3;i++)
+    {
+        rgbas.push_back(data[pos++]);
+        rgbas.push_back(data[pos++]);
+        rgbas.push_back(data[pos++]);
+        rgbas.push_back(255);
         ids.push_back(pc->genId());
-
+    }
     if (data[pos++]!=0)
     {
         pcNodes=new CPcNode* [8];
         for (size_t i=0;i<8;i++)
         {
             pcNodes[i]=new CPcNode();
-            pcNodes[i]->deserializeOld(pc,data,pos);
+            pcNodes[i]->deserialize_float(pc,data,pos);
         }
     }
 }
@@ -241,12 +280,12 @@ void CPcNode::resetAllIds(CPcStruct* pc)
         ids[i] = pc->genId();
 }
 
-void CPcNode::getDisplayPointsColorsAndIds(CPcStruct* pc,double boxS,const C3Vector& boxCenter,std::vector<float>& thePts,std::vector<unsigned char>& theRgbs,std::vector<unsigned int>& theIds) const
+void CPcNode::getDisplayPointsColorsAndIds(CPcStruct* pc,double boxS,const C3Vector& boxCenter,std::vector<float>& thePts,std::vector<unsigned char>& theRgbas,std::vector<unsigned int>& theIds) const
 {
     if (pcNodes!=nullptr)
     {
         for (size_t i=0;i<8;i++)
-            pcNodes[i]->getDisplayPointsColorsAndIds(pc,boxS*0.5,boxCenter+ocNodeTranslations[i]*boxS,thePts, theRgbs, theIds);
+            pcNodes[i]->getDisplayPointsColorsAndIds(pc,boxS*0.5,boxCenter+ocNodeTranslations[i]*boxS,thePts, theRgbas, theIds);
     }
     for (size_t i=0;i<ids.size();i++)
     {
@@ -258,21 +297,22 @@ void CPcNode::getDisplayPointsColorsAndIds(CPcStruct* pc,double boxS,const C3Vec
             thePts.push_back((float)pt(0));
             thePts.push_back((float)pt(1));
             thePts.push_back((float)pt(2));
-            theRgbs.push_back(rgbs[3*i+0]);
-            theRgbs.push_back(rgbs[3*i+1]);
-            theRgbs.push_back(rgbs[3*i+2]);
+            theRgbas.push_back(rgbas[4*i+0]);
+            theRgbas.push_back(rgbas[4*i+1]);
+            theRgbas.push_back(rgbas[4*i+2]);
+            theRgbas.push_back(rgbas[4*i+3]);
             theIds.push_back(ids[i]);
             pc->allIds[id] = false;
         }
     }
 }
 
-void CPcNode::getPointsPosAndRgb_all(double boxS,const C3Vector& boxCenter,std::vector<double>& data) const
+void CPcNode::getPointsPosAndRgba_all(double boxS,const C3Vector& boxCenter,std::vector<double>& data) const
 {
     if (pcNodes!=nullptr)
     {
         for (size_t i=0;i<8;i++)
-            pcNodes[i]->getPointsPosAndRgb_all(boxS*0.5,boxCenter+ocNodeTranslations[i]*boxS,data);
+            pcNodes[i]->getPointsPosAndRgba_all(boxS*0.5,boxCenter+ocNodeTranslations[i]*boxS,data);
     }
     for (size_t i=0;i<pts.size()/3;i++)
     {
@@ -281,18 +321,19 @@ void CPcNode::getPointsPosAndRgb_all(double boxS,const C3Vector& boxCenter,std::
         data.push_back(pt(0));
         data.push_back(pt(1));
         data.push_back(pt(2));
-        data.push_back(double(rgbs[3*i+0])/double(254.8));
-        data.push_back(double(rgbs[3*i+1])/double(254.8));
-        data.push_back(double(rgbs[3*i+2])/double(254.8));
+        data.push_back(double(rgbas[4*i+0])/double(254.8));
+        data.push_back(double(rgbas[4*i+1])/double(254.8));
+        data.push_back(double(rgbas[4*i+2])/double(254.8));
+        data.push_back(double(rgbas[4*i+3])/double(254.8));
     }
 }
 
-void CPcNode::getPointsPosAndRgb_subset(double boxS,const C3Vector& boxCenter,double prop,std::vector<double>& data) const
+void CPcNode::getPointsPosAndRgba_subset(double boxS,const C3Vector& boxCenter,double prop,std::vector<double>& data) const
 {
     if (pcNodes!=nullptr)
     {
         for (size_t i=0;i<8;i++)
-            pcNodes[i]->getPointsPosAndRgb_subset(boxS*0.5,boxCenter+ocNodeTranslations[i]*boxS,prop,data);
+            pcNodes[i]->getPointsPosAndRgba_subset(boxS*0.5,boxCenter+ocNodeTranslations[i]*boxS,prop,data);
     }
     double step=(1.0/prop)+double(0.0001);
     for (double fi=0.0;size_t(fi)<pts.size()/3;fi+=step)
@@ -302,9 +343,10 @@ void CPcNode::getPointsPosAndRgb_subset(double boxS,const C3Vector& boxCenter,do
         data.push_back(pt(0));
         data.push_back(pt(1));
         data.push_back(pt(2));
-        data.push_back(double(rgbs[3*size_t(fi)+0])/double(254.8));
-        data.push_back(double(rgbs[3*size_t(fi)+1])/double(254.8));
-        data.push_back(double(rgbs[3*size_t(fi)+2])/double(254.8));
+        data.push_back(double(rgbas[4*size_t(fi)+0])/double(254.8));
+        data.push_back(double(rgbas[4*size_t(fi)+1])/double(254.8));
+        data.push_back(double(rgbas[4*size_t(fi)+2])/double(254.8));
+        data.push_back(double(rgbas[4*size_t(fi)+3])/double(254.8));
     }
 }
 
@@ -350,12 +392,12 @@ const double* CPcNode::getPoints(double boxS,const C3Vector& boxCenter,unsigned 
     return(retVal);
 }
 
-void CPcNode::add_pts(CPcStruct* pc,double boxS,const C3Vector& boxCenter,double cellS,int cellPts,const std::vector<double>& points,std::vector<size_t>& ptsOriginalIndices,std::vector<bool>& ptsInvalidityIndicators,const std::vector<unsigned char>& rgbData,bool rgbForEachPt)
+void CPcNode::add_pts(CPcStruct* pc,double boxS,const C3Vector& boxCenter,double cellS,int cellPts,const std::vector<double>& points,std::vector<size_t>& ptsOriginalIndices,std::vector<bool>& ptsInvalidityIndicators,const std::vector<unsigned char>& rgbaData,bool rgbForEachPt)
 {
     double boxHsp=boxS*double(0.5001);
     // Compute points relative to this box:
     std::vector<double> points2;
-    std::vector<unsigned char> rgbData2;
+    std::vector<unsigned char> rgbaData2;
     std::vector<size_t> ptsOriginalIndices2;
     for (size_t i=0;i<points.size()/3;i++)
     {
@@ -369,17 +411,19 @@ void CPcNode::add_pts(CPcStruct* pc,double boxS,const C3Vector& boxCenter,double
             ptsOriginalIndices2.push_back(ptsOriginalIndices[i]);
             if (rgbForEachPt)
             {
-                rgbData2.push_back(rgbData[3*i+0]);
-                rgbData2.push_back(rgbData[3*i+1]);
-                rgbData2.push_back(rgbData[3*i+2]);
+                rgbaData2.push_back(rgbaData[4*i+0]);
+                rgbaData2.push_back(rgbaData[4*i+1]);
+                rgbaData2.push_back(rgbaData[4*i+2]);
+                rgbaData2.push_back(rgbaData[4*i+3]);
             }
         }
     }
     if (!rgbForEachPt)
     {
-        rgbData2.push_back(rgbData[0]);
-        rgbData2.push_back(rgbData[1]);
-        rgbData2.push_back(rgbData[2]);
+        rgbaData2.push_back(rgbaData[0]);
+        rgbaData2.push_back(rgbaData[1]);
+        rgbaData2.push_back(rgbaData[2]);
+        rgbaData2.push_back(rgbaData[3]);
     }
     if (points2.size()>0)
     {
@@ -400,15 +444,17 @@ void CPcNode::add_pts(CPcStruct* pc,double boxS,const C3Vector& boxCenter,double
                             ids.push_back(pc->genId());
                             if (rgbForEachPt)
                             {
-                                rgbs.push_back(rgbData2[3*i+0]);
-                                rgbs.push_back(rgbData2[3*i+1]);
-                                rgbs.push_back(rgbData2[3*i+2]);
+                                rgbas.push_back(rgbaData2[4*i+0]);
+                                rgbas.push_back(rgbaData2[4*i+1]);
+                                rgbas.push_back(rgbaData2[4*i+2]);
+                                rgbas.push_back(rgbaData2[4*i+3]);
                             }
                             else
                             {
-                                rgbs.push_back(rgbData2[0]);
-                                rgbs.push_back(rgbData2[1]);
-                                rgbs.push_back(rgbData2[2]);
+                                rgbas.push_back(rgbaData2[0]);
+                                rgbas.push_back(rgbaData2[1]);
+                                rgbas.push_back(rgbaData2[2]);
+                                rgbas.push_back(rgbaData2[3]);
                             }
                         }
                     }
@@ -417,13 +463,13 @@ void CPcNode::add_pts(CPcStruct* pc,double boxS,const C3Vector& boxCenter,double
                 { // we create new children..
                     pcNodes=new CPcNode* [8];
                     for (size_t i=0;i<8;i++)
-                        pcNodes[i]=new CPcNode(pc,boxS*0.5,ocNodeTranslations[i]*boxS,cellS,cellPts,points2,ptsOriginalIndices2,ptsInvalidityIndicators,rgbData2,rgbForEachPt);
+                        pcNodes[i]=new CPcNode(pc,boxS*0.5,ocNodeTranslations[i]*boxS,cellS,cellPts,points2,ptsOriginalIndices2,ptsInvalidityIndicators,rgbaData2,rgbForEachPt);
                 }
             }
             else
             { // continue exploring...
                 for (size_t i=0;i<8;i++)
-                    pcNodes[i]->add_pts(pc,boxS*0.5,ocNodeTranslations[i]*boxS,cellS,cellPts,points2,ptsOriginalIndices2,ptsInvalidityIndicators,rgbData2,rgbForEachPt);
+                    pcNodes[i]->add_pts(pc,boxS*0.5,ocNodeTranslations[i]*boxS,cellS,cellPts,points2,ptsOriginalIndices2,ptsInvalidityIndicators,rgbaData2,rgbForEachPt);
             }
         }
         else
@@ -441,15 +487,17 @@ void CPcNode::add_pts(CPcStruct* pc,double boxS,const C3Vector& boxCenter,double
                         ids.push_back(pc->genId());
                         if (rgbForEachPt)
                         {
-                            rgbs.push_back(rgbData2[3*i+0]);
-                            rgbs.push_back(rgbData2[3*i+1]);
-                            rgbs.push_back(rgbData2[3*i+2]);
+                            rgbas.push_back(rgbaData2[4*i+0]);
+                            rgbas.push_back(rgbaData2[4*i+1]);
+                            rgbas.push_back(rgbaData2[4*i+2]);
+                            rgbas.push_back(rgbaData2[4*i+3]);
                         }
                         else
                         {
-                            rgbs.push_back(rgbData2[0]);
-                            rgbs.push_back(rgbData2[1]);
-                            rgbs.push_back(rgbData2[2]);
+                            rgbas.push_back(rgbaData2[0]);
+                            rgbas.push_back(rgbaData2[1]);
+                            rgbas.push_back(rgbaData2[2]);
+                            rgbas.push_back(rgbaData2[3]);
                         }
                     }
                 }
@@ -458,16 +506,17 @@ void CPcNode::add_pts(CPcStruct* pc,double boxS,const C3Vector& boxCenter,double
             { // we have to create children...
                 if (!rgbForEachPt)
                 { // create individual colors anyway (but same), since we need to also handle previous points:
-                    rgbData2.clear();
+                    rgbaData2.clear();
                     for (size_t i=0;i<points2.size()/3;i++)
                     {
-                        rgbData2.push_back(rgbData[0]);
-                        rgbData2.push_back(rgbData[1]);
-                        rgbData2.push_back(rgbData[2]);
+                        rgbaData2.push_back(rgbaData[0]);
+                        rgbaData2.push_back(rgbaData[1]);
+                        rgbaData2.push_back(rgbaData[2]);
+                        rgbaData2.push_back(rgbaData[3]);
                     }
                 }
-                rgbData2.insert(rgbData2.end(),rgbs.begin(),rgbs.end());
-                rgbs.clear();
+                rgbaData2.insert(rgbaData2.end(),rgbas.begin(),rgbas.end());
+                rgbas.clear();
 
                 points2.insert(points2.end(),pts.begin(),pts.end());
                 for (size_t i=0;i<pts.size()/3;i++)
@@ -480,7 +529,7 @@ void CPcNode::add_pts(CPcStruct* pc,double boxS,const C3Vector& boxCenter,double
                 ids.clear();
                 pcNodes=new CPcNode* [8];
                 for (size_t i=0;i<8;i++)
-                    pcNodes[i]=new CPcNode(pc,boxS*0.5,ocNodeTranslations[i]*boxS,cellS,cellPts,points2,ptsOriginalIndices2,ptsInvalidityIndicators,rgbData2,true);
+                    pcNodes[i]=new CPcNode(pc,boxS*0.5,ocNodeTranslations[i]*boxS,cellS,cellPts,points2,ptsOriginalIndices2,ptsInvalidityIndicators,rgbaData2,true);
             }
         }
     }
@@ -546,7 +595,7 @@ bool CPcNode::delete_pts(CPcStruct* pc,double boxS,const C3Vector& boxCenter,con
                         pts.erase(pts.begin()+3*j,pts.begin()+3*j+3);
                         pc->remId(ids[j]);
                         ids.erase(ids.begin()+j, ids.begin()+1);
-                        rgbs.erase(rgbs.begin()+3*j,rgbs.begin()+3*j+3);
+                        rgbas.erase(rgbas.begin()+4*j,rgbas.begin()+4*j+4);
                         if (count!=nullptr)
                             count[0]++;
                         j--; // reprocess this pos
@@ -628,7 +677,7 @@ bool CPcNode::delete_octree(CPcStruct* pc,double pcBoxS,const C3Vector& pcBoxCen
                         if ( (fabs(pt(0))<ocBoxHsp)&&(fabs(pt(1))<ocBoxHsp)&&(fabs(pt(2))<ocBoxHsp) )
                         {
                             pts.erase(pts.begin()+3*i,pts.begin()+3*i+3);
-                            rgbs.erase(rgbs.begin()+3*i,rgbs.begin()+3*i+3);
+                            rgbas.erase(rgbas.begin()+4*i,rgbas.begin()+4*i+4);
                             pc->remId(ids[i]);
                             ids.erase(ids.begin()+i, ids.begin()+i+1);
                             if (count!=nullptr)
@@ -723,15 +772,15 @@ bool CPcNode::intersect_pts(CPcStruct* pc,double boxS,const C3Vector& boxCenter,
             if (removableCnt==pts.size()/3)
             {
                 pts.clear();
-                rgbs.clear();
+                rgbas.clear();
                 pc->remIds(ids);
                 ids.clear();
                 return(true); // this node could be removed
             }
             std::vector<double> pts2(pts);
-            std::vector<unsigned char> rgbs2(rgbs);
+            std::vector<unsigned char> rgbas2(rgbas);
             pts.clear();
-            rgbs.clear();
+            rgbas.clear();
             pc->remIds(ids);
             ids.clear();
             for (size_t i=0;i<removableFlags.size();i++)
@@ -742,9 +791,10 @@ bool CPcNode::intersect_pts(CPcStruct* pc,double boxS,const C3Vector& boxCenter,
                     pts.push_back(pts2[3*i+1]);
                     pts.push_back(pts2[3*i+2]);
                     ids.push_back(pc->genId());
-                    rgbs.push_back(rgbs2[3*i+0]);
-                    rgbs.push_back(rgbs2[3*i+1]);
-                    rgbs.push_back(rgbs2[3*i+2]);
+                    rgbas.push_back(rgbas2[4*i+0]);
+                    rgbas.push_back(rgbas2[4*i+1]);
+                    rgbas.push_back(rgbas2[4*i+2]);
+                    rgbas.push_back(rgbas2[4*i+3]);
                 }
             }
             return(false); // keep this node

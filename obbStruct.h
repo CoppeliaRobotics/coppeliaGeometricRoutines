@@ -1,7 +1,7 @@
 #pragma once
 
-#include "conf.h"
-#include "obbNode.h"
+#include <conf.h>
+#include <obbNode.h>
 
 class CObbStruct
 {

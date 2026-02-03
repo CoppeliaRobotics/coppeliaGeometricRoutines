@@ -1,5 +1,5 @@
-#include "calcUtils.h"
-#include "obbStruct.h"
+#include <calcUtils.h>
+#include <obbStruct.h>
 
 std::vector<CObbStruct*> CObbStruct::_obbStructs;
 
