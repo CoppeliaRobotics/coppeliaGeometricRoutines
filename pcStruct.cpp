@@ -103,6 +103,7 @@ void CPcStruct::scaleYourself(double f)
     cellSize*=f;
     boxSize*=f;
     boxPos*=f;
+    refreshDisplayData();
 }
 
 unsigned char* CPcStruct::serialize(int& dataSize) const

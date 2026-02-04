@@ -129,6 +129,7 @@ void COcStruct::scaleYourself(double f)
     cellSize*=f;
     boxSize*=f;
     boxPos*=f;
+    refreshDisplayData();
 }
 
 unsigned char* COcStruct::serialize(int& dataSize) const
