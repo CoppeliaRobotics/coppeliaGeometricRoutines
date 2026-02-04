@@ -235,15 +235,18 @@ void COcNode::getDisplayVoxelsColorsAndIds(COcStruct* oct, double pBoxSize,const
     }
     if (!empty)
     {
-        thePts.push_back(float(boxCenter(0)));
-        thePts.push_back(float(boxCenter(1)));
-        thePts.push_back(float(boxCenter(2)));
-        theRgbas.push_back(rgba[0]);
-        theRgbas.push_back(rgba[1]);
-        theRgbas.push_back(rgba[2]);
-        theRgbas.push_back(rgba[3]);
-        theIds.push_back(id);
-        oct->allIds[id] = false;
+        if (oct->allIds[id])
+        { // fetch only new voxels
+            thePts.push_back(float(boxCenter(0)));
+            thePts.push_back(float(boxCenter(1)));
+            thePts.push_back(float(boxCenter(2)));
+            theRgbas.push_back(rgba[0]);
+            theRgbas.push_back(rgba[1]);
+            theRgbas.push_back(rgba[2]);
+            theRgbas.push_back(rgba[3]);
+            theIds.push_back(id);
+            oct->allIds[id] = false;
+        }
     }
 }
 
