@@ -594,7 +594,7 @@ bool CPcNode::delete_pts(CPcStruct* pc,double boxS,const C3Vector& boxCenter,con
                     {
                         pts.erase(pts.begin()+3*j,pts.begin()+3*j+3);
                         pc->remId(ids[j]);
-                        ids.erase(ids.begin()+j, ids.begin()+1);
+                        ids.erase(ids.begin()+j, ids.begin()+j+1);
                         rgbas.erase(rgbas.begin()+4*j,rgbas.begin()+4*j+4);
                         if (count!=nullptr)
                             count[0]++;

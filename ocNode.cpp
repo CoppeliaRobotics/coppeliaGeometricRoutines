@@ -477,7 +477,10 @@ bool COcNode::deleteVoxels_octree(COcStruct* oct, const C4X4Matrix& oc1M,double 
             {
                 retVal=false;
                 for (size_t i=0;i<8;i++)
-                    retVal=retVal||deleteVoxels_octree(oct, oc1M,box1S,box1Center,oc2Node->ocNodes[i],oc2M,box2S*0.5,box2Center+ocNodeTranslations[i]*box2S);
+                {
+                    bool bb=deleteVoxels_octree(oct, oc1M,box1S,box1Center,oc2Node->ocNodes[i],oc2M,box2S*0.5,box2Center+ocNodeTranslations[i]*box2S);
+                    retVal=retVal||bb;
+                }
             }
             else
             {
@@ -495,15 +498,19 @@ bool COcNode::deleteVoxels_octree(COcStruct* oct, const C4X4Matrix& oc1M,double 
     {
         if (!empty)
         {
-            if (CCalcUtils::doCollide_box_cell(oc2MRel,C3Vector(box2Hsp,box2Hsp,box2Hsp),box1Hsp,true))
+            if (oc2Node->ocNodes!=nullptr)
             {
-                if (oc2Node->ocNodes!=nullptr)
+                if (CCalcUtils::doCollide_box_cell(oc2MRel,C3Vector(box2Hsp,box2Hsp,box2Hsp),box1Hsp,true))
                 {
-                    bool retVal=false;
+                    retVal=false;
                     for (size_t i=0;i<8;i++)
                         retVal=retVal||deleteVoxels_octree(oct, oc1M,box1S,box1Center,oc2Node->ocNodes[i],oc2M,box2S*0.5,box2Center+ocNodeTranslations[i]*box2S);
                 }
+                else
+                    retVal=false;
             }
+            else if (!oc2Node->empty)
+                retVal=CCalcUtils::doCollide_box_cell(oc2MRel,C3Vector(box2Hsp,box2Hsp,box2Hsp),box1Hsp,true);
             else
                 retVal=false;
         }
