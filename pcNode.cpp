@@ -800,7 +800,22 @@ bool CPcNode::intersect_pts(CPcStruct* pc,double boxS,const C3Vector& boxCenter,
             return(false); // keep this node
         }
     }
-    return(true); // nothing to intersect, remove this node (maybe)
+    // nothing to intersect, remove all points (and this node (maybe))
+    if (pts.size() > 0)
+    {
+        pts.clear();
+        rgbas.clear();
+        pc->remIds(ids);
+        ids.clear();
+    }
+    else if (pcNodes!=nullptr)
+    {
+        for (size_t i=0;i<8;i++)
+            delete pcNodes[i];
+        delete[] pcNodes;
+        pcNodes=nullptr;
+    }
+    return(true);
 }
 
 void CPcNode::flagDuplicates(double boxS,const C3Vector& boxCenter,const std::vector<double>& points,const std::vector<size_t>& ptsOriginalIndices,std::vector<bool>& duplicateIndicators,double proximityTol) const
