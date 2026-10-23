@@ -3,7 +3,7 @@
 #include <cstdio>
 #include <calcUtils.h>
 
-bool geom_getMeshMeshCollision(const CObbStruct* mesh1ObbStruct,const C7Vector& mesh1Transformation,const CObbStruct* mesh2ObbStruct,const C7Vector& mesh2Transformation,std::vector<double>* intersections/*=nullptr*/,int* mesh1Caching/*=nullptr*/,int* mesh2Caching/*=nullptr*/)
+bool geom_getMeshMeshCollision(const CObbStruct* mesh1ObbStruct,const CPose& mesh1Transformation,const CObbStruct* mesh2ObbStruct,const CPose& mesh2Transformation,std::vector<double>* intersections/*=nullptr*/,int* mesh1Caching/*=nullptr*/,int* mesh2Caching/*=nullptr*/)
 {
     bool retVal=false;
     if ( (mesh1Caching!=nullptr)&&(mesh2Caching!=nullptr)&&(intersections==nullptr) )
@@ -31,7 +31,7 @@ bool geom_getMeshMeshCollision(const CObbStruct* mesh1ObbStruct,const C7Vector& 
     return(retVal);
 }
 
-bool geom_getMeshOctreeCollision(const CObbStruct* meshObbStruct,const C7Vector& meshTransformation,const COcStruct* ocStruct,const C7Vector& octreeTransformation,int* meshCaching/*=nullptr*/,unsigned  long long int* ocCaching/*=nullptr*/)
+bool geom_getMeshOctreeCollision(const CObbStruct* meshObbStruct,const CPose& meshTransformation,const COcStruct* ocStruct,const CPose& octreeTransformation,int* meshCaching/*=nullptr*/,unsigned  long long int* ocCaching/*=nullptr*/)
 {
     bool retVal=false;
     if ( (meshCaching!=nullptr)&&(ocCaching!=nullptr) )
@@ -59,7 +59,7 @@ bool geom_getMeshOctreeCollision(const CObbStruct* meshObbStruct,const C7Vector&
 }
 
 
-bool geom_getMeshTriangleCollision(const CObbStruct* meshObbStruct,const C7Vector& meshTransformation,const C3Vector& p,const C3Vector& v,const C3Vector& w,std::vector<double>* intersections/*=nullptr*/,int* caching/*=nullptr*/)
+bool geom_getMeshTriangleCollision(const CObbStruct* meshObbStruct,const CPose& meshTransformation,const C3Vector& p,const C3Vector& v,const C3Vector& w,std::vector<double>* intersections/*=nullptr*/,int* caching/*=nullptr*/)
 {
     bool retVal=false;
     if ( (caching!=nullptr)&&(intersections==nullptr) )
@@ -80,7 +80,7 @@ bool geom_getMeshTriangleCollision(const CObbStruct* meshObbStruct,const C7Vecto
     return(retVal);
 }
 
-bool geom_getMeshSegmentCollision(const CObbStruct* meshObbStruct,const C7Vector& meshTransformation,const C3Vector& segmentExtremity,const C3Vector& segmentVector,std::vector<double>* intersections/*=nullptr*/,int* caching/*=nullptr*/)
+bool geom_getMeshSegmentCollision(const CObbStruct* meshObbStruct,const CPose& meshTransformation,const C3Vector& segmentExtremity,const C3Vector& segmentVector,std::vector<double>* intersections/*=nullptr*/,int* caching/*=nullptr*/)
 {
     bool retVal=false;
     if ( (caching!=nullptr)&&(intersections==nullptr) )
@@ -101,13 +101,13 @@ bool geom_getMeshSegmentCollision(const CObbStruct* meshObbStruct,const C7Vector
     return(retVal);
 }
 
-bool geom_getMeshSegmentCollision_withTriInfo(const CObbStruct* meshObbStruct,const C7Vector& meshTransformation,const C3Vector& segmentExtremity,const C3Vector& segmentVector,C3Vector& intersection,int& triangleIndex)
+bool geom_getMeshSegmentCollision_withTriInfo(const CObbStruct* meshObbStruct,const CPose& meshTransformation,const C3Vector& segmentExtremity,const C3Vector& segmentVector,C3Vector& intersection,int& triangleIndex)
 {
     bool retVal=meshObbStruct->obb->checkCollision_segp_withTriInfo(meshObbStruct,meshTransformation.getMatrix(),segmentExtremity,segmentVector,intersection,triangleIndex);
     return(retVal);
 }
 
-bool geom_getOctreeOctreeCollision(const COcStruct* oc1Struct,const C7Vector& octree1Transformation,const COcStruct* oc2Struct,const C7Vector& octree2Transformation,unsigned  long long int* oc1Caching/*=nullptr*/,unsigned  long long int* oc2Caching/*=nullptr*/)
+bool geom_getOctreeOctreeCollision(const COcStruct* oc1Struct,const CPose& octree1Transformation,const COcStruct* oc2Struct,const CPose& octree2Transformation,unsigned  long long int* oc1Caching/*=nullptr*/,unsigned  long long int* oc2Caching/*=nullptr*/)
 {
     bool retVal=false;
     if ( (oc1Caching!=nullptr)&&(oc2Caching!=nullptr) )
@@ -130,7 +130,7 @@ bool geom_getOctreeOctreeCollision(const COcStruct* oc1Struct,const C7Vector& oc
     return(retVal);
 }
 
-bool geom_getOctreePtcloudCollision(const COcStruct* ocStruct,const C7Vector& octreeTransformation,const CPcStruct* pcStruct,const C7Vector& ptcloudTransformation,unsigned  long long int* ocCaching/*=nullptr*/,unsigned  long long int* pcCaching/*=nullptr*/)
+bool geom_getOctreePtcloudCollision(const COcStruct* ocStruct,const CPose& octreeTransformation,const CPcStruct* pcStruct,const CPose& ptcloudTransformation,unsigned  long long int* ocCaching/*=nullptr*/,unsigned  long long int* pcCaching/*=nullptr*/)
 {
     bool retVal=false;
     if ( (ocCaching!=nullptr)&&(pcCaching!=nullptr) )
@@ -162,7 +162,7 @@ bool geom_getOctreePtcloudCollision(const COcStruct* ocStruct,const C7Vector& oc
     return(retVal);
 }
 
-bool geom_getOctreeTriangleCollision(const COcStruct* ocStruct,const C7Vector& octreeTransformation,const C3Vector& p,const C3Vector& v,const C3Vector& w,unsigned long long int* caching/*=nullptr*/)
+bool geom_getOctreeTriangleCollision(const COcStruct* ocStruct,const CPose& octreeTransformation,const C3Vector& p,const C3Vector& v,const C3Vector& w,unsigned long long int* caching/*=nullptr*/)
 {
     bool retVal=false;
     if (caching!=nullptr)
@@ -181,7 +181,7 @@ bool geom_getOctreeTriangleCollision(const COcStruct* ocStruct,const C7Vector& o
     }
     if (!retVal)
     {
-        C7Vector trInv(octreeTransformation.getInverse());
+        CPose trInv(octreeTransformation.getInverse());
         C3Vector _p(trInv*p);
         trInv.X.clear();
         C3Vector _v(trInv*v);
@@ -191,7 +191,7 @@ bool geom_getOctreeTriangleCollision(const COcStruct* ocStruct,const C7Vector& o
     return(retVal);
 }
 
-bool geom_getOctreeSegmentCollision(const COcStruct* ocStruct,const C7Vector& octreeTransformation,const C3Vector& segmentExtremity,const C3Vector& segmentVector,unsigned long long int* caching/*=nullptr*/)
+bool geom_getOctreeSegmentCollision(const COcStruct* ocStruct,const CPose& octreeTransformation,const C3Vector& segmentExtremity,const C3Vector& segmentVector,unsigned long long int* caching/*=nullptr*/)
 {
     bool retVal=false;
     if (caching!=nullptr)
@@ -209,7 +209,7 @@ bool geom_getOctreeSegmentCollision(const COcStruct* ocStruct,const C7Vector& oc
     }
     if (!retVal)
     {
-        C7Vector trInv(octreeTransformation.getInverse());
+        CPose trInv(octreeTransformation.getInverse());
         C3Vector _segP(trInv*segmentExtremity);
         trInv.X.clear();
         C3Vector _segL(trInv*segmentVector);
@@ -218,10 +218,10 @@ bool geom_getOctreeSegmentCollision(const COcStruct* ocStruct,const C7Vector& oc
     return(retVal);
 }
 
-bool geom_getOctreePointsCollision(const COcStruct* ocStruct,const C7Vector& octreeTransformation,const double* points,int pointCount)
+bool geom_getOctreePointsCollision(const COcStruct* ocStruct,const CPose& octreeTransformation,const double* points,int pointCount)
 {
     bool retVal=false;
-    C7Vector trInv(octreeTransformation.getInverse());
+    CPose trInv(octreeTransformation.getInverse());
     std::vector<double> _points;
     _points.resize(pointCount*3);
     for (int i=0;i<pointCount;i++)
@@ -236,7 +236,7 @@ bool geom_getOctreePointsCollision(const COcStruct* ocStruct,const C7Vector& oct
     return(retVal);
 }
 
-bool geom_getOctreePointCollision(const COcStruct* ocStruct,const C7Vector& octreeTransformation,const C3Vector& point,unsigned int* usrData/*=nullptr*/,unsigned long long int* caching/*=nullptr*/)
+bool geom_getOctreePointCollision(const COcStruct* ocStruct,const CPose& octreeTransformation,const C3Vector& point,unsigned int* usrData/*=nullptr*/,unsigned long long int* caching/*=nullptr*/)
 {
     bool retVal=false;
     if (caching!=nullptr)
@@ -252,32 +252,32 @@ bool geom_getOctreePointCollision(const COcStruct* ocStruct,const C7Vector& octr
     }
     if (!retVal)
     {
-        C7Vector trInv(octreeTransformation.getInverse());
+        CPose trInv(octreeTransformation.getInverse());
         C3Vector _point(trInv*point);
         retVal=ocStruct->doCollide_pt(_point,usrData,caching);
     }
     return(retVal);
 }
 
-bool geom_getBoxBoxCollision(const C7Vector& box1Transformation,const C3Vector& box1HalfSize,const C7Vector& box2Transformation,const C3Vector& box2HalfSize,bool boxesAreSolid)
+bool geom_getBoxBoxCollision(const CPose& box1Transformation,const C3Vector& box1HalfSize,const CPose& box2Transformation,const C3Vector& box2HalfSize,bool boxesAreSolid)
 {
     bool retVal=CCalcUtils::doCollide_box_box(box1Transformation.getMatrix(),box1HalfSize,box2Transformation.getMatrix(),box2HalfSize,boxesAreSolid);
     return(retVal);
 }
 
-bool geom_getBoxTriangleCollision(const C7Vector& boxTransformation,const C3Vector& boxHalfSize,bool boxIsSolid,const C3Vector& p,const C3Vector& v,const C3Vector& w)
+bool geom_getBoxTriangleCollision(const CPose& boxTransformation,const C3Vector& boxHalfSize,bool boxIsSolid,const C3Vector& p,const C3Vector& v,const C3Vector& w)
 {
     bool retVal=CCalcUtils::doCollide_box_tri(boxTransformation.getMatrix(),boxHalfSize,boxIsSolid,p,v,w);
     return(retVal);
 }
 
-bool geom_getBoxSegmentCollision(const C7Vector& boxTransformation,const C3Vector& boxHalfSize,bool boxIsSolid,const C3Vector& segmentEndPoint,const C3Vector& segmentVector)
+bool geom_getBoxSegmentCollision(const CPose& boxTransformation,const C3Vector& boxHalfSize,bool boxIsSolid,const C3Vector& segmentEndPoint,const C3Vector& segmentVector)
 {
     bool retVal=CCalcUtils::doCollide_box_segp(boxTransformation.getMatrix(),boxHalfSize,boxIsSolid,segmentEndPoint,segmentVector);
     return(retVal);
 }
 
-bool geom_getBoxPointCollision(const C7Vector& boxTransformation,const C3Vector& boxHalfSize,const C3Vector& point)
+bool geom_getBoxPointCollision(const CPose& boxTransformation,const C3Vector& boxHalfSize,const C3Vector& point)
 {
     C3Vector pt(point);
     pt*=boxTransformation.getInverse();
@@ -323,7 +323,7 @@ bool geom_getTriangleSegmentCollision(const C3Vector& p,const C3Vector& v,const 
     return(retVal);
 }
 
-bool geom_getBoxBoxDistanceIfSmaller(const C7Vector& box1Transformation,const C3Vector& box1HalfSize,const C7Vector& box2Transformation,const C3Vector& box2HalfSize,bool boxesAreSolid,double& dist,C3Vector* distSegPt1/*=nullptr*/,C3Vector* distSegPt2/*=nullptr*/,bool altRoutine/*=false*/)
+bool geom_getBoxBoxDistanceIfSmaller(const CPose& box1Transformation,const C3Vector& box1HalfSize,const CPose& box2Transformation,const C3Vector& box2HalfSize,bool boxesAreSolid,double& dist,C3Vector* distSegPt1/*=nullptr*/,C3Vector* distSegPt2/*=nullptr*/,bool altRoutine/*=false*/)
 {
     bool retVal;
     if (altRoutine)
@@ -333,34 +333,34 @@ bool geom_getBoxBoxDistanceIfSmaller(const C7Vector& box1Transformation,const C3
     return(retVal);
 }
 
-double geom_getBoxBoxDistance(const C7Vector& box1Transformation,const C3Vector& box1HalfSize,const C7Vector& box2Transformation,const C3Vector& box2HalfSize,bool boxesAreSolid,C3Vector* distSegPt1/*=nullptr*/,C3Vector* distSegPt2/*=nullptr*/,bool altRoutine/*=false*/)
+double geom_getBoxBoxDistance(const CPose& box1Transformation,const C3Vector& box1HalfSize,const CPose& box2Transformation,const C3Vector& box2HalfSize,bool boxesAreSolid,C3Vector* distSegPt1/*=nullptr*/,C3Vector* distSegPt2/*=nullptr*/,bool altRoutine/*=false*/)
 {
     double dist=DBL_MAX;
     geom_getBoxBoxDistanceIfSmaller(box1Transformation.getMatrix(),box1HalfSize,box2Transformation.getMatrix(),box2HalfSize,boxesAreSolid,dist,distSegPt1,distSegPt2,altRoutine);
     return(dist);
 }
 
-double geom_getApproxBoxBoxDistance(const C7Vector& box1Transformation,const C3Vector& box1HalfSize,const C7Vector& box2Transformation,const C3Vector& box2HalfSize)
+double geom_getApproxBoxBoxDistance(const CPose& box1Transformation,const C3Vector& box1HalfSize,const CPose& box2Transformation,const C3Vector& box2HalfSize)
 {
     double retVal=CCalcUtils::getApproxDistance_box_box(box1Transformation.getMatrix(),box1HalfSize,box2Transformation.getMatrix(),box2HalfSize);
     return(retVal);
 }
 
-bool geom_getBoxCubeDistanceIfSmaller(const C7Vector& boxTransformation,const C3Vector& boxHalfSize,const C7Vector& cubeTransformation,double cubeHalfSize,bool boxAndCubeAreSolid,double& dist,C3Vector* distSegPt1/*=nullptr*/,C3Vector* distSegPt2/*=nullptr*/)
+bool geom_getBoxCubeDistanceIfSmaller(const CPose& boxTransformation,const C3Vector& boxHalfSize,const CPose& cubeTransformation,double cubeHalfSize,bool boxAndCubeAreSolid,double& dist,C3Vector* distSegPt1/*=nullptr*/,C3Vector* distSegPt2/*=nullptr*/)
 {
     C3Vector chs(cubeHalfSize,cubeHalfSize,cubeHalfSize);
     bool retVal=geom_getBoxBoxDistanceIfSmaller(boxTransformation.getMatrix(),boxHalfSize,cubeTransformation.getMatrix(),chs,boxAndCubeAreSolid,dist,distSegPt1,distSegPt2);
     return(retVal);
 }
 
-double geom_getBoxCubeDistance(const C7Vector& boxTransformation,const C3Vector& boxHalfSize,const C7Vector& cubeTransformation,double cubeHalfSize,bool boxAndCubeAreSolid,C3Vector* distSegPt1/*=nullptr*/,C3Vector* distSegPt2/*=nullptr*/)
+double geom_getBoxCubeDistance(const CPose& boxTransformation,const C3Vector& boxHalfSize,const CPose& cubeTransformation,double cubeHalfSize,bool boxAndCubeAreSolid,C3Vector* distSegPt1/*=nullptr*/,C3Vector* distSegPt2/*=nullptr*/)
 {
     C3Vector chs(cubeHalfSize,cubeHalfSize,cubeHalfSize);
     double dist=geom_getBoxBoxDistance(boxTransformation,boxHalfSize,cubeTransformation,chs,boxAndCubeAreSolid,distSegPt1,distSegPt2);
     return(dist);
 }
 
-bool geom_getBoxTriangleDistanceIfSmaller(const C7Vector& boxTransformation,const C3Vector& boxHalfSize,bool boxIsSolid,const C3Vector& p,const C3Vector& v,const C3Vector& w,double& dist,C3Vector* distSegPt1/*=nullptr*/,C3Vector* distSegPt2/*=nullptr*/,bool altRoutine/*=false*/)
+bool geom_getBoxTriangleDistanceIfSmaller(const CPose& boxTransformation,const C3Vector& boxHalfSize,bool boxIsSolid,const C3Vector& p,const C3Vector& v,const C3Vector& w,double& dist,C3Vector* distSegPt1/*=nullptr*/,C3Vector* distSegPt2/*=nullptr*/,bool altRoutine/*=false*/)
 {
     bool retVal;
     if (altRoutine)
@@ -370,14 +370,14 @@ bool geom_getBoxTriangleDistanceIfSmaller(const C7Vector& boxTransformation,cons
     return(retVal);
 }
 
-double geom_getBoxTriangleDistance(const C7Vector& boxTransformation,const C3Vector& boxHalfSize,bool boxIsSolid,const C3Vector& p,const C3Vector& v,const C3Vector& w,C3Vector* distSegPt1/*=nullptr*/,C3Vector* distSegPt2/*=nullptr*/,bool altRoutine/*=false*/)
+double geom_getBoxTriangleDistance(const CPose& boxTransformation,const C3Vector& boxHalfSize,bool boxIsSolid,const C3Vector& p,const C3Vector& v,const C3Vector& w,C3Vector* distSegPt1/*=nullptr*/,C3Vector* distSegPt2/*=nullptr*/,bool altRoutine/*=false*/)
 {
     double dist=DBL_MAX;
     geom_getBoxTriangleDistanceIfSmaller(boxTransformation,boxHalfSize,boxIsSolid,p,v,w,dist,distSegPt1,distSegPt2,altRoutine);
     return(dist);
 }
 
-bool geom_getBoxSegmentDistanceIfSmaller(const C7Vector& boxTransformation,const C3Vector& boxHalfSize,bool boxIsSolid,const C3Vector& segmentEndPoint,const C3Vector& segmentVector,double& dist,C3Vector* distSegPt1/*=nullptr*/,C3Vector* distSegPt2/*=nullptr*/,bool altRoutine/*=false*/)
+bool geom_getBoxSegmentDistanceIfSmaller(const CPose& boxTransformation,const C3Vector& boxHalfSize,bool boxIsSolid,const C3Vector& segmentEndPoint,const C3Vector& segmentVector,double& dist,C3Vector* distSegPt1/*=nullptr*/,C3Vector* distSegPt2/*=nullptr*/,bool altRoutine/*=false*/)
 {
     bool retVal;
     if (altRoutine)
@@ -387,20 +387,20 @@ bool geom_getBoxSegmentDistanceIfSmaller(const C7Vector& boxTransformation,const
     return(retVal);
 }
 
-double geom_getBoxSegmentDistance(const C7Vector& boxTransformation,const C3Vector& boxHalfSize,bool boxIsSolid,const C3Vector& segmentEndPoint,const C3Vector& segmentVector,C3Vector* distSegPt1/*=nullptr*/,C3Vector* distSegPt2/*=nullptr*/,bool altRoutine/*=false*/)
+double geom_getBoxSegmentDistance(const CPose& boxTransformation,const C3Vector& boxHalfSize,bool boxIsSolid,const C3Vector& segmentEndPoint,const C3Vector& segmentVector,C3Vector* distSegPt1/*=nullptr*/,C3Vector* distSegPt2/*=nullptr*/,bool altRoutine/*=false*/)
 {
     double dist=DBL_MAX;
     geom_getBoxSegmentDistanceIfSmaller(boxTransformation.getMatrix(),boxHalfSize,boxIsSolid,segmentEndPoint,segmentVector,dist,distSegPt1,distSegPt2,altRoutine);
     return(dist);
 }
 
-bool geom_getBoxPointDistanceIfSmaller(const C7Vector& boxTransformation,const C3Vector& boxHalfSize,bool boxIsSolid,const C3Vector& point,double& dist,C3Vector* distSegPt1/*=nullptr*/)
+bool geom_getBoxPointDistanceIfSmaller(const CPose& boxTransformation,const C3Vector& boxHalfSize,bool boxIsSolid,const C3Vector& point,double& dist,C3Vector* distSegPt1/*=nullptr*/)
 {
     bool retVal=CCalcUtils::getDistance_box_pt(boxTransformation.getMatrix(),boxHalfSize,boxIsSolid,point,dist,distSegPt1,nullptr);
     return(retVal);
 }
 
-double geom_getBoxPointDistance(const C7Vector& boxTransformation,const C3Vector& boxHalfSize,bool boxIsSolid,const C3Vector& point,C3Vector* distSegPt1/*=nullptr*/)
+double geom_getBoxPointDistance(const CPose& boxTransformation,const C3Vector& boxHalfSize,bool boxIsSolid,const C3Vector& point,C3Vector* distSegPt1/*=nullptr*/)
 {
     double dist=DBL_MAX;
     geom_getBoxPointDistanceIfSmaller(boxTransformation,boxHalfSize,boxIsSolid,point,dist,distSegPt1);
@@ -473,11 +473,11 @@ double geom_getSegmentPointDistance(const C3Vector& segmentEndPoint,const C3Vect
     return(dist);
 }
 
-CObbStruct* geom_createMesh(const double* vertices,int verticesSize,const int* indices,int indicesSize,const C7Vector* meshOrigin/*=nullptr*/,double triangleEdgeMaxLength/*=double(0.3)*/,int maxTrianglesInBoundingBox/*=8*/)
+CObbStruct* geom_createMesh(const double* vertices,int verticesSize,const int* indices,int indicesSize,const CPose* meshOrigin/*=nullptr*/,double triangleEdgeMaxLength/*=double(0.3)*/,int maxTrianglesInBoundingBox/*=8*/)
 {
     std::vector<double> _vertices;
     _vertices.resize(size_t(verticesSize));
-    C7Vector trInv;
+    CPose trInv;
     trInv.setIdentity();
     if (meshOrigin!=nullptr)
         trInv=meshOrigin->getInverse();
@@ -541,7 +541,7 @@ double geom_getMeshRootObbVolume(const CObbStruct* meshObbStruct)
     return(meshObbStruct->obb->boxHs(0)*meshObbStruct->obb->boxHs(1)*meshObbStruct->obb->boxHs(2)*8);
 }
 
-bool geom_getMeshMeshDistanceIfSmaller(const CObbStruct* mesh1ObbStruct,const C7Vector& mesh1Transformation,const CObbStruct* mesh2ObbStruct,const C7Vector& mesh2Transformation,double& dist,C3Vector* minDistSegPt1/*=nullptr*/,C3Vector* minDistSegPt2/*=nullptr*/,int* mesh1Caching/*=nullptr*/,int* mesh2Caching/*=nullptr*/)
+bool geom_getMeshMeshDistanceIfSmaller(const CObbStruct* mesh1ObbStruct,const CPose& mesh1Transformation,const CObbStruct* mesh2ObbStruct,const CPose& mesh2Transformation,double& dist,C3Vector* minDistSegPt1/*=nullptr*/,C3Vector* minDistSegPt2/*=nullptr*/,int* mesh1Caching/*=nullptr*/,int* mesh2Caching/*=nullptr*/)
 {
     bool retVal=false;
     if ( (mesh1Caching!=nullptr)&&(mesh2Caching!=nullptr) )
@@ -570,7 +570,7 @@ bool geom_getMeshMeshDistanceIfSmaller(const CObbStruct* mesh1ObbStruct,const C7
     return(retVal);
 }
 
-bool geom_getMeshTriangleDistanceIfSmaller(const CObbStruct* meshObbStruct,const C7Vector& meshTransformation,const C3Vector& p,const C3Vector& v,const C3Vector& w,double& dist,C3Vector* minDistSegPt1/*=nullptr*/,C3Vector* minDistSegPt2/*=nullptr*/,int* caching/*=nullptr*/)
+bool geom_getMeshTriangleDistanceIfSmaller(const CObbStruct* meshObbStruct,const CPose& meshTransformation,const C3Vector& p,const C3Vector& v,const C3Vector& w,double& dist,C3Vector* minDistSegPt1/*=nullptr*/,C3Vector* minDistSegPt2/*=nullptr*/,int* caching/*=nullptr*/)
 {
     bool retVal=false;
     if (caching!=nullptr)
@@ -592,21 +592,21 @@ bool geom_getMeshTriangleDistanceIfSmaller(const CObbStruct* meshObbStruct,const
     return(retVal);
 }
 
-double geom_getMeshTriangleDistance(const CObbStruct* meshObbStruct,const C7Vector& meshTransformation,const C3Vector& p,const C3Vector& v,const C3Vector& w,C3Vector* minDistSegPt1/*=nullptr*/,C3Vector* minDistSegPt2/*=nullptr*/,int* caching/*=nullptr*/)
+double geom_getMeshTriangleDistance(const CObbStruct* meshObbStruct,const CPose& meshTransformation,const C3Vector& p,const C3Vector& v,const C3Vector& w,C3Vector* minDistSegPt1/*=nullptr*/,C3Vector* minDistSegPt2/*=nullptr*/,int* caching/*=nullptr*/)
 {
     double dist=DBL_MAX;
     geom_getMeshTriangleDistanceIfSmaller(meshObbStruct,meshTransformation,p,v,w,dist,minDistSegPt1,minDistSegPt2,caching);
     return(dist);
 }
 
-double geom_getMeshMeshDistance(const CObbStruct* mesh1ObbStruct,const C7Vector& mesh1Transformation,const CObbStruct* mesh2ObbStruct,const C7Vector& mesh2Transformation,C3Vector* minDistSegPt1/*=nullptr*/,C3Vector* minDistSegPt2/*=nullptr*/,int* mesh1Caching/*=nullptr*/,int* mesh2Caching/*=nullptr*/)
+double geom_getMeshMeshDistance(const CObbStruct* mesh1ObbStruct,const CPose& mesh1Transformation,const CObbStruct* mesh2ObbStruct,const CPose& mesh2Transformation,C3Vector* minDistSegPt1/*=nullptr*/,C3Vector* minDistSegPt2/*=nullptr*/,int* mesh1Caching/*=nullptr*/,int* mesh2Caching/*=nullptr*/)
 {
     double dist=DBL_MAX;
     geom_getMeshMeshDistanceIfSmaller(mesh1ObbStruct,mesh1Transformation,mesh2ObbStruct,mesh2Transformation,dist,minDistSegPt1,minDistSegPt2,mesh1Caching,mesh2Caching);
     return(dist);
 }
 
-bool geom_getMeshSegmentDistanceIfSmaller(const CObbStruct* meshObbStruct,const C7Vector& meshTransformation,const C3Vector& segmentEndPoint,const C3Vector& segmentVector,double& dist,C3Vector* minDistSegPt1/*=nullptr*/,C3Vector* minDistSegPt2/*=nullptr*/,int* caching/*=nullptr*/)
+bool geom_getMeshSegmentDistanceIfSmaller(const CObbStruct* meshObbStruct,const CPose& meshTransformation,const C3Vector& segmentEndPoint,const C3Vector& segmentVector,double& dist,C3Vector* minDistSegPt1/*=nullptr*/,C3Vector* minDistSegPt2/*=nullptr*/,int* caching/*=nullptr*/)
 {
     bool retVal=false;
     if (caching!=nullptr)
@@ -628,14 +628,14 @@ bool geom_getMeshSegmentDistanceIfSmaller(const CObbStruct* meshObbStruct,const 
     return(retVal);
 }
 
-double geom_getMeshSegmentDistance(const CObbStruct* meshObbStruct,const C7Vector& meshTransformation,const C3Vector& segmentEndPoint,const C3Vector& segmentVector,C3Vector* minDistSegPt1/*=nullptr*/,C3Vector* minDistSegPt2/*=nullptr*/,int* caching/*=nullptr*/)
+double geom_getMeshSegmentDistance(const CObbStruct* meshObbStruct,const CPose& meshTransformation,const C3Vector& segmentEndPoint,const C3Vector& segmentVector,C3Vector* minDistSegPt1/*=nullptr*/,C3Vector* minDistSegPt2/*=nullptr*/,int* caching/*=nullptr*/)
 {
     double dist=DBL_MAX;
     geom_getMeshSegmentDistanceIfSmaller(meshObbStruct,meshTransformation,segmentEndPoint,segmentVector,dist,minDistSegPt1,minDistSegPt2,caching);
     return(dist);
 }
 
-bool geom_getMeshPointDistanceIfSmaller(const CObbStruct* meshObbStruct,const C7Vector& meshTransformation,const C3Vector& point,double& dist,C3Vector* minDistSegPt/*=nullptr*/,int* caching/*=nullptr*/)
+bool geom_getMeshPointDistanceIfSmaller(const CObbStruct* meshObbStruct,const CPose& meshTransformation,const C3Vector& point,double& dist,C3Vector* minDistSegPt/*=nullptr*/,int* caching/*=nullptr*/)
 {
     bool retVal=false;
     if (caching!=nullptr)
@@ -657,14 +657,14 @@ bool geom_getMeshPointDistanceIfSmaller(const CObbStruct* meshObbStruct,const C7
     return(retVal);
 }
 
-double geom_getMeshPointDistance(const CObbStruct* meshObbStruct,const C7Vector& meshTransformation,const C3Vector& point,C3Vector* minDistSegPt/*=nullptr*/,int* caching/*=nullptr*/)
+double geom_getMeshPointDistance(const CObbStruct* meshObbStruct,const CPose& meshTransformation,const C3Vector& point,C3Vector* minDistSegPt/*=nullptr*/,int* caching/*=nullptr*/)
 {
     double dist=DBL_MAX;
     geom_getMeshPointDistanceIfSmaller(meshObbStruct,meshTransformation,point,dist,minDistSegPt,caching);
     return(dist);
 }
 
-bool geom_getMeshOctreeDistanceIfSmaller(const CObbStruct* meshObbStruct,const C7Vector& meshTransformation,const COcStruct* ocStruct,const C7Vector& octreeTransformation,double& dist,C3Vector* meshMinDistPt/*=nullptr*/,C3Vector* ocMinDistPt/*=nullptr*/,int* meshCaching/*=nullptr*/,unsigned  long long int* ocCaching/*=nullptr*/)
+bool geom_getMeshOctreeDistanceIfSmaller(const CObbStruct* meshObbStruct,const CPose& meshTransformation,const COcStruct* ocStruct,const CPose& octreeTransformation,double& dist,C3Vector* meshMinDistPt/*=nullptr*/,C3Vector* ocMinDistPt/*=nullptr*/,int* meshCaching/*=nullptr*/,unsigned  long long int* ocCaching/*=nullptr*/)
 {
     bool retVal=false;
     if ( (meshCaching!=nullptr)&&(ocCaching!=nullptr) )
@@ -699,14 +699,14 @@ bool geom_getMeshOctreeDistanceIfSmaller(const CObbStruct* meshObbStruct,const C
     return(retVal);
 }
 
-double geom_getMeshOctreeDistance(const CObbStruct* meshObbStruct,const C7Vector& meshTransformation,const COcStruct* ocStruct,const C7Vector& octreeTransformation,C3Vector* meshMinDistPt/*=nullptr*/,C3Vector* ocMinDistPt/*=nullptr*/,int* meshCaching/*=nullptr*/,unsigned  long long int* ocCaching/*=nullptr*/)
+double geom_getMeshOctreeDistance(const CObbStruct* meshObbStruct,const CPose& meshTransformation,const COcStruct* ocStruct,const CPose& octreeTransformation,C3Vector* meshMinDistPt/*=nullptr*/,C3Vector* ocMinDistPt/*=nullptr*/,int* meshCaching/*=nullptr*/,unsigned  long long int* ocCaching/*=nullptr*/)
 {
     double dist=DBL_MAX;
     geom_getMeshOctreeDistanceIfSmaller(meshObbStruct,meshTransformation,ocStruct,octreeTransformation,dist,meshMinDistPt,ocMinDistPt,meshCaching,ocCaching);
     return(dist);
 }
 
-bool geom_getMeshPtcloudDistanceIfSmaller(const CObbStruct* meshObbStruct,const C7Vector& meshTransformation,const CPcStruct* pcStruct,const C7Vector& pcTransformation,double& dist,C3Vector* meshMinDistPt/*=nullptr*/,C3Vector* pcMinDistPt/*=nullptr*/,int* meshCaching/*=nullptr*/,unsigned  long long int* pcCaching/*=nullptr*/)
+bool geom_getMeshPtcloudDistanceIfSmaller(const CObbStruct* meshObbStruct,const CPose& meshTransformation,const CPcStruct* pcStruct,const CPose& pcTransformation,double& dist,C3Vector* meshMinDistPt/*=nullptr*/,C3Vector* pcMinDistPt/*=nullptr*/,int* meshCaching/*=nullptr*/,unsigned  long long int* pcCaching/*=nullptr*/)
 {
     bool retVal=false;
     if ( (meshCaching!=nullptr)&&(pcCaching!=nullptr) )
@@ -746,14 +746,14 @@ bool geom_getMeshPtcloudDistanceIfSmaller(const CObbStruct* meshObbStruct,const 
     return(retVal);
 }
 
-double geom_getMeshPtcloudDistance(const CObbStruct* meshObbStruct,const C7Vector& meshTransformation,const CPcStruct* pcStruct,const C7Vector& pcTransformation,C3Vector* meshMinDistPt/*=nullptr*/,C3Vector* pcMinDistPt/*=nullptr*/,int* meshCaching/*=nullptr*/,unsigned  long long int* pcCaching/*=nullptr*/)
+double geom_getMeshPtcloudDistance(const CObbStruct* meshObbStruct,const CPose& meshTransformation,const CPcStruct* pcStruct,const CPose& pcTransformation,C3Vector* meshMinDistPt/*=nullptr*/,C3Vector* pcMinDistPt/*=nullptr*/,int* meshCaching/*=nullptr*/,unsigned  long long int* pcCaching/*=nullptr*/)
 {
     double dist=DBL_MAX;
     geom_getMeshPtcloudDistanceIfSmaller(meshObbStruct,meshTransformation,pcStruct,pcTransformation,dist,meshMinDistPt,pcMinDistPt,meshCaching,pcCaching);
     return(dist);
 }
 
-bool geom_getOctreePtcloudDistanceIfSmaller(const COcStruct* ocStruct,const C7Vector& octreeTransformation,const CPcStruct* pcStruct,const C7Vector& pcTransformation,double& dist,C3Vector* ocMinDistPt/*=nullptr*/,C3Vector* pcMinDistPt/*=nullptr*/,unsigned  long long int* ocCaching/*=nullptr*/,unsigned  long long int* pcCaching/*=nullptr*/)
+bool geom_getOctreePtcloudDistanceIfSmaller(const COcStruct* ocStruct,const CPose& octreeTransformation,const CPcStruct* pcStruct,const CPose& pcTransformation,double& dist,C3Vector* ocMinDistPt/*=nullptr*/,C3Vector* pcMinDistPt/*=nullptr*/,unsigned  long long int* ocCaching/*=nullptr*/,unsigned  long long int* pcCaching/*=nullptr*/)
 {
     bool retVal=false;
     if ( (ocCaching!=nullptr)&&(pcCaching!=nullptr) )
@@ -789,14 +789,14 @@ bool geom_getOctreePtcloudDistanceIfSmaller(const COcStruct* ocStruct,const C7Ve
     return(retVal);
 }
 
-double geom_getOctreePtcloudDistance(const COcStruct* ocStruct,const C7Vector& octreeTransformation,const CPcStruct* pcStruct,const C7Vector& pcTransformation,C3Vector* ocMinDistPt/*=nullptr*/,C3Vector* pcMinDistPt/*=nullptr*/,unsigned  long long int* ocCaching/*=nullptr*/,unsigned  long long int* pcCaching/*=nullptr*/)
+double geom_getOctreePtcloudDistance(const COcStruct* ocStruct,const CPose& octreeTransformation,const CPcStruct* pcStruct,const CPose& pcTransformation,C3Vector* ocMinDistPt/*=nullptr*/,C3Vector* pcMinDistPt/*=nullptr*/,unsigned  long long int* ocCaching/*=nullptr*/,unsigned  long long int* pcCaching/*=nullptr*/)
 {
     double dist=DBL_MAX;
     geom_getOctreePtcloudDistanceIfSmaller(ocStruct,octreeTransformation,pcStruct,pcTransformation,dist,ocMinDistPt,pcMinDistPt,ocCaching,pcCaching);
     return(dist);
 }
 
-bool geom_getOctreeOctreeDistanceIfSmaller(const COcStruct* oc1Struct,const C7Vector& octree1Transformation,const COcStruct* oc2Struct,const C7Vector& octree2Transformation,double& dist,C3Vector* oc1MinDistPt/*=nullptr*/,C3Vector* oc2MinDistPt/*=nullptr*/,unsigned  long long int* oc1Caching/*=nullptr*/,unsigned  long long int* oc2Caching/*=nullptr*/)
+bool geom_getOctreeOctreeDistanceIfSmaller(const COcStruct* oc1Struct,const CPose& octree1Transformation,const COcStruct* oc2Struct,const CPose& octree2Transformation,double& dist,C3Vector* oc1MinDistPt/*=nullptr*/,C3Vector* oc2MinDistPt/*=nullptr*/,unsigned  long long int* oc1Caching/*=nullptr*/,unsigned  long long int* oc2Caching/*=nullptr*/)
 {
     bool retVal=false;
     if ( (oc1Caching!=nullptr)&&(oc2Caching!=nullptr) )
@@ -816,14 +816,14 @@ bool geom_getOctreeOctreeDistanceIfSmaller(const COcStruct* oc1Struct,const C7Ve
     return(retVal);
 }
 
-double geom_getOctreeOctreeDistance(const COcStruct* oc1Struct,const C7Vector& octree1Transformation,const COcStruct* oc2Struct,const C7Vector& octree2Transformation,C3Vector* oc1MinDistPt/*=nullptr*/,C3Vector* oc2MinDistPt/*=nullptr*/,unsigned  long long int* oc1Caching/*=nullptr*/,unsigned  long long int* oc2Caching/*=nullptr*/)
+double geom_getOctreeOctreeDistance(const COcStruct* oc1Struct,const CPose& octree1Transformation,const COcStruct* oc2Struct,const CPose& octree2Transformation,C3Vector* oc1MinDistPt/*=nullptr*/,C3Vector* oc2MinDistPt/*=nullptr*/,unsigned  long long int* oc1Caching/*=nullptr*/,unsigned  long long int* oc2Caching/*=nullptr*/)
 {
     double dist=DBL_MAX;
     geom_getOctreeOctreeDistanceIfSmaller(oc1Struct,octree1Transformation,oc2Struct,octree2Transformation,dist,oc1MinDistPt,oc2MinDistPt,oc1Caching,oc2Caching);
     return(dist);
 }
 
-bool geom_getOctreeTriangleDistanceIfSmaller(const COcStruct* ocStruct,const C7Vector& octreeTransformation,const C3Vector& p,const C3Vector& v,const C3Vector& w,double& dist,C3Vector* ocMinDistPt/*=nullptr*/,C3Vector* triMinDistPt/*=nullptr*/,unsigned  long long int* ocCaching/*=nullptr*/)
+bool geom_getOctreeTriangleDistanceIfSmaller(const COcStruct* ocStruct,const CPose& octreeTransformation,const C3Vector& p,const C3Vector& v,const C3Vector& w,double& dist,C3Vector* ocMinDistPt/*=nullptr*/,C3Vector* triMinDistPt/*=nullptr*/,unsigned  long long int* ocCaching/*=nullptr*/)
 {
     bool retVal=false;
     if (ocCaching!=nullptr)
@@ -847,7 +847,7 @@ bool geom_getOctreeTriangleDistanceIfSmaller(const COcStruct* ocStruct,const C7V
             }
         }
     }
-    C7Vector trInv(octreeTransformation.getInverse());
+    CPose trInv(octreeTransformation.getInverse());
     C3Vector _p(trInv*p);
     trInv.X.clear();
     C3Vector _v(trInv*v);
@@ -864,14 +864,14 @@ bool geom_getOctreeTriangleDistanceIfSmaller(const COcStruct* ocStruct,const C7V
     return(retVal);
 }
 
-double geom_getOctreeTriangleDistance(const COcStruct* ocStruct,const C7Vector& octreeTransformation,const C3Vector& p,const C3Vector& v,const C3Vector&w,C3Vector* ocMinDistPt/*=nullptr*/,C3Vector* triMinDistPt/*=nullptr*/,unsigned  long long int* ocCaching/*=nullptr*/)
+double geom_getOctreeTriangleDistance(const COcStruct* ocStruct,const CPose& octreeTransformation,const C3Vector& p,const C3Vector& v,const C3Vector&w,C3Vector* ocMinDistPt/*=nullptr*/,C3Vector* triMinDistPt/*=nullptr*/,unsigned  long long int* ocCaching/*=nullptr*/)
 {
     double dist=DBL_MAX;
     geom_getOctreeTriangleDistanceIfSmaller(ocStruct,octreeTransformation,p,v,w,dist,ocMinDistPt,triMinDistPt,ocCaching);
     return(dist);
 }
 
-bool geom_getOctreeSegmentDistanceIfSmaller(const COcStruct* ocStruct,const C7Vector& octreeTransformation,const C3Vector& segmentEndPoint,const C3Vector& segmentVector,double& dist,C3Vector* ocMinDistPt/*=nullptr*/,C3Vector* segMinDistPt/*=nullptr*/,unsigned  long long int* ocCaching/*=nullptr*/)
+bool geom_getOctreeSegmentDistanceIfSmaller(const COcStruct* ocStruct,const CPose& octreeTransformation,const C3Vector& segmentEndPoint,const C3Vector& segmentVector,double& dist,C3Vector* ocMinDistPt/*=nullptr*/,C3Vector* segMinDistPt/*=nullptr*/,unsigned  long long int* ocCaching/*=nullptr*/)
 {
     bool retVal=false;
     if (ocCaching!=nullptr)
@@ -894,7 +894,7 @@ bool geom_getOctreeSegmentDistanceIfSmaller(const COcStruct* ocStruct,const C7Ve
             }
         }
     }
-    C7Vector trInv(octreeTransformation.getInverse());
+    CPose trInv(octreeTransformation.getInverse());
     C3Vector _segP(trInv*segmentEndPoint);
     trInv.X.clear();
     C3Vector _segL(trInv*segmentVector);
@@ -910,14 +910,14 @@ bool geom_getOctreeSegmentDistanceIfSmaller(const COcStruct* ocStruct,const C7Ve
     return(retVal);
 }
 
-double geom_getOctreeSegmentDistance(const COcStruct* ocStruct,const C7Vector& octreeTransformation,const C3Vector& segmentEndPoint,const C3Vector& segmentVector,C3Vector* ocMinDistPt/*=nullptr*/,C3Vector* segMinDistPt/*=nullptr*/,unsigned  long long int* ocCaching/*=nullptr*/)
+double geom_getOctreeSegmentDistance(const COcStruct* ocStruct,const CPose& octreeTransformation,const C3Vector& segmentEndPoint,const C3Vector& segmentVector,C3Vector* ocMinDistPt/*=nullptr*/,C3Vector* segMinDistPt/*=nullptr*/,unsigned  long long int* ocCaching/*=nullptr*/)
 {
     double dist=DBL_MAX;
     geom_getOctreeSegmentDistanceIfSmaller(ocStruct,octreeTransformation,segmentEndPoint,segmentVector,dist,ocMinDistPt,segMinDistPt,ocCaching);
     return(dist);
 }
 
-bool geom_getOctreePointDistanceIfSmaller(const COcStruct* ocStruct,const C7Vector& octreeTransformation,const C3Vector& point,double& dist,C3Vector* ocMinDistPt/*=nullptr*/,unsigned  long long int* ocCaching/*=nullptr*/)
+bool geom_getOctreePointDistanceIfSmaller(const COcStruct* ocStruct,const CPose& octreeTransformation,const C3Vector& point,double& dist,C3Vector* ocMinDistPt/*=nullptr*/,unsigned  long long int* ocCaching/*=nullptr*/)
 {
     bool retVal=false;
     if (ocCaching!=nullptr)
@@ -936,7 +936,7 @@ bool geom_getOctreePointDistanceIfSmaller(const COcStruct* ocStruct,const C7Vect
             }
         }
     }
-    C7Vector trInv(octreeTransformation.getInverse());
+    CPose trInv(octreeTransformation.getInverse());
     C3Vector _point(trInv*point);
     bool b=ocStruct->getDistance_pt(_point,dist,ocMinDistPt,ocCaching);
     if (b)
@@ -948,14 +948,14 @@ bool geom_getOctreePointDistanceIfSmaller(const COcStruct* ocStruct,const C7Vect
     return(retVal);
 }
 
-double geom_getOctreePointDistance(const COcStruct* ocStruct,const C7Vector& octreeTransformation,const C3Vector& point,C3Vector* ocMinDistPt/*=nullptr*/,unsigned  long long int* ocCaching/*=nullptr*/)
+double geom_getOctreePointDistance(const COcStruct* ocStruct,const CPose& octreeTransformation,const C3Vector& point,C3Vector* ocMinDistPt/*=nullptr*/,unsigned  long long int* ocCaching/*=nullptr*/)
 {
     double dist=DBL_MAX;
     geom_getOctreePointDistanceIfSmaller(ocStruct,octreeTransformation,point,dist,ocMinDistPt,ocCaching);
     return(dist);
 }
 
-bool geom_getPtcloudPtcloudDistanceIfSmaller(const CPcStruct* pc1Struct,const C7Vector& pc1Transformation,const CPcStruct* pc2Struct,const C7Vector& pc2Transformation,double& dist,C3Vector* pc1MinDistPt/*=nullptr*/,C3Vector* pc2MinDistPt/*=nullptr*/,unsigned  long long int* pc1Caching/*=nullptr*/,unsigned  long long int* pc2Caching/*=nullptr*/)
+bool geom_getPtcloudPtcloudDistanceIfSmaller(const CPcStruct* pc1Struct,const CPose& pc1Transformation,const CPcStruct* pc2Struct,const CPose& pc2Transformation,double& dist,C3Vector* pc1MinDistPt/*=nullptr*/,C3Vector* pc2MinDistPt/*=nullptr*/,unsigned  long long int* pc1Caching/*=nullptr*/,unsigned  long long int* pc2Caching/*=nullptr*/)
 {
     bool retVal=false;
     if ( (pc1Caching!=nullptr)&&(pc2Caching!=nullptr) )
@@ -998,14 +998,14 @@ bool geom_getPtcloudPtcloudDistanceIfSmaller(const CPcStruct* pc1Struct,const C7
     return(retVal);
 }
 
-double geom_getPtcloudPtcloudDistance(const CPcStruct* pc1Struct,const C7Vector& pc1Transformation,const CPcStruct* pc2Struct,const C7Vector& pc2Transformation,C3Vector* pc1MinDistPt/*=nullptr*/,C3Vector* pc2MinDistPt/*=nullptr*/,unsigned  long long int* pc1Caching/*=nullptr*/,unsigned  long long int* pc2Caching/*=nullptr*/)
+double geom_getPtcloudPtcloudDistance(const CPcStruct* pc1Struct,const CPose& pc1Transformation,const CPcStruct* pc2Struct,const CPose& pc2Transformation,C3Vector* pc1MinDistPt/*=nullptr*/,C3Vector* pc2MinDistPt/*=nullptr*/,unsigned  long long int* pc1Caching/*=nullptr*/,unsigned  long long int* pc2Caching/*=nullptr*/)
 {
     double dist=DBL_MAX;
     geom_getPtcloudPtcloudDistanceIfSmaller(pc1Struct,pc1Transformation,pc2Struct,pc2Transformation,dist,pc1MinDistPt,pc2MinDistPt,pc1Caching,pc2Caching);
     return(dist);
 }
 
-bool geom_getPtcloudTriangleDistanceIfSmaller(const CPcStruct* pcStruct,const C7Vector& pcTransformation,const C3Vector& p,const C3Vector& v,const C3Vector& w,double& dist,C3Vector* pcMinDistPt/*=nullptr*/,C3Vector* triMinDistPt/*=nullptr*/,unsigned  long long int* pcCaching/*=nullptr*/)
+bool geom_getPtcloudTriangleDistanceIfSmaller(const CPcStruct* pcStruct,const CPose& pcTransformation,const C3Vector& p,const C3Vector& v,const C3Vector& w,double& dist,C3Vector* pcMinDistPt/*=nullptr*/,C3Vector* triMinDistPt/*=nullptr*/,unsigned  long long int* pcCaching/*=nullptr*/)
 {
     bool retVal=false;
     if (pcCaching!=nullptr)
@@ -1033,14 +1033,14 @@ bool geom_getPtcloudTriangleDistanceIfSmaller(const CPcStruct* pcStruct,const C7
     return(retVal);
 }
 
-double geom_getPtcloudTriangleDistance(const CPcStruct* pcStruct,const C7Vector& pcTransformation,const C3Vector& p,const C3Vector& v,const C3Vector& w,C3Vector* pcMinDistPt/*=nullptr*/,C3Vector* triMinDistPt/*=nullptr*/,unsigned  long long int* pcCaching/*=nullptr*/)
+double geom_getPtcloudTriangleDistance(const CPcStruct* pcStruct,const CPose& pcTransformation,const C3Vector& p,const C3Vector& v,const C3Vector& w,C3Vector* pcMinDistPt/*=nullptr*/,C3Vector* triMinDistPt/*=nullptr*/,unsigned  long long int* pcCaching/*=nullptr*/)
 {
     double dist=DBL_MAX;
     geom_getPtcloudTriangleDistanceIfSmaller(pcStruct,pcTransformation,p,v,w,dist,pcMinDistPt,triMinDistPt,pcCaching);
     return(dist);
 }
 
-bool geom_getPtcloudSegmentDistanceIfSmaller(const CPcStruct* pcStruct,const C7Vector& pcTransformation,const C3Vector& segmentEndPoint,const C3Vector& segmentVector,double& dist,C3Vector* pcMinDistPt/*=nullptr*/,C3Vector* segMinDistPt/*=nullptr*/,unsigned  long long int* pcCaching/*=nullptr*/)
+bool geom_getPtcloudSegmentDistanceIfSmaller(const CPcStruct* pcStruct,const CPose& pcTransformation,const C3Vector& segmentEndPoint,const C3Vector& segmentVector,double& dist,C3Vector* pcMinDistPt/*=nullptr*/,C3Vector* segMinDistPt/*=nullptr*/,unsigned  long long int* pcCaching/*=nullptr*/)
 {
     bool retVal=false;
     if (pcCaching!=nullptr)
@@ -1068,14 +1068,14 @@ bool geom_getPtcloudSegmentDistanceIfSmaller(const CPcStruct* pcStruct,const C7V
     return(retVal);
 }
 
-double geom_getPtcloudSegmentDistance(const CPcStruct* pcStruct,const C7Vector& pcTransformation,const C3Vector& segmentEndPoint,const C3Vector& segmentVector,C3Vector* pcMinDistPt/*=nullptr*/,C3Vector* segMinDistPt/*=nullptr*/,unsigned  long long int* pcCaching/*=nullptr*/)
+double geom_getPtcloudSegmentDistance(const CPcStruct* pcStruct,const CPose& pcTransformation,const C3Vector& segmentEndPoint,const C3Vector& segmentVector,C3Vector* pcMinDistPt/*=nullptr*/,C3Vector* segMinDistPt/*=nullptr*/,unsigned  long long int* pcCaching/*=nullptr*/)
 {
     double dist=DBL_MAX;
     geom_getPtcloudSegmentDistanceIfSmaller(pcStruct,pcTransformation,segmentEndPoint,segmentVector,dist,pcMinDistPt,segMinDistPt,pcCaching);
     return(dist);
 }
 
-bool geom_getPtcloudPointDistanceIfSmaller(const CPcStruct* pcStruct,const C7Vector& pcTransformation,const C3Vector& point,double& dist,C3Vector* pcMinDistPt/*=nullptr*/,unsigned  long long int* pcCaching/*=nullptr*/)
+bool geom_getPtcloudPointDistanceIfSmaller(const CPcStruct* pcStruct,const CPose& pcTransformation,const C3Vector& point,double& dist,C3Vector* pcMinDistPt/*=nullptr*/,unsigned  long long int* pcCaching/*=nullptr*/)
 {
     bool retVal=false;
     if (pcCaching!=nullptr)
@@ -1105,7 +1105,7 @@ bool geom_getPtcloudPointDistanceIfSmaller(const CPcStruct* pcStruct,const C7Vec
     return(retVal);
 }
 
-double geom_getPtcloudPointDistance(const CPcStruct* pcStruct,const C7Vector& pcTransformation,const C3Vector& point,C3Vector* pcMinDistPt/*=nullptr*/,unsigned  long long int* pcCaching/*=nullptr*/)
+double geom_getPtcloudPointDistance(const CPcStruct* pcStruct,const CPose& pcTransformation,const C3Vector& point,C3Vector* pcMinDistPt/*=nullptr*/,unsigned  long long int* pcCaching/*=nullptr*/)
 {
     double dist=DBL_MAX;
     geom_getPtcloudPointDistanceIfSmaller(pcStruct,pcTransformation,point,dist,pcMinDistPt,pcCaching);
@@ -1127,11 +1127,11 @@ void geom_getOctreeVoxelData(const COcStruct* ocStruct,std::vector<double>& voxe
     ocStruct->getVoxelsPosAndRgba(voxelData,userData);
 }
 
-COcStruct* geom_createOctreeFromPoints(const double* points,int pointCnt,const C7Vector* octreeOrigin/*=nullptr*/,double cellS/*=double(0.05)*/,const unsigned char rgbaData[4]/*=nullptr*/,unsigned int usrData/*=0*/)
+COcStruct* geom_createOctreeFromPoints(const double* points,int pointCnt,const CPose* octreeOrigin/*=nullptr*/,double cellS/*=double(0.05)*/,const unsigned char rgbaData[4]/*=nullptr*/,unsigned int usrData/*=0*/)
 {
     std::vector<double> relPts;
     relPts.resize(size_t(pointCnt)*3);
-    C7Vector trInv;
+    CPose trInv;
     trInv.setIdentity();
     if (octreeOrigin!=nullptr)
         trInv=octreeOrigin->getInverse();
@@ -1155,11 +1155,11 @@ COcStruct* geom_createOctreeFromPoints(const double* points,int pointCnt,const C
     return(ocStruct);
 }
 
-COcStruct* geom_createOctreeFromColorPoints(const double* points,int pointCnt,const C7Vector* octreeOrigin/*=nullptr*/,double cellS/*=double(0.05)*/,const unsigned char* rgbaData/*=nullptr*/,const unsigned int* usrData/*=nullptr*/)
+COcStruct* geom_createOctreeFromColorPoints(const double* points,int pointCnt,const CPose* octreeOrigin/*=nullptr*/,double cellS/*=double(0.05)*/,const unsigned char* rgbaData/*=nullptr*/,const unsigned int* usrData/*=nullptr*/)
 {
     std::vector<double> relPts;
     relPts.resize(size_t(pointCnt)*3);
-    C7Vector trInv;
+    CPose trInv;
     trInv.setIdentity();
     if (octreeOrigin!=nullptr)
         trInv=octreeOrigin->getInverse();
@@ -1189,9 +1189,9 @@ COcStruct* geom_createOctreeFromColorPoints(const double* points,int pointCnt,co
     return(ocStruct);
 }
 
-COcStruct* geom_createOctreeFromMesh(const CObbStruct* meshObbStruct,const C7Vector& meshTransformation,const C7Vector* octreeOrigin/*=nullptr*/,double cellS/*=double(0.05)*/,const unsigned char rgbaData[4]/*=nullptr*/,unsigned int usrData/*=0*/)
+COcStruct* geom_createOctreeFromMesh(const CObbStruct* meshObbStruct,const CPose& meshTransformation,const CPose* octreeOrigin/*=nullptr*/,double cellS/*=double(0.05)*/,const unsigned char rgbaData[4]/*=nullptr*/,unsigned int usrData/*=0*/)
 {
-    C7Vector _octreeOrigin;
+    CPose _octreeOrigin;
     _octreeOrigin.setIdentity();
     if (octreeOrigin!=nullptr)
         _octreeOrigin=octreeOrigin[0];
@@ -1207,9 +1207,9 @@ COcStruct* geom_createOctreeFromMesh(const CObbStruct* meshObbStruct,const C7Vec
     return(ocStruct);
 }
 
-COcStruct* geom_createOctreeFromOctree(const COcStruct* otherOctreeStruct,const C7Vector& otherOctreeTransformation,const C7Vector* newOctreeOrigin/*=nullptr*/,double newOctreeCellS/*=double(0.05)*/,const unsigned char rgbaData[4]/*=nullptr*/,unsigned int usrData/*=0*/)
+COcStruct* geom_createOctreeFromOctree(const COcStruct* otherOctreeStruct,const CPose& otherOctreeTransformation,const CPose* newOctreeOrigin/*=nullptr*/,double newOctreeCellS/*=double(0.05)*/,const unsigned char rgbaData[4]/*=nullptr*/,unsigned int usrData/*=0*/)
 {
-    C7Vector _newOctreeOrigin;
+    CPose _newOctreeOrigin;
     _newOctreeOrigin.setIdentity();
     if (newOctreeOrigin!=nullptr)
         _newOctreeOrigin=newOctreeOrigin[0];
@@ -1281,11 +1281,11 @@ COcStruct* geom_getOctreeFromSerializationData(const unsigned char* serializatio
     }
 }
 
-CPcStruct* geom_createPtcloudFromPoints(const double* points,int pointCnt,const C7Vector* ptcloudOrigin/*=nullptr*/,double cellS/*=double(0.05)*/,int maxPointCnt/*=20*/,const unsigned char rgbData[3]/*=nullptr*/,double proximityTol/*=double(0.005)*/)
+CPcStruct* geom_createPtcloudFromPoints(const double* points,int pointCnt,const CPose* ptcloudOrigin/*=nullptr*/,double cellS/*=double(0.05)*/,int maxPointCnt/*=20*/,const unsigned char rgbData[3]/*=nullptr*/,double proximityTol/*=double(0.005)*/)
 {
     std::vector<double> relPts;
     relPts.resize(size_t(pointCnt)*3);
-    C7Vector trInv;
+    CPose trInv;
     trInv.setIdentity();
     if (ptcloudOrigin!=nullptr)
         trInv=ptcloudOrigin->getInverse();
@@ -1308,11 +1308,11 @@ CPcStruct* geom_createPtcloudFromPoints(const double* points,int pointCnt,const 
     return(pcStruct);
 }
 
-CPcStruct* geom_createPtcloudFromColorPoints(const double* points,int pointCnt,const C7Vector* ptcloudOrigin/*=nullptr*/,double cellS/*=double(0.05)*/,int maxPointCnt/*=20*/,const unsigned char* rgbData/*=nullptr*/,double proximityTol/*=double(0.005)*/)
+CPcStruct* geom_createPtcloudFromColorPoints(const double* points,int pointCnt,const CPose* ptcloudOrigin/*=nullptr*/,double cellS/*=double(0.05)*/,int maxPointCnt/*=20*/,const unsigned char* rgbData/*=nullptr*/,double proximityTol/*=double(0.005)*/)
 {
     std::vector<double> relPts;
     relPts.resize(size_t(pointCnt)*3);
-    C7Vector trInv;
+    CPose trInv;
     trInv.setIdentity();
     if (ptcloudOrigin!=nullptr)
         trInv=ptcloudOrigin->getInverse();
@@ -1432,13 +1432,13 @@ bool geom_isPointInVolume(const double* planesIn,int planesInSize,const C3Vector
     return(retVal);
 }
 
-bool geom_isPointInVolume(const double* planesIn,int planesInSize,const C7Vector& sensorTransformation,const C3Vector& point)
+bool geom_isPointInVolume(const double* planesIn,int planesInSize,const CPose& sensorTransformation,const C3Vector& point)
 {
     bool retVal=geom_isPointInVolume(planesIn,planesInSize,sensorTransformation.getInverse()*point);
     return(retVal);
 }
 
-bool geom_volumeSensorDetectMeshIfSmaller(const double* planesIn,int planesInSize,const double* planesOut,int planesOutSize,const CObbStruct* obbStruct,const C7Vector& meshTransformation,double& dist,bool fast/*=false*/,bool frontDetection/*=true*/,bool backDetection/*=true*/,double maxAngle/*=0.0*/,C3Vector* detectPt/*=nullptr*/,C3Vector* triN/*=nullptr*/)
+bool geom_volumeSensorDetectMeshIfSmaller(const double* planesIn,int planesInSize,const double* planesOut,int planesOutSize,const CObbStruct* obbStruct,const CPose& meshTransformation,double& dist,bool fast/*=false*/,bool frontDetection/*=true*/,bool backDetection/*=true*/,double maxAngle/*=0.0*/,C3Vector* detectPt/*=nullptr*/,C3Vector* triN/*=nullptr*/)
 { // planesOutSize can be 0. Sensor is at the origin. Mesh is relative to sensor
     CVolumePlanes _planesIn(planesIn,(size_t)planesInSize);
     CVolumePlanes _planesOut(planesOut,(size_t)planesOutSize);
@@ -1449,9 +1449,9 @@ bool geom_volumeSensorDetectMeshIfSmaller(const double* planesIn,int planesInSiz
     return(retVal);
 }
 
-bool geom_volumeSensorDetectMeshIfSmaller(const double* planesIn,int planesInSize,const double* planesOut,int planesOutSize,const C7Vector& sensorTransformation,const CObbStruct* obbStruct,const C7Vector& meshTransformation,double& dist,bool fast/*=false*/,bool frontDetection/*=true*/,bool backDetection/*=true*/,double maxAngle/*=0.0*/,C3Vector* detectPt/*=nullptr*/,C3Vector* triN/*=nullptr*/)
+bool geom_volumeSensorDetectMeshIfSmaller(const double* planesIn,int planesInSize,const double* planesOut,int planesOutSize,const CPose& sensorTransformation,const CObbStruct* obbStruct,const CPose& meshTransformation,double& dist,bool fast/*=false*/,bool frontDetection/*=true*/,bool backDetection/*=true*/,double maxAngle/*=0.0*/,C3Vector* detectPt/*=nullptr*/,C3Vector* triN/*=nullptr*/)
 { // planesOutSize can be 0.
-    C7Vector sensorTransformationInv=sensorTransformation.getInverse();
+    CPose sensorTransformationInv=sensorTransformation.getInverse();
     bool retVal=geom_volumeSensorDetectMeshIfSmaller(planesIn,planesInSize,planesOut,planesOutSize,obbStruct,sensorTransformationInv*meshTransformation,dist,fast,frontDetection,backDetection,maxAngle,detectPt,triN);
     if (retVal)
     {
@@ -1463,7 +1463,7 @@ bool geom_volumeSensorDetectMeshIfSmaller(const double* planesIn,int planesInSiz
     return(retVal);
 }
 
-bool geom_volumeSensorDetectOctreeIfSmaller(const double* planesIn,int planesInSize,const double* planesOut,int planesOutSize,const COcStruct* ocStruct,const C7Vector& octreeTransformation,double& dist,bool fast/*=false*/,bool frontDetection/*=true*/,bool backDetection/*=true*/,double maxAngle/*=0.0*/,C3Vector* detectPt/*=nullptr*/,C3Vector* triN/*=nullptr*/)
+bool geom_volumeSensorDetectOctreeIfSmaller(const double* planesIn,int planesInSize,const double* planesOut,int planesOutSize,const COcStruct* ocStruct,const CPose& octreeTransformation,double& dist,bool fast/*=false*/,bool frontDetection/*=true*/,bool backDetection/*=true*/,double maxAngle/*=0.0*/,C3Vector* detectPt/*=nullptr*/,C3Vector* triN/*=nullptr*/)
 { // planesOutSize can be 0. Sensor is at the origin. Octree is relative to sensor
     CVolumePlanes _planesIn(planesIn,(size_t)planesInSize);
     CVolumePlanes _planesOut(planesOut,(size_t)planesOutSize);
@@ -1474,9 +1474,9 @@ bool geom_volumeSensorDetectOctreeIfSmaller(const double* planesIn,int planesInS
     return(retVal);
 }
 
-bool geom_volumeSensorDetectOctreeIfSmaller(const double* planesIn,int planesInSize,const double* planesOut,int planesOutSize,const C7Vector& sensorTransformation,const COcStruct* ocStruct,const C7Vector& octreeTransformation,double& dist,bool fast/*=false*/,bool frontDetection/*=true*/,bool backDetection/*=true*/,double maxAngle/*=0.0*/,C3Vector* detectPt/*=nullptr*/,C3Vector* triN/*=nullptr*/)
+bool geom_volumeSensorDetectOctreeIfSmaller(const double* planesIn,int planesInSize,const double* planesOut,int planesOutSize,const CPose& sensorTransformation,const COcStruct* ocStruct,const CPose& octreeTransformation,double& dist,bool fast/*=false*/,bool frontDetection/*=true*/,bool backDetection/*=true*/,double maxAngle/*=0.0*/,C3Vector* detectPt/*=nullptr*/,C3Vector* triN/*=nullptr*/)
 { // planesOutSize can be 0.
-    C7Vector sensorTransformationInv=sensorTransformation.getInverse();
+    CPose sensorTransformationInv=sensorTransformation.getInverse();
     bool retVal=geom_volumeSensorDetectOctreeIfSmaller(planesIn,planesInSize,planesOut,planesOutSize,ocStruct,sensorTransformationInv*octreeTransformation,dist,fast,frontDetection,backDetection,maxAngle,detectPt,triN);
     if (retVal)
     {
@@ -1488,7 +1488,7 @@ bool geom_volumeSensorDetectOctreeIfSmaller(const double* planesIn,int planesInS
     return(retVal);
 }
 
-bool geom_volumeSensorDetectPtcloudIfSmaller(const double* planesIn,int planesInSize,const double* planesOut,int planesOutSize,const CPcStruct* pcStruct,const C7Vector& ptcloudTransformation,double& dist,bool fast/*=false*/,C3Vector* detectPt/*=nullptr*/)
+bool geom_volumeSensorDetectPtcloudIfSmaller(const double* planesIn,int planesInSize,const double* planesOut,int planesOutSize,const CPcStruct* pcStruct,const CPose& ptcloudTransformation,double& dist,bool fast/*=false*/,C3Vector* detectPt/*=nullptr*/)
 { // planesOutSize can be 0. Sensor is at the origin. PtCloud is relative to sensor
     CVolumePlanes _planesIn(planesIn,(size_t)planesInSize);
     CVolumePlanes _planesOut(planesOut,(size_t)planesOutSize);
@@ -1496,9 +1496,9 @@ bool geom_volumeSensorDetectPtcloudIfSmaller(const double* planesIn,int planesIn
     return(retVal);
 }
 
-bool geom_volumeSensorDetectPtcloudIfSmaller(const double* planesIn,int planesInSize,const double* planesOut,int planesOutSize,const C7Vector& sensorTransformation,const CPcStruct* pcStruct,const C7Vector& ptcloudTransformation,double& dist,bool fast/*=false*/,C3Vector* detectPt/*=nullptr*/)
+bool geom_volumeSensorDetectPtcloudIfSmaller(const double* planesIn,int planesInSize,const double* planesOut,int planesOutSize,const CPose& sensorTransformation,const CPcStruct* pcStruct,const CPose& ptcloudTransformation,double& dist,bool fast/*=false*/,C3Vector* detectPt/*=nullptr*/)
 { // planesOutSize can be 0.
-    C7Vector sensorTransformationInv=sensorTransformation.getInverse();
+    CPose sensorTransformationInv=sensorTransformation.getInverse();
     bool retVal=geom_volumeSensorDetectPtcloudIfSmaller(planesIn,planesInSize,planesOut,planesOutSize,pcStruct,sensorTransformationInv*ptcloudTransformation,dist,fast,detectPt);
     if (retVal)
     {
@@ -1519,9 +1519,9 @@ bool geom_volumeSensorDetectTriangleIfSmaller(const double* planesIn,int planesI
     return(retVal);
 }
 
-bool geom_volumeSensorDetectTriangleIfSmaller(const double* planesIn,int planesInSize,const double* planesOut,int planesOutSize,const C7Vector& sensorTransformation,const C3Vector& p,const C3Vector& v,const C3Vector& w,double& dist,bool frontDetection/*=true*/,bool backDetection/*=true*/,double maxAngle/*=0.0*/,C3Vector* detectPt/*=nullptr*/,C3Vector* triN/*=nullptr*/)
+bool geom_volumeSensorDetectTriangleIfSmaller(const double* planesIn,int planesInSize,const double* planesOut,int planesOutSize,const CPose& sensorTransformation,const C3Vector& p,const C3Vector& v,const C3Vector& w,double& dist,bool frontDetection/*=true*/,bool backDetection/*=true*/,double maxAngle/*=0.0*/,C3Vector* detectPt/*=nullptr*/,C3Vector* triN/*=nullptr*/)
 { // planesOutSize can be 0.
-    C7Vector sensorTransformationInv=sensorTransformation.getInverse();
+    CPose sensorTransformationInv=sensorTransformation.getInverse();
     bool retVal=geom_volumeSensorDetectTriangleIfSmaller(planesIn,planesInSize,planesOut,planesOutSize,sensorTransformationInv*p,sensorTransformationInv.Q*v,sensorTransformationInv.Q*w,dist,frontDetection,backDetection,maxAngle,detectPt,triN);
     if (retVal)
     {
@@ -1544,9 +1544,9 @@ bool geom_volumeSensorDetectSegmentIfSmaller(const double* planesIn,int planesIn
     return(retVal);
 }
 
-bool geom_volumeSensorDetectSegmentIfSmaller(const double* planesIn,int planesInSize,const double* planesOut,int planesOutSize,const C7Vector& sensorTransformation,const C3Vector& segmentEndPoint,const C3Vector& segmentVector,double& dist,double maxAngle/*=0.0*/,C3Vector* detectPt/*=nullptr*/)
+bool geom_volumeSensorDetectSegmentIfSmaller(const double* planesIn,int planesInSize,const double* planesOut,int planesOutSize,const CPose& sensorTransformation,const C3Vector& segmentEndPoint,const C3Vector& segmentVector,double& dist,double maxAngle/*=0.0*/,C3Vector* detectPt/*=nullptr*/)
 { // planesOutSize can be 0.
-    C7Vector sensorTransformationInv=sensorTransformation.getInverse();
+    CPose sensorTransformationInv=sensorTransformation.getInverse();
     bool retVal=geom_volumeSensorDetectSegmentIfSmaller(planesIn,planesInSize,planesOut,planesOutSize,sensorTransformationInv*segmentEndPoint,sensorTransformationInv.Q*segmentVector,dist,maxAngle,detectPt);
     if (retVal)
     {
@@ -1556,7 +1556,7 @@ bool geom_volumeSensorDetectSegmentIfSmaller(const double* planesIn,int planesIn
     return(retVal);
 }
 
-bool geom_raySensorDetectMeshIfSmaller(const C3Vector& rayStart,const C3Vector& rayVect,const CObbStruct* obbStruct,const C7Vector& meshTransformation,double& dist,double forbiddenDist/*=0.0*/,bool fast/*=false*/,bool frontDetection/*=true*/,bool backDetection/*=true*/,double maxAngle/*=0.0*/,C3Vector* detectPt/*=nullptr*/,C3Vector* triN/*=nullptr*/,bool* forbiddenDistTouched/*=nullptr*/)
+bool geom_raySensorDetectMeshIfSmaller(const C3Vector& rayStart,const C3Vector& rayVect,const CObbStruct* obbStruct,const CPose& meshTransformation,double& dist,double forbiddenDist/*=0.0*/,bool fast/*=false*/,bool frontDetection/*=true*/,bool backDetection/*=true*/,double maxAngle/*=0.0*/,C3Vector* detectPt/*=nullptr*/,C3Vector* triN/*=nullptr*/,bool* forbiddenDistTouched/*=nullptr*/)
 { // Sensor is at the origin. Mesh is relative to sensor
     double cosAngle=2.0; // means angle not taken into account
     if ( (maxAngle>0.0)&&(maxAngle<=piValD2+double(0.001)) )
@@ -1565,9 +1565,9 @@ bool geom_raySensorDetectMeshIfSmaller(const C3Vector& rayStart,const C3Vector& 
     return(retVal);
 }
 
-bool geom_raySensorDetectMeshIfSmaller(const C7Vector& sensorTransformation,double rayOffset,double rayLength,const CObbStruct* obbStruct,const C7Vector& meshTransformation,double& dist,double forbiddenDist/*=0.0*/,bool fast/*=false*/,bool frontDetection/*=true*/,bool backDetection/*=true*/,double maxAngle/*=0.0*/,C3Vector* detectPt/*=nullptr*/,C3Vector* triN/*=nullptr*/,bool* forbiddenDistTouched/*=nullptr*/)
+bool geom_raySensorDetectMeshIfSmaller(const CPose& sensorTransformation,double rayOffset,double rayLength,const CObbStruct* obbStruct,const CPose& meshTransformation,double& dist,double forbiddenDist/*=0.0*/,bool fast/*=false*/,bool frontDetection/*=true*/,bool backDetection/*=true*/,double maxAngle/*=0.0*/,C3Vector* detectPt/*=nullptr*/,C3Vector* triN/*=nullptr*/,bool* forbiddenDistTouched/*=nullptr*/)
 {
-    C7Vector sensorTransformationInv=sensorTransformation.getInverse();
+    CPose sensorTransformationInv=sensorTransformation.getInverse();
     C3Vector rayStart(0.0,0.0,rayOffset);
     C3Vector rayVect(0.0,0.0,rayLength);
     bool retVal=geom_raySensorDetectMeshIfSmaller(rayStart,rayVect,obbStruct,sensorTransformationInv*meshTransformation,dist,forbiddenDist,fast,frontDetection,backDetection,maxAngle,detectPt,triN,forbiddenDistTouched);
@@ -1582,7 +1582,7 @@ bool geom_raySensorDetectMeshIfSmaller(const C7Vector& sensorTransformation,doub
 }
 
 
-bool geom_raySensorDetectOctreeIfSmaller(const C3Vector& rayStart,const C3Vector& rayVect,const COcStruct* ocStruct,const C7Vector& octreeTransformation,double& dist,double forbiddenDist/*=0.0*/,bool fast/*=false*/,bool frontDetection/*=true*/,bool backDetection/*=true*/,double maxAngle/*=0.0*/,C3Vector* detectPt/*=nullptr*/,C3Vector* triN/*=nullptr*/,bool* forbiddenDistTouched/*=nullptr*/)
+bool geom_raySensorDetectOctreeIfSmaller(const C3Vector& rayStart,const C3Vector& rayVect,const COcStruct* ocStruct,const CPose& octreeTransformation,double& dist,double forbiddenDist/*=0.0*/,bool fast/*=false*/,bool frontDetection/*=true*/,bool backDetection/*=true*/,double maxAngle/*=0.0*/,C3Vector* detectPt/*=nullptr*/,C3Vector* triN/*=nullptr*/,bool* forbiddenDistTouched/*=nullptr*/)
 { // Sensor is at the origin. octree is relative to sensor
     double cosAngle=2.0; // means angle not taken into account
     if ( (maxAngle>0.0)&&(maxAngle<=piValD2+double(0.001)) )
@@ -1591,9 +1591,9 @@ bool geom_raySensorDetectOctreeIfSmaller(const C3Vector& rayStart,const C3Vector
     return(retVal);
 }
 
-bool geom_raySensorDetectOctreeIfSmaller(const C7Vector& sensorTransformation,double rayOffset,double rayLength,const COcStruct* ocStruct,const C7Vector& octreeTransformation,double& dist,double forbiddenDist/*=0.0*/,bool fast/*=false*/,bool frontDetection/*=true*/,bool backDetection/*=true*/,double maxAngle/*=0.0*/,C3Vector* detectPt/*=nullptr*/,C3Vector* triN/*=nullptr*/,bool* forbiddenDistTouched/*=nullptr*/)
+bool geom_raySensorDetectOctreeIfSmaller(const CPose& sensorTransformation,double rayOffset,double rayLength,const COcStruct* ocStruct,const CPose& octreeTransformation,double& dist,double forbiddenDist/*=0.0*/,bool fast/*=false*/,bool frontDetection/*=true*/,bool backDetection/*=true*/,double maxAngle/*=0.0*/,C3Vector* detectPt/*=nullptr*/,C3Vector* triN/*=nullptr*/,bool* forbiddenDistTouched/*=nullptr*/)
 {
-    C7Vector sensorTransformationInv=sensorTransformation.getInverse();
+    CPose sensorTransformationInv=sensorTransformation.getInverse();
     C3Vector rayStart(0.0,0.0,rayOffset);
     C3Vector rayVect(0.0,0.0,rayLength);
     bool retVal=geom_raySensorDetectOctreeIfSmaller(rayStart,rayVect,ocStruct,sensorTransformationInv*octreeTransformation,dist,forbiddenDist,fast,frontDetection,backDetection,maxAngle,detectPt,triN,forbiddenDistTouched);
@@ -1607,11 +1607,11 @@ bool geom_raySensorDetectOctreeIfSmaller(const C7Vector& sensorTransformation,do
     return(retVal);
 }
 
-void geom_insertPointsIntoPtcloud(CPcStruct* pcStruct,const C7Vector& ptcloudTransformation,const double* points,int pointCnt,const unsigned char rgbaData[4]/*=nullptr*/,double proximityTol/*=double(0.001)*/)
+void geom_insertPointsIntoPtcloud(CPcStruct* pcStruct,const CPose& ptcloudTransformation,const double* points,int pointCnt,const unsigned char rgbaData[4]/*=nullptr*/,double proximityTol/*=double(0.001)*/)
 {
     std::vector<double> relPts;
     relPts.resize(size_t(pointCnt)*3);
-    C7Vector trInv(ptcloudTransformation.getInverse());
+    CPose trInv(ptcloudTransformation.getInverse());
     for (size_t i=0;i<size_t(pointCnt);i++)
     {
         C3Vector v(points+3*i);
@@ -1631,11 +1631,11 @@ void geom_insertPointsIntoPtcloud(CPcStruct* pcStruct,const C7Vector& ptcloudTra
     pcStruct->add_pts(&relPts[0],pointCnt,_rgbaData,false,proximityTol);
 }
 
-void geom_insertColorPointsIntoPtcloud(CPcStruct* pcStruct,const C7Vector& ptcloudTransformation,const double* points,int pointCnt,const unsigned char* rgbaData/*=nullptr*/,double proximityTol/*=double(0.001)*/)
+void geom_insertColorPointsIntoPtcloud(CPcStruct* pcStruct,const CPose& ptcloudTransformation,const double* points,int pointCnt,const unsigned char* rgbaData/*=nullptr*/,double proximityTol/*=double(0.001)*/)
 {
     std::vector<double> relPts;
     relPts.resize(size_t(pointCnt)*3);
-    C7Vector trInv(ptcloudTransformation.getInverse());
+    CPose trInv(ptcloudTransformation.getInverse());
     for (size_t i=0;i<size_t(pointCnt);i++)
     {
         C3Vector v(points+3*i);
@@ -1654,11 +1654,11 @@ void geom_insertColorPointsIntoPtcloud(CPcStruct* pcStruct,const C7Vector& ptclo
     pcStruct->add_pts(&relPts[0],pointCnt,&_rgbaData[0],true,proximityTol);
 }
 
-bool geom_removePointsFromPtcloud(CPcStruct* pcStruct,const C7Vector& ptcloudTransformation,const double* points,int pointCnt,double proximityTol/*=double(0.001)*/,int* countRemoved/*=nullptr*/)
+bool geom_removePointsFromPtcloud(CPcStruct* pcStruct,const CPose& ptcloudTransformation,const double* points,int pointCnt,double proximityTol/*=double(0.001)*/,int* countRemoved/*=nullptr*/)
 { // returns true if the pt cloud is empty after the operation
     std::vector<double> relPts;
     relPts.resize(size_t(pointCnt)*3);
-    C7Vector trInv(ptcloudTransformation.getInverse());
+    CPose trInv(ptcloudTransformation.getInverse());
     for (size_t i=0;i<size_t(pointCnt);i++)
     {
         C3Vector v(points+3*i);
@@ -1671,17 +1671,17 @@ bool geom_removePointsFromPtcloud(CPcStruct* pcStruct,const C7Vector& ptcloudTra
     return(retVal);
 }
 
-bool geom_removeOctreeFromPtcloud(CPcStruct* pcStruct,const C7Vector& ptcloudTransformation,const COcStruct* ocStruct,const C7Vector& octreeTransformation,int* countRemoved/*=nullptr*/)
+bool geom_removeOctreeFromPtcloud(CPcStruct* pcStruct,const CPose& ptcloudTransformation,const COcStruct* ocStruct,const CPose& octreeTransformation,int* countRemoved/*=nullptr*/)
 { // returns true if the pt cloud is empty after the operation
    bool retVal=pcStruct->delete_octree(ptcloudTransformation.getMatrix(),ocStruct,octreeTransformation.getMatrix(),countRemoved);
    return(retVal);
 }
 
-bool geom_intersectPointsWithPtcloud(CPcStruct* pcStruct,const C7Vector& ptcloudTransformation,const double* points,int pointCnt,double proximityTol/*=double(0.001)*/)
+bool geom_intersectPointsWithPtcloud(CPcStruct* pcStruct,const CPose& ptcloudTransformation,const double* points,int pointCnt,double proximityTol/*=double(0.001)*/)
 { // returns true if the pt cloud is empty after the operation
     std::vector<double> relPts;
     relPts.resize(size_t(pointCnt)*3);
-    C7Vector trInv(ptcloudTransformation.getInverse());
+    CPose trInv(ptcloudTransformation.getInverse());
     for (size_t i=0;i<size_t(pointCnt);i++)
     {
         C3Vector v(points+3*i);
@@ -1704,11 +1704,11 @@ int geom_getPtcloudNonEmptyCellCount(const CPcStruct* pcStruct)
     return(int(pcStruct->countCellsWithContent()));
 }
 
-void geom_insertPointsIntoOctree(COcStruct* ocStruct,const C7Vector& octreeTransformation,const double* points,int pointCnt,const unsigned char rgbaData[4]/*=nullptr*/,unsigned int usrData/*=0*/)
+void geom_insertPointsIntoOctree(COcStruct* ocStruct,const CPose& octreeTransformation,const double* points,int pointCnt,const unsigned char rgbaData[4]/*=nullptr*/,unsigned int usrData/*=0*/)
 {
     std::vector<double> relPts;
     relPts.resize(size_t(pointCnt)*3);
-    C7Vector trInv(octreeTransformation.getInverse());
+    CPose trInv(octreeTransformation.getInverse());
     for (size_t i=0;i<size_t(pointCnt);i++)
     {
         C3Vector v(points+3*i);
@@ -1728,11 +1728,11 @@ void geom_insertPointsIntoOctree(COcStruct* ocStruct,const C7Vector& octreeTrans
     ocStruct->add_pts(&relPts[0],(size_t)pointCnt,_rgbaData,&usrData,false);
 }
 
-void geom_insertColorPointsIntoOctree(COcStruct* ocStruct,const C7Vector& octreeTransformation,const double* points,int pointCnt,const unsigned char* rgbaData/*=nullptr*/,const unsigned int* usrData/*=nullptr*/)
+void geom_insertColorPointsIntoOctree(COcStruct* ocStruct,const CPose& octreeTransformation,const double* points,int pointCnt,const unsigned char* rgbaData/*=nullptr*/,const unsigned int* usrData/*=nullptr*/)
 {
     std::vector<double> relPts;
     relPts.resize(size_t(pointCnt)*3);
-    C7Vector trInv(octreeTransformation.getInverse());
+    CPose trInv(octreeTransformation.getInverse());
     for (size_t i=0;i<size_t(pointCnt);i++)
     {
         C3Vector v(points+3*i);
@@ -1758,7 +1758,7 @@ void geom_insertColorPointsIntoOctree(COcStruct* ocStruct,const C7Vector& octree
     ocStruct->add_pts(&relPts[0],(size_t)pointCnt,&_rgbaData[0],&_usrData[0],true);
 }
 
-void geom_insertMeshIntoOctree(COcStruct* ocStruct,const C7Vector& octreeTransformation,const CObbStruct* obbStruct,const C7Vector& meshTransformation,const unsigned char rgbaData[4]/*=nullptr*/,unsigned int usrData/*=0*/)
+void geom_insertMeshIntoOctree(COcStruct* ocStruct,const CPose& octreeTransformation,const CObbStruct* obbStruct,const CPose& meshTransformation,const unsigned char rgbaData[4]/*=nullptr*/,unsigned int usrData/*=0*/)
 {
     unsigned char _rgbaData[4];
     if (rgbaData!=nullptr)
@@ -1771,7 +1771,7 @@ void geom_insertMeshIntoOctree(COcStruct* ocStruct,const C7Vector& octreeTransfo
     ocStruct->add_shape(octreeTransformation.getMatrix(),obbStruct,meshTransformation.getMatrix(),_rgbaData,usrData);
 }
 
-void geom_insertOctreeIntoOctree(COcStruct* oc1Struct,const C7Vector& octree1Transformation,const COcStruct* oc2Struct,const C7Vector& octree2Transformation,const unsigned char rgbaData[4]/*=nullptr*/,unsigned int usrData/*=0*/)
+void geom_insertOctreeIntoOctree(COcStruct* oc1Struct,const CPose& octree1Transformation,const COcStruct* oc2Struct,const CPose& octree2Transformation,const unsigned char rgbaData[4]/*=nullptr*/,unsigned int usrData/*=0*/)
 {
     unsigned char _rgbaData[4];
     if (rgbaData!=nullptr)
@@ -1784,11 +1784,11 @@ void geom_insertOctreeIntoOctree(COcStruct* oc1Struct,const C7Vector& octree1Tra
     oc1Struct->add_octree(octree1Transformation.getMatrix(),oc2Struct,octree2Transformation.getMatrix(),_rgbaData,usrData);
 }
 
-bool geom_removePointsFromOctree(COcStruct* ocStruct,const C7Vector& octreeTransformation,const double* points,int pointCnt)
+bool geom_removePointsFromOctree(COcStruct* ocStruct,const CPose& octreeTransformation,const double* points,int pointCnt)
 { // returns true if the oc tree is empty after the operation
     std::vector<double> relPts;
     relPts.resize(size_t(pointCnt)*3);
-    C7Vector trInv(octreeTransformation.getInverse());
+    CPose trInv(octreeTransformation.getInverse());
     for (size_t i=0;i<size_t(pointCnt);i++)
     {
         C3Vector v(points+3*i);
@@ -1801,13 +1801,13 @@ bool geom_removePointsFromOctree(COcStruct* ocStruct,const C7Vector& octreeTrans
     return(retVal);
 }
 
-bool geom_removeMeshFromOctree(COcStruct* ocStruct,const C7Vector& octreeTransformation,const CObbStruct* obbStruct,const C7Vector& meshTransformation)
+bool geom_removeMeshFromOctree(COcStruct* ocStruct,const CPose& octreeTransformation,const CObbStruct* obbStruct,const CPose& meshTransformation)
 { // returns true if the oc tree is empty after the operation
     bool retVal=ocStruct->deleteVoxels_shape(octreeTransformation.getMatrix(),obbStruct,meshTransformation.getMatrix());
     return(retVal);
 }
 
-bool geom_removeOctreeFromOctree(COcStruct* oc1Struct,const C7Vector& octree1Transformation,const COcStruct* oc2Struct,const C7Vector& octree2Transformation)
+bool geom_removeOctreeFromOctree(COcStruct* oc1Struct,const CPose& octree1Transformation,const COcStruct* oc2Struct,const CPose& octree2Transformation)
 { // returns true if the oc tree is empty after the operation
     bool retVal=oc1Struct->deleteVoxels_octree(octree1Transformation.getMatrix(),oc2Struct,octree2Transformation.getMatrix());
     return(retVal);

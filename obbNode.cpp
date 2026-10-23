@@ -227,7 +227,7 @@ void CObbNode::scaleYourself(double f)
 
 void CObbNode::serialize(std::vector<unsigned char>& data) const
 {
-    C7Vector tr(boxM);
+    CPose tr(boxM);
     pushData(data,&tr.X(0),sizeof(double));
     pushData(data,&tr.X(1),sizeof(double));
     pushData(data,&tr.X(2),sizeof(double));
@@ -256,7 +256,7 @@ void CObbNode::serialize(std::vector<unsigned char>& data) const
 
 void CObbNode::deserialize(const unsigned char* data,int& pos)
 {
-    C7Vector tr;
+    CPose tr;
     tr.X(0)=(reinterpret_cast<const double*>(data+pos))[0];pos+=sizeof(double);
     tr.X(1)=(reinterpret_cast<const double*>(data+pos))[0];pos+=sizeof(double);
     tr.X(2)=(reinterpret_cast<const double*>(data+pos))[0];pos+=sizeof(double);
@@ -309,7 +309,7 @@ void CObbNode::splitTriangles(const std::vector<double>& allVertices,const std::
         triIndicesGroup1.clear();
         triIndicesGroup2.clear();
 
-        C7Vector qInv(boxM.getTransformation().getInverse());
+        CPose qInv(boxM.getTransformation().getInverse());
         std::vector<C3Vector> triCenters;
         C3Vector avgTriCenter;
         avgTriCenter.clear();
@@ -360,7 +360,7 @@ void CObbNode::splitTriangles(const std::vector<double>& allVertices,const std::
 C4X4Matrix CObbNode::getNaturalFrame(const std::vector<double>& allVertices,const std::vector<int>& allTriangles,const std::vector<int>& trianglesIndices,C3Vector& boxHs)
 {
     C4X4Matrix bestM;
-    C4Vector bestQ;
+    CQuaternion bestQ;
     bestQ.setIdentity();
     bestM.setIdentity();
     boxHs.setData(double(0.00001),double(0.00001),double(0.00001));
@@ -389,9 +389,9 @@ C4X4Matrix CObbNode::getNaturalFrame(const std::vector<double>& allVertices,cons
         {
             for (size_t i=0;i<orientationsCnt[l];i++)
             { // test all orientations and select the one with the smallest z-axis
-                C4Vector q(orientations[l]+4*i);
+                CQuaternion q(orientations[l]+4*i);
                 q=bestQ*q;
-                C4Vector qInv(q.getInverse());
+                CQuaternion qInv(q.getInverse());
                 double minV=DBL_MAX;
                 double maxV=-DBL_MAX;
                 double l;
@@ -421,9 +421,9 @@ C4X4Matrix CObbNode::getNaturalFrame(const std::vector<double>& allVertices,cons
         {
             for (size_t i=0;i<circularOrientationsCnt[l];i++)
             { // test all circular orientations on top of the previous found and the one with the smallest volume
-                C4Vector q(circularOrientations[l]+4*i);
+                CQuaternion q(circularOrientations[l]+4*i);
                 q=bestQ*q;
-                C4Vector qInv(q.getInverse());
+                CQuaternion qInv(q.getInverse());
                 C3Vector minV(DBL_MAX,DBL_MAX,DBL_MAX);
                 C3Vector maxV(-DBL_MAX,-DBL_MAX,-DBL_MAX);
                 double vol;
