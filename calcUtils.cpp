@@ -532,8 +532,9 @@ bool CCalcUtils::isApproxDistanceSmaller_box_box_fast(const C4X4Matrix& box1,con
     // dist is modified if return is true
     if (dist==0.0)
         return(false);
-    C3Vector axis((box2.X-box1.X).getNormalized());
-    double box1Box2Proj=fabs((box2.X-box1.X)*axis);
+    C3Vector delta(box2.X-box1.X);
+    C3Vector axis(delta.getNormalized());
+    double box1Box2Proj=fabs(delta*axis);
     double box1Overlap=fabs(box1.M.axis[0]*axis)*box1Hs(0)+fabs(box1.M.axis[1]*axis)*box1Hs(1)+fabs(box1.M.axis[2]*axis)*box1Hs(2);
     double box2Overlap=fabs(box2.M.axis[0]*axis)*box2Hs(0)+fabs(box2.M.axis[1]*axis)*box2Hs(1)+fabs(box2.M.axis[2]*axis)*box2Hs(2);
     double d=box1Box2Proj-box1Overlap-box2Overlap;

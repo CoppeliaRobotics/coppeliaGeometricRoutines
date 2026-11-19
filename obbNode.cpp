@@ -367,15 +367,16 @@ C4X4Matrix CObbNode::getNaturalFrame(const std::vector<double>& allVertices,cons
     if (trianglesIndices.size()!=0)
     {
         std::vector<C3Vector> usedVertices;
-        std::vector<bool> usedV(allVertices.size(),false);
+        // one flag per vertex (not per double): 3x less to allocate and clear per node
+        std::vector<bool> usedV(allVertices.size()/3,false);
         for (size_t i=0;i<trianglesIndices.size();i++)
         {
             for (size_t j=0;j<3;j++)
             {
                 int ind=3*allTriangles[3*trianglesIndices[i]+j];
-                if (!usedV[ind])
+                if (!usedV[ind/3])
                 {
-                    usedV[ind]=true;
+                    usedV[ind/3]=true;
                     C3Vector v(&allVertices[0]+ind);
                     usedVertices.push_back(v);
                 }
@@ -392,16 +393,20 @@ C4X4Matrix CObbNode::getNaturalFrame(const std::vector<double>& allVertices,cons
                 CQuaternion q(orientations[l]+4*i);
                 q=bestQ*q;
                 CQuaternion qInv(q.getInverse());
+                // rotate through the equivalent row of the rotation matrix: for the
+                // z-extent only one row is needed instead of a full quaternion product
+                C3X3Matrix qInvM(qInv.getMatrix());
                 double minV=DBL_MAX;
                 double maxV=-DBL_MAX;
                 double l;
                 for (size_t j=0;j<usedVertices.size();j++)
                 {
-                    C3Vector v(qInv*usedVertices[j]);
-                    if (v(2)<minV)
-                        minV=v(2);
-                    if (v(2)>maxV)
-                        maxV=v(2);
+                    const C3Vector& sv=usedVertices[j];
+                    simReal v2=qInvM.axis[0](2)*sv(0)+qInvM.axis[1](2)*sv(1)+qInvM.axis[2](2)*sv(2);
+                    if (v2<minV)
+                        minV=v2;
+                    if (v2>maxV)
+                        maxV=v2;
                     l=maxV-minV;
                     if (l>=smallestZ)
                         break;
@@ -424,13 +429,15 @@ C4X4Matrix CObbNode::getNaturalFrame(const std::vector<double>& allVertices,cons
                 CQuaternion q(circularOrientations[l]+4*i);
                 q=bestQ*q;
                 CQuaternion qInv(q.getInverse());
+                // same rotation as qInv*vertex, computed as a 3x3 product
+                C3X3Matrix qInvM(qInv.getMatrix());
                 C3Vector minV(DBL_MAX,DBL_MAX,DBL_MAX);
                 C3Vector maxV(-DBL_MAX,-DBL_MAX,-DBL_MAX);
                 double vol;
                 C3Vector dim;
                 for (size_t j=0;j<usedVertices.size();j++)
                 {
-                    C3Vector v(qInv*usedVertices[j]);
+                    C3Vector v(qInvM*usedVertices[j]);
                     minV.keepMin(v);
                     maxV.keepMax(v);
                     dim=maxV-minV;
