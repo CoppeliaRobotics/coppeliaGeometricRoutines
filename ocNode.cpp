@@ -705,6 +705,9 @@ bool COcNode::add_octree(COcStruct* oct, const C4X4Matrix& oc1M,double cell1S,do
     m1.X+=oc1M.M*box1Center;
     C4X4Matrix m2(oc2M);
     m2.X+=oc2M.M*box2Center;
+    // conservative reject before the 4x4 inverse: separated boxes cannot collide
+    if (CCalcUtils::getApproxDistance_box_box(m1,C3Vector(box1Hsp,box1Hsp,box1Hsp),m2,C3Vector(box2Hsp,box2Hsp,box2Hsp))>0.0)
+        return(false);
     C4X4Matrix oc2MRel(m1.getInverse()*m2);
     if (box1S>cell1S*double(1.5))
     { // not a leaf node yet..
@@ -1009,6 +1012,9 @@ bool COcNode::doCollide_octree(const C4X4Matrix& oc1M,double cell1S,double box1S
     m1.X+=oc1M.M*box1Center;
     C4X4Matrix m2(oc2M);
     m2.X+=oc2M.M*box2Center;
+    // conservative reject before the 4x4 inverse: separated boxes cannot collide
+    if (CCalcUtils::getApproxDistance_box_box(m1,C3Vector(box1Hsp,box1Hsp,box1Hsp),m2,C3Vector(box2Hsp,box2Hsp,box2Hsp))>0.0)
+        return(false);
     C4X4Matrix oc2MRel(m1.getInverse()*m2);
     if (box1S>cell1S*double(1.5))
     { // not a leaf node yet..
@@ -1087,6 +1093,9 @@ bool COcNode::doCollide_ptcloud(const C4X4Matrix& ocM,double ocCellS,double ocBo
     m1.X+=ocM.M*ocBoxCenter;
     C4X4Matrix m2(pcM);
     m2.X+=pcM.M*pcBoxCenter;
+    // conservative reject before the 4x4 inverse: separated boxes cannot collide
+    if (CCalcUtils::getApproxDistance_box_box(m1,C3Vector(ocBoxHsp,ocBoxHsp,ocBoxHsp),m2,C3Vector(pcBoxHsp,pcBoxHsp,pcBoxHsp))>0.0)
+        return(false);
     C4X4Matrix pcMRel(m1.getInverse()*m2);
     if (ocBoxS>ocCellS*double(1.5))
     { // not a leaf node yet for the octree..
