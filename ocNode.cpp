@@ -1414,13 +1414,15 @@ bool COcNode::getDistance_octree(const C4X4Matrix& oc1M,double ocBox1S,const C3V
     bool retVal=false;
     if (dist==0.0)
         return(retVal);
-    C4X4Matrix m1(oc1M);
-    m1.X+=oc1M.M*ocBox1Center;
-    C4X4Matrix m2(oc2M);
-    m2.X+=oc2M.M*ocBox2Center;
-    double dd=CCalcUtils::getApproxDistance_box_box(m1,C3Vector(ocBox1S*0.5,ocBox1S*0.5,ocBox1S*0.5),m2,C3Vector(ocBox2S*0.5,ocBox2S*0.5,ocBox2S*0.5));
+    C3Vector x1(oc1M.X+oc1M.M*ocBox1Center);
+    C3Vector x2(oc2M.X+oc2M.M*ocBox2Center);
+    double dd=CCalcUtils::getApproxDistance_box_box_x(x1,oc1M.M,C3Vector(ocBox1S*0.5,ocBox1S*0.5,ocBox1S*0.5),x2,oc2M.M,C3Vector(ocBox2S*0.5,ocBox2S*0.5,ocBox2S*0.5));
     if (dd<dist)
-    { // we might be closer
+    { // we might be closer (the matrices are only needed from here on)
+        C4X4Matrix m1(oc1M);
+        m1.X=x1;
+        C4X4Matrix m2(oc2M);
+        m2.X=x2;
         int nodeToExplore=-1;
         if (ocNodes!=nullptr)
         {
@@ -1501,13 +1503,15 @@ bool COcNode::getDistance_ptcloud(const C4X4Matrix& ocM,double ocBoxS,const C3Ve
     bool retVal=false;
     if (dist==0.0)
         return(retVal);
-    C4X4Matrix m1(ocM);
-    m1.X+=ocM.M*ocBoxCenter;
-    C4X4Matrix m2(pcM);
-    m2.X+=pcM.M*pcBoxCenter;
-    double dd=CCalcUtils::getApproxDistance_box_box(m1,C3Vector(ocBoxS*0.5,ocBoxS*0.5,ocBoxS*0.5),m2,C3Vector(pcBoxS*0.5,pcBoxS*0.5,pcBoxS*0.5));
+    C3Vector x1(ocM.X+ocM.M*ocBoxCenter);
+    C3Vector x2(pcM.X+pcM.M*pcBoxCenter);
+    double dd=CCalcUtils::getApproxDistance_box_box_x(x1,ocM.M,C3Vector(ocBoxS*0.5,ocBoxS*0.5,ocBoxS*0.5),x2,pcM.M,C3Vector(pcBoxS*0.5,pcBoxS*0.5,pcBoxS*0.5));
     if (dd<dist)
-    { // we might be closer
+    { // we might be closer (the matrices are only needed from here on)
+        C4X4Matrix m1(ocM);
+        m1.X=x1;
+        C4X4Matrix m2(pcM);
+        m2.X=x2;
         bool explorePc=false;
         if (ocNodes!=nullptr)
         {

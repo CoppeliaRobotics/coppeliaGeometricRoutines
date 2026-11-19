@@ -917,6 +917,20 @@ double CCalcUtils::getApproxDistance_box_box(const C4X4Matrix& box1,const C3Vect
     return(d);
 }
 
+double CCalcUtils::getApproxDistance_box_box_x(const C3Vector& x1,const C3X3Matrix& m1,const C3Vector& hs1,
+                                               const C3Vector& x2,const C3X3Matrix& m2,const C3Vector& hs2)
+{   // Same projection bound as isApproxDistanceSmaller_box_box_fast, from (X,M,hs)
+    C3Vector delta(x2-x1);
+    C3Vector axis(delta.getNormalized());
+    double proj=fabs(delta*axis);
+    double ov1=fabs(m1.axis[0]*axis)*hs1(0)+fabs(m1.axis[1]*axis)*hs1(1)+fabs(m1.axis[2]*axis)*hs1(2);
+    double ov2=fabs(m2.axis[0]*axis)*hs2(0)+fabs(m2.axis[1]*axis)*hs2(1)+fabs(m2.axis[2]*axis)*hs2(2);
+    double d=proj-ov1-ov2;
+    if (d<0.0)
+        d=0.0;
+    return(d);
+}
+
 double CCalcUtils::getApproxDistance_box_cell(const C4X4Matrix& box,const C3Vector& boxHs,double cellHs)
 {   // Convenience function
     double d=DBL_MAX;

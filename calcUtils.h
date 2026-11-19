@@ -160,6 +160,10 @@ public:
     static bool isApproxDistanceSmaller_tri_pt_fast(const C3Vector& p,const C3Vector& v,const C3Vector& w,const C3Vector& pt,double& dist);
     static bool isApproxDistanceSmaller_segp_segp_fast(const C3Vector& seg1P,C3Vector seg1L,const C3Vector& seg2P,C3Vector seg2L,double& dist);
     static double getApproxDistance_box_box(const C4X4Matrix& box1,const C3Vector& box1Hs,const C4X4Matrix& box2,const C3Vector& box2Hs);
+    // Same bound, but from (position, rotation, half-size) so callers can prune before
+    // constructing the 4x4 matrices. Identical value to getApproxDistance_box_box().
+    static double getApproxDistance_box_box_x(const C3Vector& x1,const C3X3Matrix& m1,const C3Vector& hs1,
+                                              const C3Vector& x2,const C3X3Matrix& m2,const C3Vector& hs2);
     static double getApproxDistance_box_cell(const C4X4Matrix& box,const C3Vector& boxHs,double cellHs);
     static double getApproxDistance_box_tri(const C4X4Matrix& box,const C3Vector& boxHs,const C3Vector& p,const C3Vector& v,const C3Vector& w);
     static double getApproxDistance_box_seg(const C4X4Matrix& box,const C3Vector& boxHs,const C3Vector& segCenter,const C3Vector& segHs);

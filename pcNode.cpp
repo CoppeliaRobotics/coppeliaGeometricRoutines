@@ -1124,19 +1124,21 @@ bool CPcNode::getDistance_ptcloud(double box1Size,const C3Vector& box1Center,con
     bool retVal=false;
     if (dist==0.0)
         return(retVal);
-    C4X4Matrix m1(pc1M);
-    m1.X+=pc1M.M*box1Center;
-    C4X4Matrix m2(pc2M);
-    m2.X+=pc2M.M*box2Center;
     double pc1BoxHsp=box1Size*double(0.5001);
     double pc2BoxHsp=box2Size*double(0.5001);
+    C3Vector x1(pc1M.X+pc1M.M*box1Center);
+    C3Vector x2(pc2M.X+pc2M.M*box2Center);
     // Tighter, still conservative prune bound: the projection-based box-box
     // lower bound already used by the octree kernels, instead of the
     // circumscribed-sphere bound. It always underestimates the real distance,
     // so no pair that could be closer is ever discarded.
-    double d=CCalcUtils::getApproxDistance_box_box(m1,C3Vector(pc1BoxHsp,pc1BoxHsp,pc1BoxHsp),m2,C3Vector(pc2BoxHsp,pc2BoxHsp,pc2BoxHsp));
+    double d=CCalcUtils::getApproxDistance_box_box_x(x1,pc1M.M,C3Vector(pc1BoxHsp,pc1BoxHsp,pc1BoxHsp),x2,pc2M.M,C3Vector(pc2BoxHsp,pc2BoxHsp,pc2BoxHsp));
     if (d<dist)
-    {   // We might be closer...
+    {   // We might be closer... (the matrices are only needed from here on)
+        C4X4Matrix m1(pc1M);
+        m1.X=x1;
+        C4X4Matrix m2(pc2M);
+        m2.X=x2;
         int nodeIndexToExplore=-1;
         if (pcNodes==nullptr)
         { // PC1 can't be explored. Does it have points?
