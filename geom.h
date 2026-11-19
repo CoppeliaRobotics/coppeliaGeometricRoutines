@@ -41,8 +41,8 @@ bool geom_removeMeshFromOctree(COcStruct* ocStruct,const CPose& octreeTransforma
 bool geom_removeOctreeFromOctree(COcStruct* oc1Struct,const CPose& octree1Transformation,const COcStruct* oc2Struct,const CPose& octree2Transformation);
 
 // Point cloud creation/destruction/manipulation/info
-CPcStruct* geom_createPtcloudFromPoints(const double* points,int pointCnt,const CPose* ptcloudOrigin=nullptr,double cellS=double(0.05),int maxPointCnt=20,const unsigned char rgbData[3]=nullptr,double proximityTol=double(0.005));
-CPcStruct* geom_createPtcloudFromColorPoints(const double* points,int pointCnt,const CPose* ptcloudOrigin=nullptr,double cellS=double(0.05),int maxPointCnt=20,const unsigned char* rgbData=nullptr,double proximityTol=double(0.005));
+CPcStruct* geom_createPtcloudFromPoints(const double* points,int pointCnt,const CPose* ptcloudOrigin=nullptr,double cellS=double(0.05),int maxPointCnt=20,const unsigned char rgbaData[4]=nullptr,double proximityTol=double(0.005));
+CPcStruct* geom_createPtcloudFromColorPoints(const double* points,int pointCnt,const CPose* ptcloudOrigin=nullptr,double cellS=double(0.05),int maxPointCnt=20,const unsigned char* rgbaData=nullptr,double proximityTol=double(0.005));
 CPcStruct* geom_copyPtcloud(const CPcStruct* pcStruct);
 CPcStruct* geom_getPtcloudFromSerializationData(const unsigned char* serializationData);
 void geom_getPtcloudSerializationData(const CPcStruct* pcStruct,std::vector<unsigned char>& serializationData);

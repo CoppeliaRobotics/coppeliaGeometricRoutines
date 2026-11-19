@@ -5,7 +5,7 @@
 COcStruct::COcStruct()
 {
     nextId = OCT_MAX_ID; // triggers a full data retrieval next time data is fetched
-    allIds.resize(OCT_MAX_ID, false);
+    allIds.resize(OCT_MAX_ID + 1, false);
     ocNode=new COcNode();
 }
 
@@ -13,7 +13,7 @@ COcStruct::COcStruct(double cellS,const double* points,size_t pointCnt,const uns
 {
     // Create an OC tree from points
     nextId = OCT_MAX_ID; // triggers a full data retrieval next time data is fetched
-    allIds.resize(OCT_MAX_ID, false);
+    allIds.resize(OCT_MAX_ID + 1, false);
     ocNode=new COcNode();
     _create(cellS,points,pointCnt,rgbaData,usrData,dataForEachPt);
 }
@@ -22,7 +22,7 @@ COcStruct::COcStruct(const C4X4Matrix& ocM,double cellS,const CObbStruct* obbStr
 {
     // Create an OC tree from a shape
     nextId = OCT_MAX_ID; // triggers a full data retrieval next time data is fetched
-    allIds.resize(OCT_MAX_ID, false);
+    allIds.resize(OCT_MAX_ID + 1, false);
     ocNode=new COcNode();
     C4X4Matrix tr(ocM.getInverse()*shapeM);
     std::vector<double> points;
@@ -42,7 +42,7 @@ COcStruct::COcStruct(const C4X4Matrix& oc1M,double cell1S,const COcStruct* oc2St
 {
     // Create an OC tree from another OC tree
     nextId = OCT_MAX_ID; // triggers a full data retrieval next time data is fetched
-    allIds.resize(OCT_MAX_ID, false);
+    allIds.resize(OCT_MAX_ID + 1, false);
     ocNode=new COcNode();
     C4X4Matrix tr(oc1M.getInverse()*oc2M);
     std::vector<double> points;
@@ -225,7 +225,7 @@ bool COcStruct::getDisplayVoxelsColorsAndIds(std::vector<float>& thePts,std::vec
         retVal = true;
         nextId = 1;
         allIds.clear();
-        allIds.resize(OCT_MAX_ID, false);
+        allIds.resize(OCT_MAX_ID + 1, false);
         for (size_t i=0;i<8;i++)
             ocNode->ocNodes[i]->resetAllIds(this);
         removedIds.clear();

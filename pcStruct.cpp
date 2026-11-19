@@ -6,7 +6,7 @@
 CPcStruct::CPcStruct()
 {
     nextId = PTS_MAX_ID; // triggers a full data retrieval next time data is fetched
-    allIds.resize(PTS_MAX_ID, false);
+    allIds.resize(PTS_MAX_ID + 1, false);
     pcNode=new CPcNode();
 }
 
@@ -14,7 +14,7 @@ CPcStruct::CPcStruct(double cellS,int cellPts,const double* points,size_t pointC
 {
     // Create an PC tree from points
     nextId = PTS_MAX_ID; // triggers a full data retrieval next time data is fetched
-    allIds.resize(PTS_MAX_ID, false);
+    allIds.resize(PTS_MAX_ID + 1, false);
     pcNode=new CPcNode();
     _create(cellS,cellPts,points,pointCnt,rgbaData,rgbForEachPt,proximityTol);
 }
@@ -234,7 +234,7 @@ bool CPcStruct::getDisplayPointsColorsAndIds(std::vector<float>& thePts,std::vec
         retVal = true;
         nextId = 0;
         allIds.clear();
-        allIds.resize(PTS_MAX_ID, false);
+        allIds.resize(PTS_MAX_ID + 1, false);
         for (size_t i=0;i<8;i++)
             pcNode->pcNodes[i]->resetAllIds(this);
         removedIds.clear();

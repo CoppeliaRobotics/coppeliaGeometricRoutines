@@ -401,7 +401,7 @@ td.section { margin: 0; padding: 0; }
 </tr>
 <tr class="apiTableTr">
 <td class="apiTableLeftCSyn">Synopsis</td>
-<td class="apiTableRightCSyn">COcStruct* geom_createOctreeFromColorPoints(const double* points,int pointCnt,const CPose* octreeOrigin=nullptr,double cellS=0.05,const unsigned char* rgbData=nullptr,const unsigned int* usrData=nullptr)</td>
+<td class="apiTableRightCSyn">COcStruct* geom_createOctreeFromColorPoints(const double* points,int pointCnt,const CPose* octreeOrigin=nullptr,double cellS=0.05,const unsigned char* rgbaData=nullptr,const unsigned int* usrData=nullptr)</td>
 </tr>
 <tr class="apiTableTr">
 <td class="apiTableLeftCParam">Arguments</td>
@@ -410,7 +410,7 @@ td.section { margin: 0; padding: 0; }
 <div><strong>pointCnt</strong>: the number of provided points.</div>
 <div><strong>octreeOrigin</strong>: the transformation frame of the OC-tree. Can be nullptr, in which case the frame of the OC-tree is located at the world origin.</div>
 <div><strong>cellS</strong>: The desired OC-tree voxel size.</div>
-<div><strong>rgbData</strong>: the RGB colors (0-255)of the various points (i.e. one color per point).</div>
+<div><strong>rgbaData</strong>: the RGBA colors (0-255) of the various points (i.e. 4 values per point: red, green, blue and alpha).</div>
 <div><strong>usrData</strong>: the user data of the various points (i.e. one user data per point).</div>
 </td>
 </tr>
@@ -434,7 +434,7 @@ td.section { margin: 0; padding: 0; }
 </tr>
 <tr class="apiTableTr">
 <td class="apiTableLeftCSyn">Synopsis</td>
-<td class="apiTableRightCSyn">COcStruct* geom_createOctreeFromMesh(const CObbStruct* meshObbStruct,const CPose& meshTransformation,const CPose* octreeOrigin=nullptr,double cellS=0.05,const unsigned char rgbData[3]=nullptr,unsigned int usrData=0)</td>
+<td class="apiTableRightCSyn">COcStruct* geom_createOctreeFromMesh(const CObbStruct* meshObbStruct,const CPose& meshTransformation,const CPose* octreeOrigin=nullptr,double cellS=0.05,const unsigned char rgbaData[4]=nullptr,unsigned int usrData=0)</td>
 </tr>
 <tr class="apiTableTr">
 <td class="apiTableLeftCParam">Arguments</td>
@@ -443,7 +443,7 @@ td.section { margin: 0; padding: 0; }
 <div><strong>meshTransformation</strong>: the transformation frame of the mesh object.</div>
 <div><strong>octreeOrigin</strong>: the transformation frame of the OC-tree. Can be nullptr, in which case the frame of the OC-tree is located at the world origin.</div>
 <div><strong>cellS</strong>: The desired OC-tree voxel size.</div>
-<div><strong>rgbData</strong>: the RGB color (0-255) of the generated voxels.</div>
+<div><strong>rgbaData</strong>: the RGBA color (0-255) of the generated voxels (4 values: red, green, blue and alpha).</div>
 <div><strong>usrData</strong>: the user data of the generated voxels.</div>
 </td>
 </tr>
@@ -467,7 +467,7 @@ td.section { margin: 0; padding: 0; }
 </tr>
 <tr class="apiTableTr">
 <td class="apiTableLeftCSyn">Synopsis</td>
-<td class="apiTableRightCSyn">COcStruct* geom_createOctreeFromOctree(const COcStruct* otherOctreeStruct,const CPose& otherOctreeTransformation,const CPose* newOctreeOrigin=nullptr,double newOctreeCellS=0.05,const unsigned char rgbData[3]=nullptr,unsigned int usrData=0)</td>
+<td class="apiTableRightCSyn">COcStruct* geom_createOctreeFromOctree(const COcStruct* otherOctreeStruct,const CPose& otherOctreeTransformation,const CPose* newOctreeOrigin=nullptr,double newOctreeCellS=0.05,const unsigned char rgbaData[4]=nullptr,unsigned int usrData=0)</td>
 </tr>
 <tr class="apiTableTr">
 <td class="apiTableLeftCParam">Arguments</td>
@@ -476,7 +476,7 @@ td.section { margin: 0; padding: 0; }
 <div><strong>otherOctreeTransformation</strong>: the transformation frame of the other OC-tree object.</div>
 <div><strong>newOctreeOrigin</strong>: the transformation frame of the new OC-tree. Can be nullptr, in which case the frame of the new OC-tree is located at the world origin.</div>
 <div><strong>newOctreeCellS</strong>: The desired OC-tree voxel size.</div>
-<div><strong>rgbData</strong>: the RGB color (0-255) of the generated voxels.</div>
+<div><strong>rgbaData</strong>: the RGBA color (0-255) of the generated voxels (4 values: red, green, blue and alpha).</div>
 <div><strong>usrData</strong>: the user data of the generated voxels.</div>
 </td>
 </tr>
@@ -500,7 +500,7 @@ td.section { margin: 0; padding: 0; }
 </tr>
 <tr class="apiTableTr">
 <td class="apiTableLeftCSyn">Synopsis</td>
-<td class="apiTableRightCSyn">COcStruct* geom_createOctreeFromPoints(const double* points,int pointCnt,const CPose* octreeOrigin=nullptr,double cellS=0.05,const unsigned char rgbData[3]=nullptr,unsigned int usrData=0)</td>
+<td class="apiTableRightCSyn">COcStruct* geom_createOctreeFromPoints(const double* points,int pointCnt,const CPose* octreeOrigin=nullptr,double cellS=0.05,const unsigned char rgbaData[4]=nullptr,unsigned int usrData=0)</td>
 </tr>
 <tr class="apiTableTr">
 <td class="apiTableLeftCParam">Arguments</td>
@@ -509,7 +509,7 @@ td.section { margin: 0; padding: 0; }
 <div><strong>pointCnt</strong>: the number of provided points.</div>
 <div><strong>octreeOrigin</strong>: the transformation frame of the OC-tree. Can be nullptr, in which case the frame of the OC-tree is located at the world origin.</div>
 <div><strong>cellS</strong>: The desired OC-tree voxel size.</div>
-<div><strong>rgbData</strong>: the RGB color (0-255) of the generated voxels.</div>
+<div><strong>rgbaData</strong>: the RGBA color (0-255) of the generated voxels (4 values: red, green, blue and alpha).</div>
 <div><strong>usrData</strong>: the user data of the generated voxels.</div>
 </td>
 </tr>
@@ -533,7 +533,7 @@ td.section { margin: 0; padding: 0; }
 </tr>
 <tr class="apiTableTr">
 <td class="apiTableLeftCSyn">Synopsis</td>
-<td class="apiTableRightCSyn">CPcStruct* geom_createPtcloudFromColorPoints(const double* points,int pointCnt,const CPose* ptcloudOrigin=nullptr,double cellS=0.05,int maxPointCnt=20,const unsigned char* rgbData=nullptr,double proximityTol=0.005)</td>
+<td class="apiTableRightCSyn">CPcStruct* geom_createPtcloudFromColorPoints(const double* points,int pointCnt,const CPose* ptcloudOrigin=nullptr,double cellS=0.05,int maxPointCnt=20,const unsigned char* rgbaData=nullptr,double proximityTol=0.005)</td>
 </tr>
 <tr class="apiTableTr">
 <td class="apiTableLeftCParam">Arguments</td>
@@ -543,7 +543,7 @@ td.section { margin: 0; padding: 0; }
 <div><strong>ptcloudOrigin</strong>: the transformation frame of the point-cloud. Can be nullptr, in which case the frame of the point-cloud is located at the world origin.</div>
 <div><strong>cellS</strong>: The desired voxel size of the underlying OC-tree.</div>
 <div><strong>maxPointCnt</strong>: The maximum amount of points inside of a OC-tree voxel.</div>
-<div><strong>rgbData</strong>: the RGB color (0-255) of the generated points. Specify one color per point.</div>
+<div><strong>rgbaData</strong>: the RGBA color (0-255) of the generated points. Specify one color per point (4 values per point: red, green, blue and alpha).</div>
 <div><strong>proximityTol</strong>: the distance tolerance to other points (i.e. point-point distances below the specified value are not permitted and points will be omitted).</div>
 </td>
 </tr>
@@ -567,7 +567,7 @@ td.section { margin: 0; padding: 0; }
 </tr>
 <tr class="apiTableTr">
 <td class="apiTableLeftCSyn">Synopsis</td>
-<td class="apiTableRightCSyn">CPcStruct* geom_createPtcloudFromPoints(const double* points,int pointCnt,const CPose* ptcloudOrigin=nullptr,double cellS=0.05,int maxPointCnt=20,const unsigned char rgbData[3]=nullptr,double proximityTol=0.005)</td>
+<td class="apiTableRightCSyn">CPcStruct* geom_createPtcloudFromPoints(const double* points,int pointCnt,const CPose* ptcloudOrigin=nullptr,double cellS=0.05,int maxPointCnt=20,const unsigned char rgbaData[4]=nullptr,double proximityTol=0.005)</td>
 </tr>
 <tr class="apiTableTr">
 <td class="apiTableLeftCParam">Arguments</td>
@@ -577,7 +577,7 @@ td.section { margin: 0; padding: 0; }
 <div><strong>ptcloudOrigin</strong>: the transformation frame of the point-cloud. Can be nullptr, in which case the frame of the point-cloud is located at the world origin.</div>
 <div><strong>cellS</strong>: The desired voxel size of the underlying OC-tree.</div>
 <div><strong>maxPointCnt</strong>: The maximum amount of points inside of a OC-tree voxel.</div>
-<div><strong>rgbData</strong>: the RGB color (0-255) of the generated points.</div>
+<div><strong>rgbaData</strong>: the RGBA color (0-255) of the generated points (4 values: red, green, blue and alpha).</div>
 <div><strong>proximityTol</strong>: the distance tolerance to other points (i.e. point-point distances below the specified value are not permitted and points will be omitted).</div>
 </td>
 </tr>
@@ -1790,7 +1790,7 @@ td.section { margin: 0; padding: 0; }
 <td class="apiTableLeftCParam">Arguments</td>
 <td class="apiTableRightCParam">
 <div><strong>ocStruct</strong>: a pointer to the OC-tree object.</div>
-<div><strong>voxelData</strong>: the voxel data: for each voxel, there are 3 position values (XYZ) and 3 color values (RGB, 0-1).</div>
+<div><strong>voxelData</strong>: the voxel data: for each voxel, there are 3 position values (XYZ) and 4 color values (RGBA, 0-1), i.e. 7 values per voxel.</div>
 <div><strong>userData</strong>: the user data: for each voxel, there is one user data value.</div>
 </td>
 </tr>
@@ -1881,7 +1881,7 @@ td.section { margin: 0; padding: 0; }
 <td class="apiTableLeftCParam">Arguments</td>
 <td class="apiTableRightCParam">
 <div><strong>pcStruct</strong>: a pointer to the point-cloud object.</div>
-<div><strong>pointData</strong>: the point data: for each point, there are 3 position values (XYZ) and 3 color values (RGB, 0-1).</div>
+<div><strong>pointData</strong>: the point data: for each point, there are 3 position values (XYZ) and 4 color values (RGBA, 0-1), i.e. 7 values per point.</div>
 <div><strong>prop</strong>: the proportion of data to retrieve, on a voxel-basis. 1.0 retrieves all data, 0.25 retrieves 25% of the data.</div>
 </td>
 </tr>
@@ -2278,7 +2278,7 @@ td.section { margin: 0; padding: 0; }
 </tr>
 <tr class="apiTableTr">
 <td class="apiTableLeftCSyn">Synopsis</td>
-<td class="apiTableRightCSyn">void geom_insertColorPointsIntoOctree(COcStruct* ocStruct,const CPose& octreeTransformation,const double* points,int pointCnt,const unsigned char* rgbData=nullptr,const unsigned int* usrData=nullptr)</td>
+<td class="apiTableRightCSyn">void geom_insertColorPointsIntoOctree(COcStruct* ocStruct,const CPose& octreeTransformation,const double* points,int pointCnt,const unsigned char* rgbaData=nullptr,const unsigned int* usrData=nullptr)</td>
 </tr>
 <tr class="apiTableTr">
 <td class="apiTableLeftCParam">Arguments</td>
@@ -2287,7 +2287,7 @@ td.section { margin: 0; padding: 0; }
 <div><strong>octreeTransformation</strong>: the transformation frame of the OC-tree.</div>
 <div><strong>points</strong>: an array of point values (XYZ-triplets). Points are expressed relative to the world reference frame.</div>
 <div><strong>pointCnt</strong>: the number of points.</div>
-<div><strong>rgbData</strong>: the RGB colors (0-255)of the various points (i.e. one color per point).</div>
+<div><strong>rgbaData</strong>: the RGBA colors (0-255) of the various points (i.e. 4 values per point: red, green, blue and alpha).</div>
 <div><strong>usrData</strong>: the user data of the various points (i.e. one user data per point).</div>
 </td>
 </tr>
@@ -2311,7 +2311,7 @@ td.section { margin: 0; padding: 0; }
 </tr>
 <tr class="apiTableTr">
 <td class="apiTableLeftCSyn">Synopsis</td>
-<td class="apiTableRightCSyn">void geom_insertColorPointsIntoPtcloud(CPcStruct* pcStruct,const CPose& ptcloudTransformation,const double* points,int pointCnt,const unsigned char* rgbData=nullptr,double proximityTol=0.001</td>
+<td class="apiTableRightCSyn">void geom_insertColorPointsIntoPtcloud(CPcStruct* pcStruct,const CPose& ptcloudTransformation,const double* points,int pointCnt,const unsigned char* rgbaData=nullptr,double proximityTol=0.001)</td>
 </tr>
 <tr class="apiTableTr">
 <td class="apiTableLeftCParam">Arguments</td>
@@ -2320,7 +2320,7 @@ td.section { margin: 0; padding: 0; }
 <div><strong>ptcloudTransformation</strong>: the transformation frame of the point-cloud.</div>
 <div><strong>points</strong>: an array of point values (XYZ-triplets). Points are expressed relative to the world reference frame.</div>
 <div><strong>pointCnt</strong>: the number of points.</div>
-<div><strong>rgbData</strong>: the RGB colors (0-255)of the various points (i.e. one color per point).</div>
+<div><strong>rgbaData</strong>: the RGBA colors (0-255) of the various points (i.e. 4 values per point: red, green, blue and alpha).</div>
 <div><strong>proximityTol</strong>: the distance tolerance to other points (i.e. point-point distances below the specified value are not permitted and points will be omitted).</div>
 </td>
 </tr>
@@ -2344,7 +2344,7 @@ td.section { margin: 0; padding: 0; }
 </tr>
 <tr class="apiTableTr">
 <td class="apiTableLeftCSyn">Synopsis</td>
-<td class="apiTableRightCSyn">void geom_insertMeshIntoOctree(COcStruct* ocStruct,const CPose& octreeTransformation,const CObbStruct* obbStruct,const CPose& meshTransformation,const unsigned char rgbData[3]=nullptr,unsigned int usrData=0)</td>
+<td class="apiTableRightCSyn">void geom_insertMeshIntoOctree(COcStruct* ocStruct,const CPose& octreeTransformation,const CObbStruct* obbStruct,const CPose& meshTransformation,const unsigned char rgbaData[4]=nullptr,unsigned int usrData=0)</td>
 </tr>
 <tr class="apiTableTr">
 <td class="apiTableLeftCParam">Arguments</td>
@@ -2353,7 +2353,7 @@ td.section { margin: 0; padding: 0; }
 <div><strong>octreeTransformation</strong>: the transformation frame of the OC-tree.</div>
 <div><strong>obbStruct</strong>: a pointer to the mesh object.</div>
 <div><strong>meshTransformation</strong>: the transformation frame of the mesh.</div>
-<div><strong>rgbData</strong>: the RGB color (0-255) of the generated voxels.</div>
+<div><strong>rgbaData</strong>: the RGBA color (0-255) of the generated voxels (4 values: red, green, blue and alpha).</div>
 <div><strong>usrData</strong>: the user data of the generated voxels.</div>
 </td>
 </tr>
@@ -2377,7 +2377,7 @@ td.section { margin: 0; padding: 0; }
 </tr>
 <tr class="apiTableTr">
 <td class="apiTableLeftCSyn">Synopsis</td>
-<td class="apiTableRightCSyn">void geom_insertOctreeIntoOctree(COcStruct* oc1Struct,const CPose& octree1Transformation,const COcStruct* oc2Struct,const CPose& octree2Transformation,const unsigned char rgbData[3]=nullptr,unsigned int usrData=0)</td>
+<td class="apiTableRightCSyn">void geom_insertOctreeIntoOctree(COcStruct* oc1Struct,const CPose& octree1Transformation,const COcStruct* oc2Struct,const CPose& octree2Transformation,const unsigned char rgbaData[4]=nullptr,unsigned int usrData=0)</td>
 </tr>
 <tr class="apiTableTr">
 <td class="apiTableLeftCParam">Arguments</td>
@@ -2386,7 +2386,7 @@ td.section { margin: 0; padding: 0; }
 <div><strong>octree1Transformation</strong>: the transformation frame of the OC-tree.</div>
 <div><strong>oc2Struct</strong>: a pointer to the other OC-tree object.</div>
 <div><strong>octree2Transformation</strong>: the transformation frame of the other OC-tree object.</div>
-<div><strong>rgbData</strong>: the RGB color (0-255) of the generated voxels.</div>
+<div><strong>rgbaData</strong>: the RGBA color (0-255) of the generated voxels (4 values: red, green, blue and alpha).</div>
 <div><strong>usrData</strong>: the user data of the generated voxels.</div>
 </td>
 </tr>
@@ -2410,7 +2410,7 @@ td.section { margin: 0; padding: 0; }
 </tr>
 <tr class="apiTableTr">
 <td class="apiTableLeftCSyn">Synopsis</td>
-<td class="apiTableRightCSyn">void geom_insertPointsIntoOctree(COcStruct* ocStruct,const CPose& octreeTransformation,const double* points,int pointCnt,const unsigned char rgbData[3]=nullptr,unsigned int usrData=0)</td>
+<td class="apiTableRightCSyn">void geom_insertPointsIntoOctree(COcStruct* ocStruct,const CPose& octreeTransformation,const double* points,int pointCnt,const unsigned char rgbaData[4]=nullptr,unsigned int usrData=0)</td>
 </tr>
 <tr class="apiTableTr">
 <td class="apiTableLeftCParam">Arguments</td>
@@ -2419,7 +2419,7 @@ td.section { margin: 0; padding: 0; }
 <div><strong>octreeTransformation</strong>: the transformation frame of the OC-tree.</div>
 <div><strong>points</strong>: an array of point values (XYZ-triplets). Points are expressed relative to the world reference frame.</div>
 <div><strong>pointCnt</strong>: the number of points.</div>
-<div><strong>rgbData</strong>: the RGB color (0-255) of the generated voxels.</div>
+<div><strong>rgbaData</strong>: the RGBA color (0-255) of the generated voxels (4 values: red, green, blue and alpha).</div>
 <div><strong>usrData</strong>: the user data of the generated voxels.</div>
 </td>
 </tr>
@@ -2443,7 +2443,7 @@ td.section { margin: 0; padding: 0; }
 </tr>
 <tr class="apiTableTr">
 <td class="apiTableLeftCSyn">Synopsis</td>
-<td class="apiTableRightCSyn">void geom_insertPointsIntoPtcloud(CPcStruct* pcStruct,const CPose& ptcloudTransformation,const double* points,int pointCnt,const unsigned char rgbData[3]=nullptr,double proximityTol=0.001)</td>
+<td class="apiTableRightCSyn">void geom_insertPointsIntoPtcloud(CPcStruct* pcStruct,const CPose& ptcloudTransformation,const double* points,int pointCnt,const unsigned char rgbaData[4]=nullptr,double proximityTol=0.001)</td>
 </tr>
 <tr class="apiTableTr">
 <td class="apiTableLeftCParam">Arguments</td>
@@ -2452,7 +2452,7 @@ td.section { margin: 0; padding: 0; }
 <div><strong>ptcloudTransformation</strong>: the transformation frame of the point-cloud.</div>
 <div><strong>points</strong>: an array of point values (XYZ-triplets). Points are expressed relative to the world reference frame.</div>
 <div><strong>pointCnt</strong>: the number of points.</div>
-<div><strong>rgbData</strong>: the RGB color (0-255) of the generated points.</div>
+<div><strong>rgbaData</strong>: the RGBA color (0-255) of the generated points (4 values: red, green, blue and alpha).</div>
 <div><strong>proximityTol</strong>: the distance tolerance to other points (i.e. point-point distances below the specified value are not permitted and points will be omitted).</div>
 </td>
 </tr>
