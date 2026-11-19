@@ -114,8 +114,8 @@ unsigned char* CObbStruct::serialize(int& dataSize) const
     obb->serialize(data);
 
     unsigned char* retVal=new unsigned char[data.size()];
-    for (size_t i=0;i<data.size();i++)
-        retVal[i]=data[i];
+    if (data.size()>0)
+        memcpy(retVal,&data[0],data.size());
     dataSize=int(data.size());
 
     return(retVal);

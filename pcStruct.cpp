@@ -119,8 +119,8 @@ unsigned char* CPcStruct::serialize(int& dataSize) const
     for (size_t i=0;i<8;i++)
         pcNode->pcNodes[i]->serialize(data);
     unsigned char* retVal=new unsigned char[data.size()];
-    for (size_t i=0;i<data.size();i++)
-        retVal[i]=data[i];
+    if (data.size()>0)
+        memcpy(retVal,&data[0],data.size());
     dataSize=int(data.size());
     return(retVal);
 }
@@ -161,8 +161,8 @@ unsigned char* CPcStruct::serialize_ver2(int& dataSize) const
     for (size_t i=0;i<8;i++)
         pcNode->pcNodes[i]->serialize_ver2(data);
     unsigned char* retVal=new unsigned char[data.size()];
-    for (size_t i=0;i<data.size();i++)
-        retVal[i]=data[i];
+    if (data.size()>0)
+        memcpy(retVal,&data[0],data.size());
     dataSize=int(data.size());
     return(retVal);
 }
@@ -491,7 +491,7 @@ bool CPcStruct::getDistance_pt(const C4X4Matrix& pcM,const C3Vector& point,doubl
     C3Vector relPoint(m.getInverse()*point);
 
     // Check all 8 nodes, explore close nodes first:
-    std::vector<std::pair<double,SNodeTranslation>> nodesToExplore;
+    CFixedVector<std::pair<double,SNodeTranslation>,8> nodesToExplore;
     for (size_t i=0;i<8;i++)
     {
         SNodeTranslation nodeTranslation;
@@ -529,7 +529,7 @@ bool CPcStruct::getDistance_seg(const C4X4Matrix& pcM,const C3Vector& segMiddle,
     C3Vector relSegHs(mi*segHs);
 
     // Check all 8 nodes, explore close nodes first:
-    std::vector<std::pair<double,SNodeTranslation>> nodesToExplore;
+    CFixedVector<std::pair<double,SNodeTranslation>,8> nodesToExplore;
     for (size_t i=0;i<8;i++)
     {
         SNodeTranslation nodeTranslation;
@@ -569,7 +569,7 @@ bool CPcStruct::getDistance_tri(const C4X4Matrix& pcM,const C3Vector& p,const C3
     C3Vector relC((relP*double(3.0)+relV+relW)*double(0.333333));
 
     // Check all 8 nodes, explore close nodes first:
-    std::vector<std::pair<double,SNodeTranslation>> nodesToExplore;
+    CFixedVector<std::pair<double,SNodeTranslation>,8> nodesToExplore;
     for (size_t i=0;i<8;i++)
     {
         SNodeTranslation nodeTranslation;
@@ -612,7 +612,7 @@ bool CPcStruct::getDistance_ptcloud(const CPcStruct* pc2Struct,const C4X4Matrix&
     C4X4Matrix m2(pc2M);
     m2.X+=pc2M.M*pc2Struct->boxPos;
     // Now check all 8*8 node pairs, explore close node pairs first:
-    std::vector<std::pair<double,SNodeTranslationPair>> nodePairsToExplore;
+    CFixedVector<std::pair<double,SNodeTranslationPair>,64> nodePairsToExplore;
     for (size_t i=0;i<8;i++)
     {
         SNodeTranslationPair nodeTranslationPairs;
@@ -647,7 +647,7 @@ bool CPcStruct::getSensorDistance(const C4X4Matrix& pcM,const CVolumePlanes& pla
     C4X4Matrix m(pcM);
     m.X+=pcM.M*boxPos;
     // Check all 8 nodes, explore close nodes first (close to the sensor pt):
-    std::vector<std::pair<double,SNodeTranslation>> nodesToExplore;
+    CFixedVector<std::pair<double,SNodeTranslation>,8> nodesToExplore;
     for (size_t i=0;i<8;i++)
     {
         SNodeTranslation nodeTranslation;

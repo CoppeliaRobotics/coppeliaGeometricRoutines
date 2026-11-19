@@ -1182,7 +1182,7 @@ bool COcNode::getDistance_shape(const C4X4Matrix& ocM,double ocBoxS,const C3Vect
             if ( (obb->leafTris!=nullptr)||(ocBoxS*ocBoxS*ocBoxS>obb->boxHs(0)*obb->boxHs(1)*obb->boxHs(2)) )
             { // explore the OC node. Pick the box closer to the OBB box
                 C4X4Matrix shapeTrRel(ocTr.getInverse()*shapeTr);
-                std::vector<std::pair<double,SNodeTranslation>> nodesToExplore;
+                CFixedVector<std::pair<double,SNodeTranslation>,8> nodesToExplore;
                 for (size_t i=0;i<8;i++)
                 {
                     SNodeTranslation nodeTranslation;
@@ -1457,9 +1457,13 @@ bool COcNode::getDistance_octree(const C4X4Matrix& oc1M,double ocBox1S,const C3V
             const unsigned long long int twoOcCacheValuesHere[2]={oc1CacheValueHere,oc2CacheValueHere};
             C3Vector* twoOcMinDistSegPts[2]={oc1MinDistSegPt,oc2MinDistSegPt};
             unsigned long long int* twoOcCaching[2]={oc1Caching,oc2Caching};
-            const C4X4Matrix twoMRelBoxes[2]={m1.getInverse()*m2,m2.getInverse()*m1};
+            C4X4Matrix twoMRelBoxes[2];
+            if (nodeToExplore==0)
+                twoMRelBoxes[0]=m1.getInverse()*m2;
+            else
+                twoMRelBoxes[1]=m2.getInverse()*m1;
             // Now check all 8 node pairs, explore closest node first:
-            std::vector<std::pair<double,SNodeTranslation>> nodesToExplore;
+            CFixedVector<std::pair<double,SNodeTranslation>,8> nodesToExplore;
             for (size_t i=0;i<8;i++)
             {
                 SNodeTranslation nodeTranslation;
@@ -1502,7 +1506,7 @@ bool COcNode::getDistance_ptcloud(const C4X4Matrix& ocM,double ocBoxS,const C3Ve
             {
                 if ( (ocBoxS>pcBoxS)||(pcNode->pts.size()>0) )
                 {
-                    std::vector<std::pair<double,SNodeTranslation>> nodesToExplore;
+                    CFixedVector<std::pair<double,SNodeTranslation>,8> nodesToExplore;
                     C4X4Matrix box2Rel(m1.getInverse()*m2);
                     for (size_t i=0;i<8;i++)
                     {
@@ -1570,7 +1574,7 @@ bool COcNode::getDistance_ptcloud(const C4X4Matrix& ocM,double ocBoxS,const C3Ve
         }
         if (explorePc)
         {
-            std::vector<std::pair<double,SNodeTranslation>> nodesToExplore;
+            CFixedVector<std::pair<double,SNodeTranslation>,8> nodesToExplore;
             C4X4Matrix box1Rel(m2.getInverse()*m1);
             for (size_t i=0;i<8;i++)
             {
@@ -1610,7 +1614,7 @@ bool COcNode::getSensorDistance(const C4X4Matrix& ocM,double boxS,const C3Vector
         {
             if (ocNodes!=nullptr)
             { // continue exploration
-                std::vector<std::pair<double,SNodeTranslation>> nodesToExplore;
+                CFixedVector<std::pair<double,SNodeTranslation>,8> nodesToExplore;
                 for (size_t i=0;i<8;i++)
                 {
                     SNodeTranslation nodeTranslation;
@@ -1654,7 +1658,7 @@ bool COcNode::getRaySensorDistance(const C4X4Matrix& ocM,double boxS,const C3Vec
         { // we collide..
             if (ocNodes!=nullptr)
             { // continue exploration
-                std::vector<std::pair<double,SNodeTranslation>> nodesToExplore;
+                CFixedVector<std::pair<double,SNodeTranslation>,8> nodesToExplore;
                 for (size_t i=0;i<8;i++)
                 {
                     SNodeTranslation nodeTranslation;

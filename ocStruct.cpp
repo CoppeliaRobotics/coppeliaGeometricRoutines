@@ -144,8 +144,8 @@ unsigned char* COcStruct::serialize(int& dataSize) const
     for (size_t i=0;i<8;i++)
         ocNode->ocNodes[i]->serialize(data);
     unsigned char* retVal=new unsigned char[data.size()];
-    for (size_t i=0;i<data.size();i++)
-        retVal[i]=data[i];
+    if (data.size()>0)
+        memcpy(retVal,&data[0],data.size());
     dataSize=int(data.size());
     return(retVal);
 }
@@ -206,8 +206,8 @@ unsigned char* COcStruct::serialize_ver2(int& dataSize) const
     for (size_t i=0;i<8;i++)
         ocNode->ocNodes[i]->serialize_ver2(data);
     unsigned char* retVal=new unsigned char[data.size()];
-    for (size_t i=0;i<data.size();i++)
-        retVal[i]=data[i];
+    if (data.size()>0)
+        memcpy(retVal,&data[0],data.size());
     dataSize=int(data.size());
     return(retVal);
 }
@@ -558,7 +558,7 @@ bool COcStruct::getDistance_pt(const C3Vector& point,double& dist,C3Vector* minD
         return(false);
     bool retVal=false;
     // Check all 8 nodes, explore close nodes first:
-    std::vector<std::pair<double,SNodeTranslation>> nodesToExplore;
+    CFixedVector<std::pair<double,SNodeTranslation>,8> nodesToExplore;
     for (size_t i=0;i<8;i++)
     {
         SNodeTranslation nodeTranslation;
@@ -582,7 +582,7 @@ bool COcStruct::getDistance_seg(const C3Vector& segMiddle,const C3Vector& segHs,
         return(false);
     bool retVal=false;
     // Check all 8 nodes, explore close nodes first:
-    std::vector<std::pair<double,SNodeTranslation>> nodesToExplore;
+    CFixedVector<std::pair<double,SNodeTranslation>,8> nodesToExplore;
     for (size_t i=0;i<8;i++)
     {
         SNodeTranslation nodeTranslation;
@@ -606,7 +606,7 @@ bool COcStruct::getDistance_tri(const C3Vector& p,const C3Vector& v,const C3Vect
         return(false);
     bool retVal=false;
     // Check all 8 nodes, explore close nodes first:
-    std::vector<std::pair<double,SNodeTranslation>> nodesToExplore;
+    CFixedVector<std::pair<double,SNodeTranslation>,8> nodesToExplore;
     for (size_t i=0;i<8;i++)
     {
         SNodeTranslation nodeTranslation;
@@ -678,7 +678,7 @@ bool COcStruct::getDistance_octree(const C4X4Matrix& oc1M,const COcStruct* oc2St
         }
     }
     // Now check all 8*8 node pairs, explore close node pairs first:
-    std::vector<std::pair<double,SNodeTranslationPair>> nodePairsToExplore;
+    CFixedVector<std::pair<double,SNodeTranslationPair>,64> nodePairsToExplore;
     for (size_t i=0;i<8;i++)
     {
         SNodeTranslationPair nodeTranslationPairs;
@@ -715,7 +715,7 @@ bool COcStruct::getDistance_ptcloud(const C4X4Matrix& ocM,const CPcStruct* pcStr
     C4X4Matrix m2(pcM);
     m2.X+=pcM.M*pcStruct->boxPos;
     // Check all 8*8 node pairs, explore close node pairs first:
-    std::vector<std::pair<double,SNodeTranslationPair>> nodePairsToExplore;
+    CFixedVector<std::pair<double,SNodeTranslationPair>,64> nodePairsToExplore;
     for (size_t i=0;i<8;i++)
     {
         SNodeTranslationPair nodeTranslationPairs;
@@ -750,7 +750,7 @@ bool COcStruct::getSensorDistance(const C4X4Matrix& ocM,const CVolumePlanes& pla
     C4X4Matrix m(ocM);
     m.X+=ocM.M*boxPos;
     // Check all 8 nodes, explore close nodes first (close to the sensor pt):
-    std::vector<std::pair<double,SNodeTranslation>> nodesToExplore;
+    CFixedVector<std::pair<double,SNodeTranslation>,8> nodesToExplore;
     for (size_t i=0;i<8;i++)
     {
         SNodeTranslation nodeTranslation;
@@ -780,7 +780,7 @@ bool COcStruct::getRaySensorDistance(const C4X4Matrix& ocM,const C3Vector& raySe
     C4X4Matrix m(ocM);
     m.X+=ocM.M*boxPos;
     // Check all 8 nodes, explore close nodes first (close to the sensor pt):
-    std::vector<std::pair<double,SNodeTranslation>> nodesToExplore;
+    CFixedVector<std::pair<double,SNodeTranslation>,8> nodesToExplore;
     for (size_t i=0;i<8;i++)
     {
         SNodeTranslation nodeTranslation;

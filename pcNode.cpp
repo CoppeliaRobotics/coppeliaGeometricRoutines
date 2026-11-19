@@ -134,10 +134,9 @@ void CPcNode::serialize(std::vector<unsigned char>& data) const
 {
     int s=int(pts.size());
     pushData(data,&s,sizeof(int));
-    for (size_t i=0;i<pts.size();i++)
-        pushData(data,&pts[i],sizeof(double));
-    for (size_t i=0;i<rgbas.size();i++)
-        data.push_back(rgbas[i]);
+    if (pts.size()>0)
+        pushData(data,&pts[0],pts.size()*sizeof(double));
+    data.insert(data.end(),rgbas.begin(),rgbas.end());
     if (pcNodes!=nullptr)
     {
         data.push_back(1);
@@ -151,6 +150,9 @@ void CPcNode::serialize(std::vector<unsigned char>& data) const
 void CPcNode::deserialize(CPcStruct* pc,const unsigned char* data,int& pos)
 {
     int ptsize=(reinterpret_cast<const int*>(data+pos))[0];pos+=sizeof(int);
+    pts.reserve(pts.size()+size_t(ptsize));
+    rgbas.reserve(rgbas.size()+size_t(ptsize/3)*4);
+    ids.reserve(ids.size()+size_t(ptsize/3));
     for (int i=0;i<ptsize;i++)
     {
         pts.push_back((reinterpret_cast<const double*>(data+pos))[0]);
@@ -200,6 +202,9 @@ void CPcNode::serialize_ver2(std::vector<unsigned char>& data) const
 void CPcNode::deserialize_ver2(CPcStruct* pc,const unsigned char* data,int& pos)
 {
     int ptsize=(reinterpret_cast<const int*>(data+pos))[0];pos+=sizeof(int);
+    pts.reserve(pts.size()+size_t(ptsize));
+    rgbas.reserve(rgbas.size()+size_t(ptsize/3)*4);
+    ids.reserve(ids.size()+size_t(ptsize/3));
     for (int i=0;i<ptsize;i++)
     {
         pts.push_back((reinterpret_cast<const double*>(data+pos))[0]);
@@ -1023,7 +1028,7 @@ bool CPcNode::getDistance_shape(double boxS,const C3Vector& boxCenter,const C4X4
             if ( (obb->leafTris!=nullptr)||(boxS*boxS*boxS>obb->boxHs(0)*obb->boxHs(1)*obb->boxHs(2)) )
             { // explore the PC node. Pick the box closer to the OBB box
                 C4X4Matrix shapeTrRel(pcTr.getInverse()*shapeTr);
-                std::vector<std::pair<double,SNodeTranslation>> nodesToExplore;
+                CFixedVector<std::pair<double,SNodeTranslation>,8> nodesToExplore;
                 for (size_t i=0;i<8;i++)
                 {
                     SNodeTranslation nodeTranslation;
@@ -1138,14 +1143,29 @@ bool CPcNode::getDistance_ptcloud(double box1Size,const C3Vector& box1Center,con
                     if (pc2Node->pts.size()>0)
                     { // yes. Check pt-pt distances:
                         double dSquared=dist*dist;
+                        // Transform the second cell's points once instead of once per
+                        // point pair (identical values, computed once).
+                        size_t pc2PtCnt=pc2Node->pts.size()/3;
+                        C3Vector pc2PtsBuf[256];
+                        std::vector<C3Vector> pc2PtsVec;
+                        C3Vector* pc2PtsT=pc2PtsBuf;
+                        if (pc2PtCnt>256)
+                        {
+                            pc2PtsVec.resize(pc2PtCnt);
+                            pc2PtsT=&pc2PtsVec[0];
+                        }
+                        for (size_t j=0;j<pc2PtCnt;j++)
+                        {
+                            pc2PtsT[j]=C3Vector(&pc2Node->pts[3*j]);
+                            pc2PtsT[j]*=m2;
+                        }
                         for (size_t i=0;i<pts.size()/3;i++)
                         {
                             C3Vector pt1(&pts[3*i]);
                             pt1*=m1;
-                            for (size_t j=0;j<pc2Node->pts.size()/3;j++)
+                            for (size_t j=0;j<pc2PtCnt;j++)
                             {
-                                C3Vector pt2(&pc2Node->pts[3*j]);
-                                pt2*=m2;
+                                C3Vector pt2(pc2PtsT[j]);
                                 C3Vector pt1Pt2(pt2(0)-pt1(0),pt2(1)-pt1(1),pt2(2)-pt1(2));
                                 d=pt1Pt2(0)*pt1Pt2(0)+pt1Pt2(1)*pt1Pt2(1)+pt1Pt2(2)*pt1Pt2(2);
                                 if (d<dSquared)
@@ -1190,8 +1210,12 @@ bool CPcNode::getDistance_ptcloud(double box1Size,const C3Vector& box1Center,con
             int otherNodeIndex=0;
             if (nodeIndexToExplore==0)
                 otherNodeIndex=1;
-            C4X4Matrix m2Rel(m1.getInverse()*m2);
-            C4X4Matrix m1Rel(m2.getInverse()*m1);
+            C4X4Matrix m2Rel;
+            C4X4Matrix m1Rel;
+            if (nodeIndexToExplore==0)
+                m2Rel=m1.getInverse()*m2;
+            else
+                m1Rel=m2.getInverse()*m1;
             C4X4Matrix* mRels[2]={&m2Rel,&m1Rel};
             const CPcNode* pcNodes[2]={this,pc2Node};
             double boxSizes[2]={box1Size,box2Size};
@@ -1201,7 +1225,7 @@ bool CPcNode::getDistance_ptcloud(double box1Size,const C3Vector& box1Center,con
             unsigned long long int* pcCachings[2]={pc1Caching,pc2Caching};
             unsigned long long int pcCachePoss[2]={pc1CachePos,pc2CachePos};
             // Now check all 8 node pairs, explore closest node first:
-            std::vector<std::pair<double,SNodeTranslation>> nodesToExplore;
+            CFixedVector<std::pair<double,SNodeTranslation>,8> nodesToExplore;
             for (size_t i=0;i<8;i++)
             {
                 SNodeTranslation nodeTranslation;
@@ -1263,7 +1287,7 @@ bool CPcNode::getSensorDistance(double boxS,const C3Vector& boxCenter,const C4X4
             }
             else
             { // continue exploration of the PC node. Explore closer nodes first:
-                std::vector<std::pair<double,SNodeTranslation>> nodesToExplore;
+                CFixedVector<std::pair<double,SNodeTranslation>,8> nodesToExplore;
                 for (size_t i=0;i<8;i++)
                 {
                     SNodeTranslation nodeTranslation;
