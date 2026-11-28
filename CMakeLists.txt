@@ -14,5 +14,5 @@ endif()
 list(APPEND CMAKE_MODULE_PATH ${COPPELIASIM_INCLUDE_DIR}/cmake)
 find_package(CoppeliaSim 4.5.1.7 REQUIRED)
 
-coppeliasim_add_manual(coppeliaGeometricRoutines-api.htm)
-coppeliasim_add_manual(coppeliaGeometricRoutines-api.md SUBDIR docs)
+coppeliasim_add_manual(coppeliaGeometricRoutines-api.htm SUBDIR en/coppeliaGeometricRoutines)
+coppeliasim_add_manual(coppeliaGeometricRoutines-api.md SUBDIR docs/coppeliaGeometricRoutines)
